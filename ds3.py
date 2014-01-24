@@ -1,7 +1,10 @@
+import os
+import sys
 import httplib
 import hmac
 import base64
 import xml.dom.minidom
+import argparse
 import xml.etree.ElementTree as xmldom
 
 from hashlib import sha1
@@ -83,6 +86,7 @@ class Ds3(object):
 
     def get_object(self, bucket, object_name):
         response = self.__get(join_paths(bucket, object_name))
+        print response.status
         print response.read()
 
     def put_object(self, bucket, object_name, object_data):
@@ -123,7 +127,6 @@ class Ds3(object):
         return self.__http_opt('DELETE', resource)
 
     def __http_opt(self, verb, resource):
-        print resource
         connection = httplib.HTTPConnection(self.endpoint)
         date = get_date()
         headers = {}
@@ -135,7 +138,6 @@ class Ds3(object):
         return connection.getresponse()
 
     def __put(self, resource, body='', query_params = {}):
-        print resource
         connection = httplib.HTTPConnection(self.endpoint)
         date = get_date()
         headers = {}
@@ -153,12 +155,48 @@ class Ds3(object):
         return 'AWS ' + self.credentials.client_id + ':' + signature
 
 def main():
-    client = Ds3('192.168.6.163:8080', Credentials('cnlhbg==', 'R8ATmVhzTyGX'))
-    #client.service_list()
-    bucket = 'remoteTest24' 
-    #client.create_bucket(bucket)
+    parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
+    parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket'])
+    parser.add_argument('--bucket', dest='bucket', type=str, help='What bucket to target.  Required for any operations that target a bucket')
+    parser.add_argument('--file', dest='target_file', type=str, help='The file to either get or put.  Required for any file specfic operations')
+    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the enviornment variable "DS3_ACCESS_KEY"', required=True)
+    parser.add_argument('--accessId', dest='access_id', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
+    parser.add_argument('--key', dest='key', type=str, help='The DS3 key')
+    args = parser.parse_args()
 
-    client.bucket_list(bucket)
+    access_id = os.getenv("DS3_ACCESS_KEY",args.access_id)
+    key = os.getenv("DS3_SECRET_KEY", args.key)
+
+    if not (access_id and key):
+        print 'Error: accessId and key must both be set'
+        sys.exit(1)
+
+    client = Ds3(args.endpoint, Credentials(access_id, key))
+    if args.operation == 'service_list':
+        client.service_list()
+    elif args.operation == 'create_bucket':
+        if args.bucket:
+            client.create_bucket(args.bucket)
+        else:
+            print 'Error: creat_bucket requires a bucket to be specficied'
+    elif args.operation == 'bucket_list':
+        if args.bucket:
+            client.bucket_list(args.bucket)
+        else:
+            print 'Error: bucket_list requires a bucket to be specficied'
+    elif args.operation == 'put_object':
+        if args.target_file and args.bucket:
+            client.put_object(args.bucket, args.target_file, open(args.target_file))
+        else:
+            print 'Error: put_object requires both a file and a bucket to be specficied'
+    elif args.operation == 'get_object':
+        if args.target_file and args.bucket:
+            client.get_object(args.bucket, args.target_file)
+        else:
+            print 'Error: get_object requires both a file and a bucket to be specficied'
+    else:
+        print 'Error: Unknown operation (' + str(args.operation) + ')'
+
     #import random
     #import string
 
