@@ -195,18 +195,5 @@ def main():
     else:
         print 'Error: Unknown operation (' + str(args.operation) + ')'
 
-    #import random
-    #import string
-
-    #object_list = [ObjectData('test4', '256'), ObjectData('test5', '1024'), ObjectData('test6', '2048')]
-    #for item in object_list:
-    #    client.put_object(bucket, item.name, ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(int(item.size))]))
-    #client.bulk_put(bucket, object_list)
-    #client.get_object('remoteTest23', 'user/hduser/gutenberg/4300.txt.utf-8')
-    #client.put_object('remoteTest24', 'test4', 'Here is some test data!')
-    #client.delete_object('remoteTest23', 'test2.txt')
-    #client.get_object('remoteTest23', 'test2.txt')
-    #client.bucket_list('remoteTest23')
-
 if __name__ == '__main__':
     main()
