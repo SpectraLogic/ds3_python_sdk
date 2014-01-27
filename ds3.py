@@ -11,6 +11,9 @@ from hashlib import sha1
 from urlparse import urlparse
 from email.Utils import formatdate
 
+def format_output(xml_string):
+    print xml.dom.minidom.parseString(xml_string).toprettyxml()
+
 def sign(key, contents):
     signer = hmac.new(key.encode('utf-8'), digestmod=sha1)
     signer.update(contents)
@@ -73,26 +76,23 @@ class Ds3(object):
 
     def service_list(self):
         response = self.__get('/')
-        print xml.dom.minidom.parseString(response.read()).toprettyxml()
+        return response.read() 
 
     def bucket_list(self, bucket):
         response = self.__get(join_paths('/', bucket))
-        print xml.dom.minidom.parseString(response.read()).toprettyxml()
+        return response.read() 
 
     def create_bucket(self, bucket):
         response = self.__put(join_paths('/', bucket))
-        print response.status
-        print response.read()
+        return response.read() 
 
     def get_object(self, bucket, object_name):
         response = self.__get(join_paths(bucket, object_name))
-        print response.status
-        print response.read()
+        return response.read() 
 
     def put_object(self, bucket, object_name, object_data):
         response = self.__put(join_paths(bucket, object_name), object_data)
-        print response.status
-        print response.read()
+        return response.read() 
 
     def bulk_put(self, bucket, object_list):
         objects = xmldom.Element('objects')
@@ -102,8 +102,7 @@ class Ds3(object):
             objElm.set('size', file_object.size)
             objects.append(objElm)
         response = self.__put(join_paths('/', bucket) + '/?start-bulk-put', xmldom.tostring(objects))
-        print response.status
-        print response.read()
+        return response.read() 
 
     def bulk_get(self, bucket, object_list):
         objects = xmldom.Element('objects')
@@ -112,13 +111,11 @@ class Ds3(object):
             objElm.set('name', file_object.name)
             objects.append(objElm)
         response = self.__put(join_paths('/', bucket) + '/?start-bulk-get', xmldom.tostring(objects))
-        print response.status
-        print response.read()
+        return response.read() 
 
     def delete_object(self, bucket, object_name):
         response = self.__delete(join_paths(bucket, object_name))
-        print response.status
-        print response.read()
+        return response.read() 
 
     def __get(self, resource):
         return self.__http_opt('GET', resource)
@@ -159,39 +156,40 @@ def main():
     parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket'])
     parser.add_argument('--bucket', dest='bucket', type=str, help='What bucket to target.  Required for any operations that target a bucket')
     parser.add_argument('--file', dest='target_file', type=str, help='The file to either get or put.  Required for any file specfic operations')
-    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the enviornment variable "DS3_ACCESS_KEY"', required=True)
+    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the enviornment variable "DS3_ACCESS_KEY"')
     parser.add_argument('--accessId', dest='access_id', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
     parser.add_argument('--key', dest='key', type=str, help='The DS3 key')
     args = parser.parse_args()
 
     access_id = os.getenv("DS3_ACCESS_KEY",args.access_id)
     key = os.getenv("DS3_SECRET_KEY", args.key)
+    endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
 
-    if not (access_id and key):
+    if not (access_id and key and endpoint):
         print 'Error: accessId and key must both be set'
         sys.exit(1)
 
-    client = Ds3(args.endpoint, Credentials(access_id, key))
+    client = Ds3(endpoint, Credentials(access_id, key))
     if args.operation == 'service_list':
-        client.service_list()
+        format_output(client.service_list())
     elif args.operation == 'create_bucket':
         if args.bucket:
-            client.create_bucket(args.bucket)
+            format_output(client.create_bucket(args.bucket))
         else:
             print 'Error: creat_bucket requires a bucket to be specficied'
     elif args.operation == 'bucket_list':
         if args.bucket:
-            client.bucket_list(args.bucket)
+            format_output(client.bucket_list(args.bucket))
         else:
             print 'Error: bucket_list requires a bucket to be specficied'
     elif args.operation == 'put_object':
         if args.target_file and args.bucket:
-            client.put_object(args.bucket, args.target_file, open(args.target_file))
+            format_output(client.put_object(args.bucket, args.target_file, open(args.target_file)))
         else:
             print 'Error: put_object requires both a file and a bucket to be specficied'
     elif args.operation == 'get_object':
         if args.target_file and args.bucket:
-            client.get_object(args.bucket, args.target_file)
+            format_output(client.get_object(args.bucket, args.target_file))
         else:
             print 'Error: get_object requires both a file and a bucket to be specficied'
     else:
