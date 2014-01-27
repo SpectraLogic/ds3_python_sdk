@@ -1,9 +1,19 @@
 # DS3 Python SDK
+
 ---
 
 A SDK conforming to the DS3 specification.
 
+## Installing
+
+To install the SDK untar `ds3_python_sdk.tar`, cd into `ds3_python_sdk`, and execute `sudo python setup.py install`
+
+## SDK
+
+---
+
 ## CLI
+
 ---
 
 In additon to prodiving a programming interface to DS3 this SDK also provides a CLI which exposes the DS3 interface from the command line.  This allows you to interrogate the remote DS3 endpoint from the CLI with minimal effort.
@@ -38,11 +48,15 @@ optional arguments:
 
 The `endpoint`, `accessId`, and `key` can all be specified with environment variables as well as from the CLI.
 
-### Example Usage
+### Example CLI Usage
 
 List all buckets (also called service list):
-```
-#python ./ds3.py --operation service_list
+
+`python ./ds3.py --operation service_list`
+
+Output:
+
+```xml
 <?xml version="1.0" ?>
 <ListAllMyBucketsResult xmlns="http://doc.s3.amazonaws.com/2006-03-01">
 	<Owner>
@@ -63,10 +77,13 @@ List all buckets (also called service list):
 
 ```
 
-List all objects in a bucket (also called bucket list)
+List all objects in a bucket (also called bucket list):
 
-```
-#python ./ds3.py --operation bucket_list --bucket testBucket
+`python ./ds3.py --operation bucket_list --bucket testBucket`
+
+Output:
+
+```xml
 <?xml version="1.0" ?>
 <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
 	<Name>testBucket</Name>
@@ -99,7 +116,6 @@ List all objects in a bucket (also called bucket list)
 </ListBucketResult>
 
 ```
-
 
 ### Example RC File
 
