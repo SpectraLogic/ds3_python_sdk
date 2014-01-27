@@ -156,9 +156,9 @@ def main():
     parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket'])
     parser.add_argument('--bucket', dest='bucket', type=str, help='What bucket to target.  Required for any operations that target a bucket')
     parser.add_argument('--file', dest='target_file', type=str, help='The file to either get or put.  Required for any file specfic operations')
-    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the enviornment variable "DS3_ACCESS_KEY"')
-    parser.add_argument('--accessId', dest='access_id', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
-    parser.add_argument('--key', dest='key', type=str, help='The DS3 key')
+    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the enviornment variable "DS3_ENDPOINT"') 
+    parser.add_argument('--accessId', dest='access_id', type=str, help='The DS3 access id.  Optionally you can set the enviornment variable "DS3_ACCESS_KEY"') 
+    parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
     args = parser.parse_args()
 
     access_id = os.getenv("DS3_ACCESS_KEY", args.access_id)
