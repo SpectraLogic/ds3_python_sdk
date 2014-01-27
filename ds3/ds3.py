@@ -8,7 +8,7 @@ from hashlib import sha1
 from urlparse import urlparse
 from email.Utils import formatdate
 
-def format_output(xml_string):
+def pretty_print_xml(xml_string):
     print xml.dom.minidom.parseString(xml_string).toprettyxml()
 
 def sign(key, contents):

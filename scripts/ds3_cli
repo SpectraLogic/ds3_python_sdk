@@ -31,30 +31,30 @@ def main():
 
     client = ds3.Ds3(endpoint, ds3.Credentials(access_id, key))
     if args.operation == 'service_list':
-        ds3.format_output(client.service_list())
+        ds3.pretty_print_xml(client.service_list())
     elif args.operation == 'create_bucket':
         if args.bucket:
-            ds3.format_output(client.create_bucket(args.bucket))
+            ds3.pretty_print_xml(client.create_bucket(args.bucket))
         else:
             print 'Error: creat_bucket requires a bucket to be specficied'
     elif args.operation == 'bucket_list':
         if args.bucket:
-            ds3.format_output(client.bucket_list(args.bucket))
+            ds3.pretty_print_xml(client.bucket_list(args.bucket))
         else:
             print 'Error: bucket_list requires a bucket to be specficied'
     elif args.operation == 'put_object':
         if args.target_file and args.bucket:
-            ds3.format_output(client.put_object(args.bucket, args.target_file, open(args.target_file)))
+            ds3.pretty_print_xml(client.put_object(args.bucket, args.target_file, open(args.target_file)))
         else:
             print 'Error: put_object requires both a file and a bucket to be specficied'
     elif args.operation == 'get_object':
         if args.target_file and args.bucket:
-            ds3.format_output(client.get_object(args.bucket, args.target_file))
+            ds3.pretty_print_xml(client.get_object(args.bucket, args.target_file))
         else:
             print 'Error: get_object requires both a file and a bucket to be specficied'
     elif args.operation == 'delete_object':
         if args.target_file and args.bucket:
-            ds3.format_output(client.delete_object(args.bucket, args.target_file))
+            ds3.pretty_print_xml(client.delete_object(args.bucket, args.target_file))
         else:
             print 'Error: delete_object requires both a file and a bucket to be specficied'
     else:
