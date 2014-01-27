@@ -4,6 +4,7 @@
 A SDK conforming to the DS3 specification.
 
 ## CLI
+---
 
 In additon to prodiving a programming interface to DS3 this SDK also provides a CLI which exposes the DS3 interface from the command line.  This allows you to interrogate the remote DS3 endpoint from the CLI with minimal effort.
 
@@ -39,6 +40,7 @@ The `endpoint`, `accessId`, and `key` can all be specified with environment vari
 
 ### Example Usage
 
+List all buckets (also called service list):
 ```
 #python ./ds3.py --operation service_list
 <?xml version="1.0" ?>
@@ -60,6 +62,14 @@ The `endpoint`, `accessId`, and `key` can all be specified with environment vari
 </ListAllMyBucketsResult>
 
 ```
+
+List all objects in a bucket (also called bucket list)
+
+```
+
+
+```
+
 
 ### Example RC File
 
