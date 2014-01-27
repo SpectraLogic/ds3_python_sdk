@@ -59,11 +59,11 @@ class Credentials(object):
         self.key = key
 
 class ObjectData(object):
-    def __init__(self, name, size):
+    def __init__(self, name, size=0):
         self.name = name
         self.size = size
 
-class Ds3(object):
+class Client(object):
     def __init__(self, endpoint, credentials):
         self.endpoint = endpoint
         self.credentials = credentials
