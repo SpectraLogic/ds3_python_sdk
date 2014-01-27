@@ -66,7 +66,37 @@ List all buckets (also called service list):
 List all objects in a bucket (also called bucket list)
 
 ```
-
+#python ./ds3.py --operation bucket_list --bucket testBucket
+<?xml version="1.0" ?>
+<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+	<Name>testBucket</Name>
+	<Prefix/>
+	<Marker/>
+	<MaxKeys>1000</MaxKeys>
+	<IsTruncated>false</IsTruncated>
+	<Contents>
+		<Key>testObject1</Key>
+		<LastModified>2014-01-27T11:44:50.000Z</LastModified>
+		<ETag>NOTRETURNED</ETag>
+		<Size>256</Size>
+		<StorageClass>STANDARD</StorageClass>
+		<Owner>
+			<ID>user_name</ID>
+			<DisplayName>user_name</DisplayName>
+		</Owner>
+	</Contents>
+	<Contents>
+		<Key>testObject2</Key>
+		<LastModified>2014-01-27T11:44:50.000Z</LastModified>
+		<ETag>NOTRETURNED</ETag>
+		<Size>1024</Size>
+		<StorageClass>STANDARD</StorageClass>
+		<Owner>
+			<ID>user_name</ID>
+			<DisplayName>user_name</DisplayName>
+		</Owner>
+	</Contents>
+</ListBucketResult>
 
 ```
 
