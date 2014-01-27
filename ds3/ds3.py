@@ -83,12 +83,20 @@ class Ds3(object):
         response = self.__put(join_paths('/', bucket))
         return response.read()
 
+    def delete_bucket(self, bucket):
+        response = self.__delete(join_paths('/', bucket))
+        return response.read()
+
     def get_object(self, bucket, object_name):
         response = self.__get(join_paths(bucket, object_name))
         return response.read()
 
     def put_object(self, bucket, object_name, object_data):
         response = self.__put(join_paths(bucket, object_name), object_data)
+        return response.read()
+    
+    def delete_object(self, bucket, object_name):
+        response = self.__delete(join_paths(bucket, object_name))
         return response.read()
 
     def bulk_put(self, bucket, object_list):
@@ -108,10 +116,6 @@ class Ds3(object):
             obj_elm.set('name', file_object.name)
             objects.append(obj_elm)
         response = self.__put(join_paths('/', bucket) + '/?start-bulk-get', xmldom.tostring(objects))
-        return response.read()
-
-    def delete_object(self, bucket, object_name):
-        response = self.__delete(join_paths(bucket, object_name))
         return response.read()
 
     def __get(self, resource):
