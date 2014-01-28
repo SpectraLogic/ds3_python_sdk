@@ -49,7 +49,10 @@ def main():
             print 'Error: put_object requires both a file and a bucket to be specficied'
     elif args.operation == 'get_object':
         if args.target_file and args.bucket:
-            ds3.pretty_print_xml(client.get_object(args.bucket, args.target_file))
+            result = client.get_object(args.bucket, args.target_file)
+            output_file = open(args.target_file, 'w')
+            output_file.write(result) 
+            output_file.close()
         else:
             print 'Error: get_object requires both a file and a bucket to be specficied'
     elif args.operation == 'delete_object':
