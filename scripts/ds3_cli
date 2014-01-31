@@ -17,7 +17,8 @@ def ensure_dir_exists(dir_name):
 
 def place_file(file_name, file_data):
     dir_name = os.path.dirname(file_name)
-    ensure_dir_exists(dir_name)
+    if(dir_name != ''):
+        ensure_dir_exists(dir_name)
     output_file = open(file_name, 'w')
     output_file.write(file_data) 
     output_file.close()
