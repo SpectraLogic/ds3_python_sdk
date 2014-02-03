@@ -1,3 +1,6 @@
+
+import os.path
+
 import httplib
 import hmac
 import base64
@@ -12,6 +15,7 @@ def pretty_print_xml(xml_string):
     print xml.dom.minidom.parseString(xml_string).toprettyxml()
 
 def sign(key, contents):
+    print "contents: " + contents
     signer = hmac.new(key.encode('utf-8'), digestmod=sha1)
     signer.update(contents)
     digest = signer.digest()
@@ -53,22 +57,33 @@ def build_path(resource, query_params):
     new_path += '&'.join(map(lambda tupal: (tupal[0] + '=' + tupal[1]), query_params.iteritems()))
     return new_path
 
+def ensure_schema(endpoint):
+    if endpoint.startswith('http'):
+        return endpoint
+    else:
+        return 'http://' + endpoint
+
 class Credentials(object):
     def __init__(self, client_id, key):
         self.client_id = client_id
         self.key = key
 
 class ObjectData(object):
-    def __init__(self, name, size=0):
+    def __init__(self, name, size=None):
         self.name = name
-        self.size = size
+        if size == None:
+            self.size = os.path.getsize(name)
+        else:
+            self.size = size
 
 class Client(object):
     def __init__(self, endpoint, credentials):
         self.endpoint = endpoint
         self.credentials = credentials
-        url = urlparse(self.endpoint)
+        url = urlparse(ensure_schema(self.endpoint))
         self.hostname = url.hostname
+        print "url: " + str(url)
+        print "hostname: " + str(self.hostname)
         self.port = url.port
 
     def service_list(self):
@@ -104,9 +119,9 @@ class Client(object):
         for file_object in object_list:
             obj_elm = xmldom.Element('object')
             obj_elm.set('name', file_object.name)
-            obj_elm.set('size', file_object.size)
+            obj_elm.set('size', str(file_object.size))
             objects.append(obj_elm)
-        response = self.__put(join_paths('/', bucket) + '/?start-bulk-put', xmldom.tostring(objects))
+        response = self.__put(join_paths('/_rest_/buckets/', bucket), xmldom.tostring(objects), query_params = {"operation": "start_bulk_put"})
         return response.read()
 
     def bulk_get(self, bucket, object_list):
@@ -115,7 +130,7 @@ class Client(object):
             obj_elm = xmldom.Element('object')
             obj_elm.set('name', file_object.name)
             objects.append(obj_elm)
-        response = self.__put(join_paths('/', bucket) + '/?start-bulk-get', xmldom.tostring(objects))
+        response = self.__put(join_paths('/_rest_/buckets', bucket) + '/?operation=start_bulk_get', xmldom.tostring(objects))
         return response.read()
 
     def __get(self, resource):
@@ -136,6 +151,7 @@ class Client(object):
         return connection.getresponse()
 
     def __put(self, resource, body='', query_params={}):
+        
         connection = httplib.HTTPConnection(self.endpoint)
         date = get_date()
         headers = {}

@@ -23,10 +23,26 @@ def place_file(file_name, file_data):
     output_file.write(file_data) 
     output_file.close()
 
+def file_list(directory):
+    files = []
+    for entry in os.listdir(directory):
+        full_path = os.path.join(directory, entry)
+        if os.path.isdir(full_path):
+            files.append(file_list(full_path))
+        elif os.path.isfile(full_path):
+            files.append(ds3.ObjectData(full_path))
+        else:
+            print "Unkown type"
+    return files
+
+def bulk_put(client, bucket, directory):
+    files = file_list(directory)
+    return client.bulk_put(bucket, files)
+
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
-    parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket', 'delete_bucket', 'delete_object'])
+    parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket', 'delete_bucket', 'delete_object', 'bulk_put', 'bulk_get'])
     parser.add_argument('--bucket', dest='bucket', type=str, help='What bucket to target.  Required for any operations that target a bucket')
     parser.add_argument('--file', dest='target_file', type=str, help='The file to either get or put.  Required for any file specific operations')
     parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
@@ -76,6 +92,14 @@ def main():
             ds3.pretty_print_xml(client.delete_bucket(args.bucket))
         else:
             print 'Error: delete_object requires both a file and a bucket to be specficied'
+    elif args.operation == 'bulk_put':
+        target_dir = args.target_file
+        if not target_dir:
+            target_dir = '.'
+        if args.bucket:
+            ds3.pretty_print_xml(bulk_put(client, args.bucket, target_dir))
+        else:
+            print 'Error: bulk_put requires a bucket to be specficied'
     else:
         print 'Error: Unknown operation (' + str(args.operation) + ')'
 
