@@ -143,9 +143,9 @@ class Client(object):
             obj_elm.set('name', file_object.name)
             objects.append(obj_elm)
         response = self.__put(
-            join_paths('/_rest_/buckets', bucket) +
-            '/?operation=start_bulk_get',
-            xmldom.tostring(objects))
+            join_paths('/_rest_/buckets/', bucket),
+            xmldom.tostring(objects),
+            query_params={"operation": "start_bulk_get"})
         return response.read()
 
     def __get(self, resource):
