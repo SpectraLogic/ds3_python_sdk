@@ -12,15 +12,15 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 def ensure_dir_exists(dir_name):
-    if(not os.path.exists(dir_name)):
+    if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
 def place_file(file_name, file_data):
     dir_name = os.path.dirname(file_name)
-    if(dir_name != ''):
+    if dir_name != '':
         ensure_dir_exists(dir_name)
     output_file = open(file_name, 'w')
-    output_file.write(file_data) 
+    output_file.write(file_data)
     output_file.close()
 
 def file_list(directory):

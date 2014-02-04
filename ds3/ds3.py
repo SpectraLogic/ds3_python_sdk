@@ -1,4 +1,3 @@
-
 import os.path
 
 import httplib
@@ -54,7 +53,9 @@ def build_path(resource, query_params):
         return resource
     new_path = resource + '?'
 
-    new_path += '&'.join(map(lambda tupal: (tupal[0] + '=' + tupal[1]), query_params.iteritems()))
+    new_path += '&'.join(
+        map(lambda tupal: (tupal[0] + '=' + tupal[1]),
+            query_params.iteritems()))
     return new_path
 
 def ensure_schema(endpoint):
@@ -109,7 +110,7 @@ class Client(object):
     def put_object(self, bucket, object_name, object_data):
         response = self.__put(join_paths(bucket, object_name), object_data)
         return response.read()
-    
+
     def delete_object(self, bucket, object_name):
         response = self.__delete(join_paths(bucket, object_name))
         return response.read()
@@ -121,7 +122,10 @@ class Client(object):
             obj_elm.set('name', file_object.name)
             obj_elm.set('size', str(file_object.size))
             objects.append(obj_elm)
-        response = self.__put(join_paths('/_rest_/buckets/', bucket), xmldom.tostring(objects), query_params = {"operation": "start_bulk_put"})
+        response = self.__put(
+            join_paths('/_rest_/buckets/', bucket),
+            xmldom.tostring(objects),
+            query_params={"operation": "start_bulk_put"})
         return response.read()
 
     def bulk_get(self, bucket, object_list):
@@ -130,7 +134,10 @@ class Client(object):
             obj_elm = xmldom.Element('object')
             obj_elm.set('name', file_object.name)
             objects.append(obj_elm)
-        response = self.__put(join_paths('/_rest_/buckets', bucket) + '/?operation=start_bulk_get', xmldom.tostring(objects))
+        response = self.__put(
+            join_paths('/_rest_/buckets', bucket) +
+            '/?operation=start_bulk_get',
+            xmldom.tostring(objects))
         return response.read()
 
     def __get(self, resource):
@@ -145,26 +152,38 @@ class Client(object):
         headers = {}
         headers['Host'] = self.hostname
         headers['Date'] = date
-        headers['Authorization'] = self.__build_authorization(verb=verb, date=date, resource=resource)
+        headers['Authorization'] = self.__build_authorization(
+            verb=verb, date=date, resource=resource)
         connection.request(verb, resource, headers=headers)
 
         return connection.getresponse()
 
     def __put(self, resource, body='', query_params={}):
-        
         connection = httplib.HTTPConnection(self.endpoint)
         date = get_date()
         headers = {}
         headers['Host'] = self.hostname
         headers['Date'] = date
         headers['Content-Type'] = 'application/octet-stream'
-        headers['Authorization'] = self.__build_authorization(verb='PUT', date=date, content_type='application/octet-stream', resource=resource)
+        headers['Authorization'] = self.__build_authorization(
+            verb='PUT', date=date,
+            content_type='application/octet-stream',
+            resource=resource)
         resource_path = build_path(resource, query_params)
         connection.request('PUT', resource_path, body=body, headers=headers)
 
         return connection.getresponse()
 
-    def __build_authorization(self, verb='', date='', content_type='', resource=''):
-        signature = aws_signature(self.credentials.key, verb=verb, content_type=content_type, date=date, canonicalized_resource=resource)
+    def __build_authorization(self,
+        verb='',
+        date='',
+        content_type='',
+        resource=''):
+        signature = aws_signature(
+            self.credentials.key,
+            verb=verb,
+            content_type=content_type,
+            date=date,
+            canonicalized_resource=resource)
         return 'AWS ' + self.credentials.client_id + ':' + signature
 
