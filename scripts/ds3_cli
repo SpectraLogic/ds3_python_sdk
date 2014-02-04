@@ -53,12 +53,12 @@ def main():
     access_id = os.getenv("DS3_ACCESS_KEY", args.access_id)
     key = os.getenv("DS3_SECRET_KEY", args.key)
     endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
-
+    proxy = os.getenv("http_proxy", None)
     if not (access_id and key and endpoint):
         print 'Error: accessId and key must both be set'
         sys.exit(1)
 
-    client = ds3.Client(endpoint, ds3.Credentials(access_id, key))
+    client = ds3.Client(endpoint, ds3.Credentials(access_id, key), proxy)
     if args.operation == 'service_list':
         ds3.pretty_print_xml(client.service_list())
     elif args.operation == 'create_bucket':

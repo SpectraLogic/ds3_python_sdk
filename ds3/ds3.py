@@ -7,7 +7,7 @@ import xml.dom.minidom
 import xml.etree.ElementTree as xmldom
 
 from hashlib import sha1
-from urlparse import urlparse
+import urlparse
 from email.Utils import formatdate
 
 def pretty_print_xml(xml_string):
@@ -78,14 +78,22 @@ class ObjectData(object):
             self.size = size
 
 class Client(object):
-    def __init__(self, endpoint, credentials):
+    def __init__(self, endpoint, credentials, proxy=None):
         self.endpoint = endpoint
         self.credentials = credentials
-        url = urlparse(ensure_schema(self.endpoint))
+        url = urlparse.urlparse(ensure_schema(self.endpoint))
         self.hostname = url.hostname
-        print "url: " + str(url)
-        print "hostname: " + str(self.hostname)
         self.port = url.port
+        if proxy == None:
+            self.proxy = self.endpoint
+        else:
+            print "Using proxy"
+            index = proxy.find('://')
+            if index >= 0:
+                self.proxy = proxy[index+3:]
+            else:
+                self.proxy = proxy
+        print "Proxy: " + str(self.proxy)
 
     def service_list(self):
         response = self.__get('/')
@@ -147,22 +155,22 @@ class Client(object):
         return self.__http_opt('DELETE', resource)
 
     def __http_opt(self, verb, resource):
-        connection = httplib.HTTPConnection(self.endpoint)
+        connection = httplib.HTTPConnection(self.proxy)
         date = get_date()
         headers = {}
-        headers['Host'] = self.hostname
+        headers['Host'] = self.hostname+":"+ str(self.port)
         headers['Date'] = date
         headers['Authorization'] = self.__build_authorization(
             verb=verb, date=date, resource=resource)
-        connection.request(verb, resource, headers=headers)
+        connection.request(verb, urlparse.urljoin(self.endpoint, resource), headers=headers)
 
         return connection.getresponse()
 
     def __put(self, resource, body='', query_params={}):
-        connection = httplib.HTTPConnection(self.endpoint)
+        connection = httplib.HTTPConnection(self.proxy)
         date = get_date()
         headers = {}
-        headers['Host'] = self.hostname
+        headers['Host'] = self.hostname+":"+str(self.port)
         headers['Date'] = date
         headers['Content-Type'] = 'application/octet-stream'
         headers['Authorization'] = self.__build_authorization(
@@ -170,7 +178,7 @@ class Client(object):
             content_type='application/octet-stream',
             resource=resource)
         resource_path = build_path(resource, query_params)
-        connection.request('PUT', resource_path, body=body, headers=headers)
+        connection.request('PUT', urlparse.urljoin(self.endpoint, resource_path), body=body, headers=headers)
 
         return connection.getresponse()
 
@@ -186,4 +194,3 @@ class Client(object):
             date=date,
             canonicalized_resource=resource)
         return 'AWS ' + self.credentials.client_id + ':' + signature
-
