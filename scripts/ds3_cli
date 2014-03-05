@@ -65,33 +65,33 @@ def main():
         if args.bucket:
             ds3.pretty_print_xml(client.create_bucket(args.bucket))
         else:
-            print 'Error: creat_bucket requires a bucket to be specficied'
+            print 'Error: creat_bucket requires a bucket to be specified'
     elif args.operation == 'bucket_list':
         if args.bucket:
             ds3.pretty_print_xml(client.bucket_list(args.bucket))
         else:
-            print 'Error: bucket_list requires a bucket to be specficied'
+            print 'Error: bucket_list requires a bucket to be specified'
     elif args.operation == 'put_object':
         if args.target_file and args.bucket:
             ds3.pretty_print_xml(client.put_object(args.bucket, args.target_file, open(args.target_file)))
         else:
-            print 'Error: put_object requires both a file and a bucket to be specficied'
+            print 'Error: put_object requires both a file and a bucket to be specified'
     elif args.operation == 'get_object':
         if args.target_file and args.bucket:
             result = client.get_object(args.bucket, args.target_file)
             place_file(args.target_file, result)
         else:
-            print 'Error: get_object requires both a file and a bucket to be specficied'
+            print 'Error: get_object requires both a file and a bucket to be specified'
     elif args.operation == 'delete_object':
         if args.target_file and args.bucket:
             ds3.pretty_print_xml(client.delete_object(args.bucket, args.target_file))
         else:
-            print 'Error: delete_object requires both a file and a bucket to be specficied'
+            print 'Error: delete_object requires both a file and a bucket to be specified'
     elif args.operation == 'delete_bucket':
-        if args.target_file and args.bucket:
+        if args.bucket:
             ds3.pretty_print_xml(client.delete_bucket(args.bucket))
         else:
-            print 'Error: delete_object requires both a file and a bucket to be specficied'
+            print 'Error: delete_bucket requires a bucket to be specified'
     elif args.operation == 'bulk_put':
         target_dir = args.target_file
         if not target_dir:
@@ -99,7 +99,7 @@ def main():
         if args.bucket:
             ds3.pretty_print_xml(bulk_put(client, args.bucket, target_dir))
         else:
-            print 'Error: bulk_put requires a bucket to be specficied'
+            print 'Error: bulk_put requires a bucket to be specified'
     else:
         print 'Error: Unknown operation (' + str(args.operation) + ')'
 
