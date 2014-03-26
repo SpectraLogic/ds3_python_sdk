@@ -33,7 +33,7 @@ This is an example that you might see when running the above script:
 ```xml
 
 <?xml version="1.0" ?>
-<ListAllMyBucketsResult xmlns="http://doc.s3.amazonaws.com/2006-03-01">
+<ListAllMyBucketsResult>
 	<Owner>
 		<ID>user_name</ID>
 		<DisplayName>user_name</DisplayName>
@@ -77,15 +77,18 @@ In addition to providing a programming interface to DS3 this SDK also provides a
 ```
 ds3_cli -h
 usage: ds3_cli [-h] --operation
-               {service_list,bucket_list,get_object,put_object,create_bucket,delete_bucket,delete_object}
-               [--bucket BUCKET] [--file TARGET_FILE] [--endpoint ENDPOINT]
+               {service_list,bucket_list,get_object,put_object,create_bucket,
+               delete_bucket,delete_object,bulk_put,bulk_get}
+               [--bucket BUCKET] [--file TARGET_FILE] [--endpoint ENDPOINT]               
                [--accessId ACCESS_ID] [--key KEY]
 
 DS3 Command Line Interface
 
 optional arguments:
   -h, --help            show this help message and exit
-  --operation {service_list,bucket_list,get_object,put_object,create_bucket,delete_bucket,delete_object}
+  --operation {service_list,bucket_list,get_object,put_object,
+              create_bucket,delete_bucket,delete_object,bulk_put,
+              bulk_get}
                         What operation to perform
   --bucket BUCKET       What bucket to target. Required for any operations
                         that target a bucket
@@ -112,7 +115,7 @@ Output:
 
 ```xml
 <?xml version="1.0" ?>
-<ListAllMyBucketsResult xmlns="http://doc.s3.amazonaws.com/2006-03-01">
+<ListAllMyBucketsResult> 
 	<Owner>
 		<ID>user_name</ID>
 		<DisplayName>user_name</DisplayName>
@@ -139,7 +142,7 @@ Output:
 
 ```xml
 <?xml version="1.0" ?>
-<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+<ListBucketResult> 
 	<Name>testBucket</Name>
 	<Prefix/>
 	<Marker/>

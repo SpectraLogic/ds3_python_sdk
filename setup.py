@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='DS3 SDK',
-    version='1.4',
+    version='1.5',
     description='Python SDK and CLI for DS3',
     author='Ryan Moore',
     author_email='ryanmo@spectralogic.com',
