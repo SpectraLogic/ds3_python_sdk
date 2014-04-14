@@ -1,11 +1,12 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+
 import os
 import os.path
 import sys
 import signal
 import argparse
 
-from ds3 import ds3
+import ds3
 
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
@@ -39,59 +40,66 @@ def bulk_put(client, bucket, directory):
     files = file_list(directory)
     return client.bulk_put(bucket, files)
 
+def print_service_list_result(result):
+    print "Service List (Buckets) Result for owner: ", result.owner.ownerid, "(", result.owner.displayname, ")"
+    print " "
+    
+    for bucket in result.get_buckets():
+        print "    ", bucket.name, "    ", bucket.creationdate
+        
+    print ""
+    
+def print_get_bucket_result(result):
+    print "Get Bucket result for", result.name, result.creationdate
+    print "Prefix=", result.prefix, "Marker=", result.marker, "MaxKeys=", result.maxkeys
+    print "Contents:"
+    for c in result.get_contents():
+        print "Key=", c.key, "LastModified=", c.lastmodified, "ETag=", c.etag, "Size=", c.size, "StorgeClass=", c.storageclass
+  
+    
 def main():
     signal.signal(signal.SIGINT, signal_handler)
-    parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
-    parser.add_argument('--operation', dest='operation', required=True, type=str, help='What operation to perform', choices=['service_list', 'bucket_list', 'get_object', 'put_object', 'create_bucket', 'delete_bucket', 'delete_object', 'bulk_put', 'bulk_get'])
-    parser.add_argument('--bucket', dest='bucket', type=str, help='What bucket to target.  Required for any operations that target a bucket')
-    parser.add_argument('--file', dest='target_file', type=str, help='The file to either get or put.  Required for any file specific operations')
-    parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
-    parser.add_argument('--accessId', dest='access_id', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
-    parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
-    args = parser.parse_args()
-
-    access_id = os.getenv("DS3_ACCESS_KEY", args.access_id)
-    key = os.getenv("DS3_SECRET_KEY", args.key)
-    endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
-    proxy = os.getenv("http_proxy", None)
-    if not (access_id and key and endpoint):
-        print 'Error: accessId and key must both be set'
+    args = ds3.Arguments()
+    
+    credentials = ds3.Credentials(args.accessId, args.key)
+    if credentials.isValid == False:
+        print 'Error: Credentials not valid'
         sys.exit(1)
+        
+    builder = ds3.ClientBuilder(args.endpoint, credentials)
+    client = builder.build()
+    
+    cmd = args.command
+    try:
+        if cmd == args.SERVICE_LIST:
+            response = client.get_service(ds3.GetServiceRequest())
+            print_service_list_result(response.result)
+        elif cmd == args.PUT_BUCKET:
+            response = client.put_bucket(ds3.PutBucketRequest(args.bucket))
+        elif cmd == args.DELETE_BUCKET:
+            response = client.delete_bucket(ds3.DeleteBucketRequest(args.bucket))
+        elif cmd == args.GET_BUCKET:
+            response = client.get_bucket(ds3.GetBucketRequest(args.bucket))
+            print_get_bucket_result(response.result)
+        elif cmd == args.PUT_OBJECT:
+            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.filename, open(args.filename)))
+        elif cmd == args.DELETE_OBJECT:
+            response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.filename))
+        else:
+            print "Request", cmd, "is not handled"
+            sys.exit(1)
+            
+    except ds3.RequestFailed as e:
+        print "Request", cmd, "failed", e
+    except ds3.RequestNotImplemented:
+        print "Request", cmd, "is not implemented in the SDK"
+    else:
+        #print "Request", cmd, "successfully completed"
+        response.done()
+        
+    sys.exit(0)
 
-    client = ds3.Client(endpoint, ds3.Credentials(access_id, key), proxy)
-    if args.operation == 'service_list':
-        ds3.pretty_print_xml(client.service_list())
-    elif args.operation == 'create_bucket':
-        if args.bucket:
-            client.create_bucket(args.bucket)
-        else:
-            print 'Error: creat_bucket requires a bucket to be specified'
-    elif args.operation == 'bucket_list':
-        if args.bucket:
-            ds3.pretty_print_xml(client.bucket_list(args.bucket))
-        else:
-            print 'Error: bucket_list requires a bucket to be specified'
-    elif args.operation == 'put_object':
-        if args.target_file and args.bucket:
-            client.put_object(args.bucket, args.target_file, open(args.target_file))
-        else:
-            print 'Error: put_object requires both a file and a bucket to be specified'
-    elif args.operation == 'get_object':
-        if args.target_file and args.bucket:
-            result = client.get_object(args.bucket, args.target_file)
-            place_file(args.target_file, result)
-        else:
-            print 'Error: get_object requires both a file and a bucket to be specified'
-    elif args.operation == 'delete_object':
-        if args.target_file and args.bucket:
-            client.delete_object(args.bucket, args.target_file)
-        else:
-            print 'Error: delete_object requires both a file and a bucket to be specified'
-    elif args.operation == 'delete_bucket':
-        if args.bucket:
-            client.delete_bucket(args.bucket)
-        else:
-            print 'Error: delete_bucket requires a bucket to be specified'
+    """
     elif args.operation == 'bulk_put':
         target_dir = args.target_file
         if not target_dir:
@@ -102,6 +110,7 @@ def main():
             print 'Error: bulk_put requires a bucket to be specified'
     else:
         print 'Error: Unknown operation (' + str(args.operation) + ')'
+"""
 
 if __name__ == '__main__':
     main()
