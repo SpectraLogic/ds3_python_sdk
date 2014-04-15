@@ -85,6 +85,8 @@ def main():
             response = client.put_object(ds3.PutObjectRequest(args.bucket, args.filename, open(args.filename)))
         elif cmd == args.DELETE_OBJECT:
             response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.filename))
+        elif cmd == args.GET_OBJECT:
+            response = client.get_object(args.bucket, args.filename)
         else:
             print "Request", cmd, "is not handled"
             sys.exit(1)

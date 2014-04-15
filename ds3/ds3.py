@@ -331,6 +331,17 @@ class PutObjectResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
 
+class GetObjectRequest(AbstractRequest):
+    def __init__(self, bucket, objectname):
+        self.bucket = bucket
+        self.objectname = objectname
+        self.path = self.join_paths(self.bucket, self.objectname)
+        self.httpverb - HttpVerb.GET
+    
+class GetObjectResponse(AbstractResponse):
+    def process_response(self, reponse):
+        self.check_status_code(200)
+        
 class DeleteObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectname):
         self.bucket = bucket
@@ -423,6 +434,7 @@ class Client(object):
         return DeleteBucketResponse(self.netclient.get_response(request))
         
     def get_object(self, bucket, object_name):
+        return GetObjectResponse(self.netclient.get_response(request))
         '''
         response = self.__get(join_paths(bucket, object_name))
         return response.read()
@@ -503,7 +515,7 @@ class NetworkClient(object):
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
         headers = {}
-        headers['Host'] = self.networkconnection.get_hostname()+":"+ str(self.networkconnection.get_port())
+        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
         headers['Authorization'] = self.build_authorization(
             verb=request.httpverb, date=date, resource=request.path)
@@ -517,7 +529,7 @@ class NetworkClient(object):
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
         headers = {}
-        headers['Host'] = self.networkconnection.get_hostname()+":"+ str(self.networkconnection.get_port())
+        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
         #headers['Content-Type'] = 'application/octet-stream'
         headers['Authorization'] = self.build_authorization(
