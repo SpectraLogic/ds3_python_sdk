@@ -76,6 +76,14 @@ def place_file(file_name, file_data):
     output_file.write(file_data)
     output_file.close()
 
+class ObjectData(object):
+    def __init__(self, name, size=None):
+        self.name = name
+        if size == None:
+            self.size = os.path.getsize(name)
+        else:
+            self.size = size
+
 def file_list(directory):
     files = []
     for entry in os.listdir(directory):
@@ -83,7 +91,7 @@ def file_list(directory):
         if os.path.isdir(full_path):
             files.append(file_list(full_path))
         elif os.path.isfile(full_path):
-            files.append(ds3.ObjectData(full_path))
+            files.append(dObjectData(full_path))
         else:
             print "Unkown type"
     return files

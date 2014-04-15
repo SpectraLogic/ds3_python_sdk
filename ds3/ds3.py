@@ -13,20 +13,6 @@ import StringIO
 from email.Utils import formatdate
 
 from abc import ABCMeta
-
-'''
-======================================================================================
-ObjectData
-  A file creation helper class. Not used inside DS3, but could be useful in client code
-'''
-class ObjectData(object):
-    def __init__(self, name, size=None):
-        self.name = name
-        if size == None:
-            self.size = os.path.getsize(name)
-        else:
-            self.size = size
-
  
 class XmlSerializer(object):
     
