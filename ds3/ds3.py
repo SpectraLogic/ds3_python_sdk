@@ -37,7 +37,7 @@ class ArgumentError(Exception):
         return repr(self.value)
     
 class Arguments:
-    def __init__(self): 
+    def __init__(self):
         parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
         parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=['service_list', 'get_bucket', 'get_object', 'put_object', 'put_bucket', 'delete_bucket', 'delete_object', 'bulk_put', 'bulk_get'])
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
@@ -68,19 +68,13 @@ class Arguments:
         
         if not (self.accessId and self.key and self.endpoint):
             raise ArgumentError('accessId, key, and endpoint must all be set')
-            
-        if (args.command == self.PUT_BUCKET or 
-            args.command == self.DELETE_BUCKET or 
-            args.command == self.GET_BUCKET) and len(args.bucket) == 0:
+  
+        if (args.command in [self.PUT_BUCKET, self.DELETE_BUCKET, self.GET_BUCKET]) and not args.bucket:
             raise ArgumentError('must specify bucket for bucket operations')
-
-        '''
-        if (args.command == self.PUT_OBJECT or 
-            args.command == self.DELETE_OBJECT or
-            args.command == self.GET_OBJECT) and
-            len(self.args.bucket) == 0 and len(self.args.filename) != 0:
+        
+        if (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT, self.GET_OBJECT]) and (not args.filename or not args.bucket):
             raise ArgumentError('must specify bucket and filename for object operations') 
-        '''  
+    
     
 class XmlSerializer(object):
     
