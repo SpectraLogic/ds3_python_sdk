@@ -91,7 +91,7 @@ def file_list(directory):
         if os.path.isdir(full_path):
             files.append(file_list(full_path))
         elif os.path.isfile(full_path):
-            files.append(dObjectData(full_path))
+            files.append(ObjectData(full_path))
         else:
             print "Unkown type"
     return files
