@@ -8,6 +8,58 @@ import argparse
 
 import ds3
 
+class ArgumentError(Exception):
+    def __init__(self, value):
+        self.value = value
+        
+    def __str__(self):
+        return repr(self.value)
+    
+class Arguments(object):
+    def __init__(self):
+        self.SERVICE_LIST = 'service_list'
+        self.PUT_BUCKET = 'put_bucket'
+        self.DELETE_BUCKET = 'delete_bucket'
+        self.GET_BUCKET = 'get_bucket'
+        self.PUT_OBJECT = 'put_object'
+        self.DELETE_OBJECT = 'delete_object'
+        self.GET_OBJECT = 'get_object'
+        self.BULK_PUT = 'bulk_put'
+        self.BULK_GET = 'bulk_get'
+        
+        parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
+        parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=[self.SERVICE_LIST, self.PUT_BUCKET, self.GET_BUCKET, self.DELETE_BUCKET, self.GET_OBJECT, self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT, self.BULK_GET])
+        parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
+        parser.add_argument('--file', dest='filename', type=str, help='The object filename.  Required for any file specific operations')
+        parser.add_argument('--destination', dest='destination', type=str, help="Destination for Object. Required for Get Object")
+        parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
+        parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
+        parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
+        args = parser.parse_args()
+        
+        self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
+        self.key = os.getenv("DS3_SECRET_KEY", args.key)
+        self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
+        self.proxy = os.getenv("http_proxy", None)
+  
+        self.bucket = args.bucket
+        self.filename = args.filename
+        self.destination = args.destination
+        self.command = args.command
+        
+        if not (self.accessId and self.key and self.endpoint):
+            raise ArgumentError('accessId, key, and endpoint must all be set')
+  
+        if (args.command in [self.PUT_BUCKET, self.DELETE_BUCKET, self.GET_BUCKET]) and not args.bucket:
+            raise ArgumentError('must specify bucket for bucket operations')
+        
+        if (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT]) and (not args.filename or not args.bucket):
+            raise ArgumentError('must specify bucket and filename for Put and Delete object operations') 
+        
+        if (args.command in [self.GET_OBJECT]) and (not args.filename or not args.bucket or not args.destination):
+            raise ArgumentError('must specify bucket, filename, and destination for Get Object operations') 
+
+
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
     sys.exit(0)
@@ -59,15 +111,14 @@ def print_get_bucket_result(result):
     
 def main():
     signal.signal(signal.SIGINT, signal_handler)
-    args = ds3.Arguments()
+    args = Arguments()
     
     credentials = ds3.Credentials(args.accessId, args.key)
     if credentials.isValid == False:
         print 'Error: Credentials not valid'
         sys.exit(1)
         
-    builder = ds3.ClientBuilder(args.endpoint, credentials)
-    client = builder.build()
+    client = ds3.Client(args.endpoint, credentials)
     
     cmd = args.command
     try:
@@ -82,11 +133,11 @@ def main():
             response = client.get_bucket(ds3.GetBucketRequest(args.bucket))
             print_get_bucket_result(response.result)
         elif cmd == args.PUT_OBJECT:
-            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.filename, open(args.filename)))
+            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.filename))
         elif cmd == args.DELETE_OBJECT:
             response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.filename))
         elif cmd == args.GET_OBJECT:
-            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.filename))
+            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.filename, args.destination))
         else:
             print "Request", cmd, "is not handled"
             sys.exit(1)
@@ -97,7 +148,7 @@ def main():
         print "Request", cmd, "is not implemented in the SDK"
     else:
         #print "Request", cmd, "successfully completed"
-        response.done()
+        response.close()
         
     sys.exit(0)
 

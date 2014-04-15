@@ -4,16 +4,14 @@ import hmac
 import base64
 import xml.dom.minidom
 from xml.dom.minidom import Node
-#import xml.etree.ElementTree as xmldom
 
 from hashlib import sha1
-import urlparse
 import httplib
 import urllib2
+import urlparse
 import StringIO
 from email.Utils import formatdate
 
-import argparse
 from abc import ABCMeta
 
 '''
@@ -29,53 +27,7 @@ class ObjectData(object):
         else:
             self.size = size
 
-class ArgumentError(Exception):
-    def __init__(self, value):
-        self.value = value
-        
-    def __str__(self):
-        return repr(self.value)
-    
-class Arguments:
-    def __init__(self):
-        parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
-        parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=['service_list', 'get_bucket', 'get_object', 'put_object', 'put_bucket', 'delete_bucket', 'delete_object', 'bulk_put', 'bulk_get'])
-        parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
-        parser.add_argument('--file', dest='filename', type=str, help='The object filename.  Required for any file specific operations')
-        parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
-        parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
-        parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
-        args = parser.parse_args()
-        
-        self.SERVICE_LIST = 'service_list'
-        self.PUT_BUCKET = 'put_bucket'
-        self.DELETE_BUCKET = 'delete_bucket'
-        self.GET_BUCKET = 'get_bucket'
-        self.PUT_OBJECT = 'put_object'
-        self.DELETE_OBJECT = 'delete_object'
-        self.GET_OBJECT = 'get_object'
-        self.BULK_PUT = 'bulk_put'
-        self.BULK_GET = 'bulk_get'
-        
-        self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
-        self.key = os.getenv("DS3_SECRET_KEY", args.key)
-        self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
-        self.proxy = os.getenv("http_proxy", None)
-  
-        self.bucket = args.bucket
-        self.filename = args.filename
-        self.command = args.command
-        
-        if not (self.accessId and self.key and self.endpoint):
-            raise ArgumentError('accessId, key, and endpoint must all be set')
-  
-        if (args.command in [self.PUT_BUCKET, self.DELETE_BUCKET, self.GET_BUCKET]) and not args.bucket:
-            raise ArgumentError('must specify bucket for bucket operations')
-        
-        if (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT, self.GET_OBJECT]) and (not args.filename or not args.bucket):
-            raise ArgumentError('must specify bucket and filename for object operations') 
-    
-    
+ 
 class XmlSerializer(object):
     
     def get_name_from_node(self, doc, nodename):
@@ -146,7 +98,7 @@ class Credentials(object):
         return self.key
         
     def isValid(self):
-        if len(self.accessId) > 0 and len(self.key) > 0:
+        if self.accessId and self.key:
             return True
         else:
             return False             
@@ -156,13 +108,20 @@ class Credentials(object):
 HttpVerb
   Static class for http verbs
 '''
-class HttpVerb:
+class HttpVerb(object):
     GET = 'GET'
     PUT = 'PUT'
     DELETE = 'DELETE'
     HEAD = 'HEAD'
     POST = 'POST'
     
+class RequestInvalid(Exception):
+    def __init__(self, value):
+        self.value = value
+        
+    def __str__(self):
+        return repr(self.value)
+      
 class RequestFailed(Exception):
     def __init__(self, value):
         self.value = value
@@ -177,11 +136,12 @@ class RequestNotImplemented(Exception):
     def __str__(self):
         return repr(self.value)
     
-class AbstractRequest:
+class AbstractRequest(object):
     __metaclass__ = ABCMeta
     def __init__(self):
         self.path = '/'
         self.httpverb = HttpVerb.GET
+        self.queryparams = {}
     
     def join_paths(self, path1, path2):
         final_path = ''
@@ -200,9 +160,10 @@ class AbstractRequest:
         return final_path
 
 
-class AbstractResponse:
+class AbstractResponse(object):
     __metaclass__ = ABCMeta
-    def __init__(self, response):
+    def __init__(self, response, request=None):
+        self.request = request
         self.response = response
         self.process_response(response)
     
@@ -220,8 +181,6 @@ class AbstractResponse:
         
     def close(self):
         self.response.close()
-    def done(self):
-        self.response.close()
      
 class GetServiceRequest(AbstractRequest):
     def __init__(self):
@@ -231,25 +190,22 @@ class GetServiceRequest(AbstractRequest):
 class GetServiceResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        #self.result = XmlSerializer().toListAllMyBucketsResult(response.read())
         self.result = XmlSerializer().to_list_all_my_buckets_result(response.read())
 
         
 class GetBucketRequest(AbstractRequest):
     def __init__(self, bucket):
         self.bucket = bucket
-        self.nextmarker = ''
-        self.prefix = ''
+        #self.nextmarker = ''
+        #self.prefix = ''
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.GET
         
     def with_next_marker(self, nextMarker):
-        self.nextmarker = nextMarker
-        #self.getQueryParams.put('marker', nextMarker)
+        self.queryparams['marker'] = nextMarker
         
     def with_prefix(self, prefix):
-        self.prefix = prefix
-        #self.getQueryParams.put('prefix', prefix)
+        self.queryparams['prefix'] = prefix
         
     
 class GetBucketResponse(AbstractResponse):
@@ -266,8 +222,7 @@ class PutBucketRequest(AbstractRequest):
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        
-        
+                
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
         self.bucket = bucket
@@ -279,11 +234,14 @@ class DeleteBucketResponse(AbstractResponse):
         self.check_status_code(204)
         
 class PutObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectname, objectdata):
+    def __init__(self, bucket, objectname):
+        if not os.path.isfile(objectname):
+            raise RequestInvalid("Object %s is not a file" % objectname)
+        
         self.bucket = bucket
         self.objectname = objectname
-        #POWBUG - handle errors and expection here
-        self.objectdata = objectdata
+        print "Put Object", objectname, "is", os.path.getsize(objectname)
+        self.objectdata = open(objectname) 
         self.path = self.join_paths(self.bucket, self.objectname)
         self.httpverb = HttpVerb.PUT
     
@@ -292,15 +250,18 @@ class PutObjectResponse(AbstractResponse):
         self.check_status_code(200)
 
 class GetObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectname):
+    def __init__(self, bucket, objectname, destination):
         self.bucket = bucket
         self.objectname = objectname
+        self.destination = destination
         self.path = self.join_paths(self.bucket, self.objectname)
         self.httpverb = HttpVerb.GET
     
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
         self.check_status_code(200)
+        output = open(self.request.destination, 'w')
+        output.write(self.response.read())
         
 class DeleteObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectname):
@@ -375,8 +336,8 @@ class Owner(object):
 Client
 '''
 class Client(object):
-    def __init__(self, netclient):
-        self.netclient = netclient
+    def __init__(self, endpoint, credentials):
+        self.netclient = NetworkClient(endpoint, credentials)
 
     def get_netclient(self):
         return self.netclient
@@ -394,7 +355,7 @@ class Client(object):
         return DeleteBucketResponse(self.netclient.get_response(request))
         
     def get_object(self, request):
-        return GetObjectResponse(self.netclient.get_response(request))
+        return GetObjectResponse(self.netclient.get_response(request), request)
 
     def put_object(self, request):
         return PutObjectResponse(self.netclient.put(request))
@@ -430,29 +391,6 @@ class Client(object):
             query_params={"operation": "start_bulk_get"})
         return response.read()
         """
-'''
-================================================================
-ClientBuilder
-    This builds a client
-'''   
-class ClientBuilder(object):
-    def __init__(self, endpoint, credentials):
-        self.credentials = credentials
-        self.endpoint = endpoint
-        
-    def withHttpSecure(self):
-        return self
-        
-    def withProxy(self, proxy):
-        index = proxy.find('://')
-        if index >= 0:
-            self.proxy = proxy[index+3:]
-        else:
-            self.proxy = proxy
-        
-    def build(self):
-        self.networkclient = NetworkClient(self.endpoint, self.credentials)
-        return Client(self.networkclient)
              
 '''
 ================================================================
@@ -464,10 +402,21 @@ class NetworkClient(object):
         self.networkconnection = NetworkConnection(endpoint, credentials.accessId, credentials.key)
         self.credentials = credentials
     
+    def with_http_secure(self):
+        return
+    
+    def with_proxy(self, proxy):
+        index = proxy.find('://')
+        if index >= 0:
+            self.proxy = proxy[index+3:]
+        else:
+            self.proxy = proxy
+        
     def get_networkconnection(self):
         return self.networkconnection
     
     def get_response(self, request):
+        #opener = urllib2.build_opener(VerboseHTTPHandler)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
         headers = {}
@@ -487,11 +436,13 @@ class NetworkClient(object):
         headers = {}
         headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
-        #headers['Content-Type'] = 'application/octet-stream'
+        headers['Content-Type'] = 'application/octet-stream'
         headers['Authorization'] = self.build_authorization(
-            #verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
-            verb=request.httpverb, date=date, resource=request.path)
-        connection.request(request.httpverb, request.path, body=request.objectdata, headers=headers)
+            verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
+            #verb=request.httpverb, date=date, resource=request.path)
+        s = request.objectdata.read()
+        print "size of", request.objectname, len(s)
+        connection.request(request.httpverb, request.path, body=s, headers=headers)
         if isinstance(request.objectdata, file) and not request.objectdata.closed:
             request.objectdata.close()
             
@@ -544,7 +495,6 @@ class VerboseHTTPConnection(httplib.HTTPConnection):
         print '-' * 50
         print s.strip()
         httplib.HTTPConnection.send(self, s)
-
 
 class VerboseHTTPHandler(urllib2.HTTPHandler):
     def http_open(self, req):
