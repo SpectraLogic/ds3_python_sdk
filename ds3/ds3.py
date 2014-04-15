@@ -84,39 +84,13 @@ class Arguments:
     
 class XmlSerializer(object):
     
-    def toListAllMyBucketsResult(self, xml_string):
-        obj = ListAllMyBucketsResult()
-        doc = xml.dom.minidom.parseString(xml_string)
-        
-        for node in doc.getElementsByTagName("Bucket"):
-            creationdate = ""
-            bucketname = ""
-            for node2 in node.getElementsByTagName("CreationDate"):
-                for node3 in node2.childNodes:
-                    if node3.nodeType == Node.TEXT_NODE:
-                        creationdate += node3.data
-            for node2 in node.getElementsByTagName("Name"):
-                for node3 in node2.childNodes:
-                    if node3.nodeType == Node.TEXT_NODE:
-                        bucketname += node3.data  
-            
-            obj.add_bucket(bucketname, creationdate)
-            
-        for node in doc.getElementsByTagName("Owner"):
-            displayname = ""
-            ownerid = ""
-            for node2 in node.getElementsByTagName("DisplayName"):
-                for node3 in node2.childNodes:
-                    if node3.nodeType == Node.TEXT_NODE:
-                        displayname += node3.data
-            for node2 in node.getElementsByTagName("ID"):
-                for node3 in node2.childNodes:
-                    if node3.nodeType == Node.TEXT_NODE:
-                        ownerid += node3.data  
-            
-            obj.add_owner(displayname, ownerid)     
-        
-        return obj
+    def get_name_from_node(self, doc, nodename):
+        for node in doc.getElementsByTagName(nodename):
+            for node2 in node.childNodes:
+                if node2.nodeType == Node.TEXT_NODE:
+                    return node2.data
+                
+        return ''
     
     def to_list_all_my_buckets_result(self, xml_string):
         obj = ListAllMyBucketsResult()
@@ -133,15 +107,7 @@ class XmlSerializer(object):
             obj.add_owner(name, oid)
             
         return obj
-            
-    def get_name_from_node(self, doc, nodename):
-        for node in doc.getElementsByTagName(nodename):
-            for node2 in node.childNodes:
-                if node2.nodeType == Node.TEXT_NODE:
-                    return node2.data
-                
-        return ''
-        
+                    
     def to_get_bucket_result(self, xml_string):
         obj = ListBucketResult()
         doc = xml.dom.minidom.parseString(xml_string)
@@ -336,7 +302,7 @@ class GetObjectRequest(AbstractRequest):
         self.bucket = bucket
         self.objectname = objectname
         self.path = self.join_paths(self.bucket, self.objectname)
-        self.httpverb - HttpVerb.GET
+        self.httpverb = HttpVerb.GET
     
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
@@ -433,12 +399,8 @@ class Client(object):
     def delete_bucket(self, request):
         return DeleteBucketResponse(self.netclient.get_response(request))
         
-    def get_object(self, bucket, object_name):
+    def get_object(self, request):
         return GetObjectResponse(self.netclient.get_response(request))
-        '''
-        response = self.__get(join_paths(bucket, object_name))
-        return response.read()
-        '''
 
     def put_object(self, request):
         return PutObjectResponse(self.netclient.put(request))
