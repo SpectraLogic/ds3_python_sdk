@@ -151,11 +151,14 @@ def main():
             sys.exit(1)
             
     except ds3.RequestFailed as e:
-        print "Request", cmd, "failed", e
+        print "\nRequest", cmd, "failed", e
+        print "\nCode: ", e.code
+        print "HttpErrorCode: ", e.httperrorcode
+        print "Message: ", e.message
     except ds3.RequestNotImplemented:
         print "Request", cmd, "is not implemented in the SDK"
     else:
-        #print "Request", cmd, "successfully completed"
+        print "\nRequest", cmd, "successfully completed..."
         response.close()
         
     sys.exit(0)

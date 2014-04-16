@@ -24,6 +24,16 @@ class XmlSerializer(object):
                 
         return ''
     
+    def to_ds3error(self, xml_string):
+        obj = Ds3Error()
+        doc = xml.dom.minidom.parseString(xml_string)
+        
+        obj.code = self.get_name_from_node(doc, "Code")
+        obj.httperrorcode = self.get_name_from_node(doc, "HttpErrorCode")
+        obj.message = self.get_name_from_node(doc, "Message")
+        
+        return obj
+    
     def to_list_all_my_buckets_result(self, xml_string):
         obj = ListAllMyBucketsResult()
         doc = xml.dom.minidom.parseString(xml_string)
@@ -102,25 +112,28 @@ class HttpVerb(object):
     POST = 'POST'
     
 class RequestInvalid(Exception):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, summary):
+        self.summary = summary
         
     def __str__(self):
-        return repr(self.value)
+        return repr(self.summary)
       
 class RequestFailed(Exception):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, summary, ds3error):
+        self.summary = summary
+        self.code = ds3error.code
+        self.httperrorcode = ds3error.httperrorcode
+        self.message = ds3error.message
         
     def __str__(self):
-        return repr(self.value)
+        return repr(self.summary)
     
 class RequestNotImplemented(Exception):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, summary):
+        self.summary = summary
         
     def __str__(self):
-        return repr(self.value)
+        return repr(self.summary)
     
 class AbstractRequest(object):
     __metaclass__ = ABCMeta
@@ -162,8 +175,9 @@ class AbstractResponse(object):
 
     def check_status_code(self, expectedcode):
         if self.response.status != expectedcode:
+            ds3error = XmlSerializer().to_ds3error(self.response.read())
             err = "Return Code: Expected %s - Received %s" % (expectedcode, self.response.status)
-            raise RequestFailed(err)
+            raise RequestFailed(err, ds3error)
         
     def close(self):
         self.response.close()
@@ -317,6 +331,12 @@ class Owner(object):
         self.displayname = displayname
         self.ownerid = ownerid
               
+class Ds3Error(object):
+    def __init__(self, code=None, httperrorcode=None, message=None):
+        self.code = code
+        self.httperrorcode = httperrorcode
+        self.message = message
+    
 '''
 ============================================================
 Client
