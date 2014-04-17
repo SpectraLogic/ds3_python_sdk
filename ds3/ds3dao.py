@@ -8,10 +8,27 @@ import ds3
  
 class XmlSerializer(ds3.XmlSerializer):
     
-    
-    def to_dao_prime(self, xml_string):
+    def to_dao_prime_object(self, xml_string):
+        obj = DaoPrimeObject()
         print xml_string
-        return None
+        
+        return obj
+        
+    def to_dao_prime(self, xml_string):
+        obj = DaoPrime()
+        doc = xml.dom.minidom.parseString(xml_string)
+        for node in doc.getElementsByTagName('Prime'):
+            d = {}
+            d['Active'] = str(self.get_name_from_node(node, 'Active'))
+            d['BucketId'] = str(self.get_name_from_node(node, "BucketId"))
+            d['CreatedAt'] = str(self.get_name_from_node(node, 'CreatedAt'))
+            d['RequestType'] = str(self.get_name_from_node(node, 'RequestType'))
+            d['Id'] = str(self.get_name_from_node(node, 'Id'))
+            obj.add_obj(d)
+
+        obj.add_child(self.to_dao_bucket(xml_string))
+        
+        return obj
         
     def to_dao_bucket(self, xml_string):
         obj = DaoBucket()
@@ -43,6 +60,23 @@ class XmlSerializer(ds3.XmlSerializer):
             
         return obj
     
+    def to_dao_tape(self, xml_string):
+        obj = DaoTape()
+        print xml_string
+        return obj
+    
+    def to_dao_tape_bucket(self, xml_string):
+        obj = DaoTapeBucket()
+        print xml_string
+        return obj
+    
+    def to_dao_tape_object(self, xml_string):
+        obj = DaoTapeObject()
+        print xml_string
+        return obj
+    
+        
+    
 class DaoBucketRequest(ds3.AbstractRequest):
     def __init__(self):
         self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.ds3.Bucket"
@@ -73,11 +107,51 @@ class DaoPrimeResponse(ds3.AbstractResponse):
         self.check_status_code(200)
         self.result = XmlSerializer().to_dao_prime(response.read())
 
+class DaoPrimeObjectRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.ds3.PrimeObject"
+        self.httpverb = ds3.HttpVerb.GET
+        
+class DaoPrimeObjectResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_dao_prime_object(response.read())
+
+class DaoTapeRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.tape.Tape"
+        self.httpverb = ds3.HttpVerb.GET
+        
+class DaoTapeResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_dao_tape(response.read())
+
+class DaoTapeBucketRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.tape.TapeBucket"
+        self.httpverb = ds3.HttpVerb.GET
+        
+class DaoTapeBucketResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_dao_tape_bucket(response.read())
+
+class DaoTapeObjectRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.tape.TapeObject"
+        self.httpverb = ds3.HttpVerb.GET
+        
+class DaoTapeObjectResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_dao_tape_object(response.read())
+
 class AbstractDaoRetreiver(object):
     __metaclass__ = ABCMeta
     def __init__(self):
-        print "AbstractDaoRetreiever"
         self.data = []
+        self.child = []
         
     def add_obj(self, obj):
         self.data.append(obj)
@@ -86,6 +160,9 @@ class AbstractDaoRetreiver(object):
         d = {}
         d[key] = value
         self.data.append(d)
+        
+    def add_child(self, childobj):
+        self.child.append(childobj)
 
     
 class DaoBucket(AbstractDaoRetreiver):
@@ -100,11 +177,23 @@ class DaoPrime(AbstractDaoRetreiver):
     def __init__(self):
         super(DaoPrime, self).__init__()  
 
-     
-'''
-============================================================
-Client
-'''
+class DaoPrimeObject(AbstractDaoRetreiver):
+    def __init__(self):
+        super(DaoPrimeObject, self).__init__()  
+
+class DaoTape(AbstractDaoRetreiver):
+    def __init__(self):
+        super(DaoTape, self).__init__()
+        
+class DaoTapeBucket(AbstractDaoRetreiver):
+    def __init__(self):
+        super(DaoTapeBucket, self).__init__()
+        
+class DaoTapeObject(AbstractDaoRetreiver):
+    def __init__(self):
+        super(DaoTapeObject, self).__init__()      
+
+
 class Client(ds3.Client):
     def __init__(self, endpoint, credentials):
         self.netclient = NetworkClient(endpoint, credentials)
@@ -118,6 +207,17 @@ class Client(ds3.Client):
     def dao_prime(self, request):
         return DaoPrimeResponse(self.netclient.get_response(request))
     
+    def dao_prime_object(self, request):
+        return DaoPrimeObjectResponse(self.netclient.get_response(request))
+    
+    def dao_tape(self, request):
+        return DaoTapeResponse(self.netclient.get_response(request))
+    
+    def dao_tape_bucket(self, request):
+        return DaoTapeBucketResponse(self.netclient.get_response(request))
+    
+    def dao_tape_object(self, request):
+        return DaoTapeObjectResponse(self.netclient.get_response(request))
         
 '''
 ================================================================
