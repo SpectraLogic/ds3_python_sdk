@@ -4,6 +4,7 @@ import hmac
 import base64
 import xml.dom.minidom
 from xml.dom.minidom import Node
+import xml.etree.ElementTree as ET
 
 from hashlib import sha1
 import httplib
@@ -33,7 +34,7 @@ class XmlSerializer(object):
         obj.message = self.get_name_from_node(doc, "Message")
         
         return obj
-    
+        
     def to_list_all_my_buckets_result(self, xml_string):
         obj = ListAllMyBucketsResult()
         doc = xml.dom.minidom.parseString(xml_string)
@@ -336,7 +337,7 @@ class Ds3Error(object):
         self.code = code
         self.httperrorcode = httperrorcode
         self.message = message
-    
+        
 '''
 ============================================================
 Client
@@ -368,7 +369,7 @@ class Client(object):
 
     def delete_object(self, request):
         return DeleteObjectResponse(self.netclient.get_response(request))
-
+    
     def bulk_put(self, bucket, object_list):
         """
         objects = xmldom.Element('objects')
@@ -420,7 +421,7 @@ class NetworkClient(object):
         
     def get_networkconnection(self):
         return self.networkconnection
-    
+   
     def get_response(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
