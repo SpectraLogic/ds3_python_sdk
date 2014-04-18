@@ -30,7 +30,7 @@ class Arguments(object):
         parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
         parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=[self.SERVICE_LIST, self.PUT_BUCKET, self.GET_BUCKET, self.DELETE_BUCKET, self.GET_OBJECT, self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT, self.BULK_GET])
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
-        parser.add_argument('--file', dest='filename', type=str, help='The object filename.  Required for any file specific operations')
+        parser.add_argument('--object', dest='objectkey', type=str, help='The filename or directory.  Required for any Object operations')
         parser.add_argument('--destination', dest='destination', type=str, help="Destination for Object. Required for Get Object")
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
@@ -43,7 +43,7 @@ class Arguments(object):
         self.proxy = os.getenv("http_proxy", None)
   
         self.bucket = args.bucket
-        self.filename = args.filename
+        self.objectkey = args.objectkey
         self.destination = args.destination
         self.command = args.command
         
@@ -53,11 +53,11 @@ class Arguments(object):
         if (args.command in [self.PUT_BUCKET, self.DELETE_BUCKET, self.GET_BUCKET]) and not args.bucket:
             raise ArgumentError('must specify bucket for bucket operations')
         
-        if (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT]) and (not args.filename or not args.bucket):
-            raise ArgumentError('must specify bucket and filename for Put and Delete object operations') 
+        elif (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT]) and (not args.objectkey or not args.bucket):
+            raise ArgumentError('must specify bucket and object for Put and Delete object operations') 
         
-        if (args.command in [self.GET_OBJECT]) and (not args.filename or not args.bucket or not args.destination):
-            raise ArgumentError('must specify bucket, filename, and destination for Get Object operations') 
+        elif (args.command in [self.GET_OBJECT, self.BULK_GET]) and (not args.objectkey or not args.bucket or not args.destination):
+            raise ArgumentError('must specify bucket, object, and destination for Get Object operations') 
 
 
 def signal_handler(signal, frame):
@@ -76,29 +76,18 @@ def place_file(file_name, file_data):
     output_file.write(file_data)
     output_file.close()
 
-class ObjectData(object):
-    def __init__(self, name, size=None):
-        self.name = name
-        if size == None:
-            self.size = os.path.getsize(name)
-        else:
-            self.size = size
 
-def file_list(directory):
+def create_objectinfo_list(directory):
     files = []
     for entry in os.listdir(directory):
         full_path = os.path.join(directory, entry)
         if os.path.isdir(full_path):
             files.append(file_list(full_path))
         elif os.path.isfile(full_path):
-            files.append(ObjectData(full_path))
+            files.append(ds3.Object(full_path))
         else:
             print "Unkown type"
     return files
-
-def bulk_put(client, bucket, directory):
-    files = file_list(directory)
-    return client.bulk_put(bucket, files)
 
 def print_service_list_result(result):
     print "Service List (Buckets) Result for owner: ", result.owner.ownerid, "(", result.owner.displayname, ")"
@@ -141,11 +130,16 @@ def main():
             response = client.get_bucket(ds3.GetBucketRequest(args.bucket))
             print_get_bucket_result(response.result)
         elif cmd == args.PUT_OBJECT:
-            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.filename))
+            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.objectkey))
         elif cmd == args.DELETE_OBJECT:
-            response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.filename))
+            response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.objectkey))
         elif cmd == args.GET_OBJECT:
-            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.filename, args.destination))
+            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.objectkey, args.destination))
+        elif cmd == args.BULK_PUT:
+            files = create_objectinfo_list(args.objectkey)
+            response = client.bulk_put(ds3.BulkPutRequest(args.bucket, files))
+        elif cmd == args.BULK_GET:
+            response = client.bulk_get(ds3.BulkPutRequest(args.bucket, args.objectkey, args.destination))
         else:
             print "Request", cmd, "is not handled"
             sys.exit(1)
@@ -170,10 +164,7 @@ def main():
             target_dir = '.'
         if args.bucket:
             ds3.pretty_print_xml(bulk_put(client, args.bucket, target_dir))
-        else:
-            print 'Error: bulk_put requires a bucket to be specified'
-    else:
-        print 'Error: Unknown operation (' + str(args.operation) + ')'
+
 """
 
 if __name__ == '__main__':

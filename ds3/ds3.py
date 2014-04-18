@@ -262,7 +262,7 @@ class PutObjectRequest(AbstractRequest):
         self.bucket = bucket
         self.objectkey = objectkey
         print "Put Object", objectkey, "is", os.path.getsize(objectkey)
-        self.objectdata = open(objectkey) 
+        self.objectdata = open(objectkey, "rb") 
         self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.PUT
     
@@ -281,7 +281,7 @@ class GetObjectRequest(AbstractRequest):
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
         self.check_status_code(200)
-        output = open(self.request.destination, 'w')
+        output = open(self.request.destination, 'wb')
         output.write(self.response.read())
         
 class DeleteObjectRequest(AbstractRequest):
