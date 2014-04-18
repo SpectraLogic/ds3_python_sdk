@@ -4,7 +4,7 @@ import hmac
 import base64
 import xml.dom.minidom
 from xml.dom.minidom import Node
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as xmldom
 
 from hashlib import sha1
 import httplib
@@ -15,6 +15,7 @@ from email.Utils import formatdate
 
 from abc import ABCMeta
  
+
 class XmlSerializer(object):
     
     def get_name_from_node(self, doc, nodename):
@@ -25,6 +26,10 @@ class XmlSerializer(object):
                 
         return ''
     
+    def get_attribute_from_node(self, doc, nodename, attribute):
+        
+        return ''
+        
     def to_ds3error(self, xml_string):
         obj = Ds3Error()
         doc = xml.dom.minidom.parseString(xml_string)
@@ -79,6 +84,20 @@ class XmlSerializer(object):
             obj.add_contents(content)
             
         return obj
+    
+        
+    def to_get_object_result(self, xml_string):
+        print xml_string
+        return None
+    
+    def to_bulk_put_result(self, xml_string):
+        obj = ListBucketResult()
+        doc = xml.dom.minidom.parseString(xml_string)
+        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        
+        print xml_string
+        return None
+            
     
 def pretty_print_xml(xml_string):
     print xml.dom.minidom.parseString(xml_string).toprettyxml()
@@ -142,6 +161,7 @@ class AbstractRequest(object):
         self.path = '/'
         self.httpverb = HttpVerb.GET
         self.queryparams = {}
+        self.body = None
     
     def join_paths(self, path1, path2):
         final_path = ''
@@ -235,15 +255,15 @@ class DeleteBucketResponse(AbstractResponse):
         self.check_status_code(204)
         
 class PutObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectname):
-        if not os.path.isfile(objectname):
-            raise RequestInvalid("Object %s is not a file" % objectname)
+    def __init__(self, bucket, objectkey):
+        if not os.path.isfile(objectkey):
+            raise RequestInvalid("Object %s is not a file" % objectkey)
         
         self.bucket = bucket
-        self.objectname = objectname
-        print "Put Object", objectname, "is", os.path.getsize(objectname)
-        self.objectdata = open(objectname) 
-        self.path = self.join_paths(self.bucket, self.objectname)
+        self.objectkey = objectkey
+        print "Put Object", objectkey, "is", os.path.getsize(objectkey)
+        self.objectdata = open(objectkey) 
+        self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.PUT
     
 class PutObjectResponse(AbstractResponse):
@@ -251,11 +271,11 @@ class PutObjectResponse(AbstractResponse):
         self.check_status_code(200)
 
 class GetObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectname, destination):
+    def __init__(self, bucket, objectkey, destination):
         self.bucket = bucket
-        self.objectname = objectname
+        self.objectkey = objectkey
         self.destination = destination
-        self.path = self.join_paths(self.bucket, self.objectname)
+        self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.GET
     
 class GetObjectResponse(AbstractResponse):
@@ -265,15 +285,39 @@ class GetObjectResponse(AbstractResponse):
         output.write(self.response.read())
         
 class DeleteObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectname):
+    def __init__(self, bucket, objectkey):
         self.bucket = bucket
-        self.objectname = objectname
-        self.path = self.join_paths(self.bucket, self.objectname)
+        self.objectkey = objectkey
+        self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.DELETE
     
 class DeleteObjectResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(204)
+        
+class BulkRequest(AbstractRequest):
+    def __init__(self, bucket, objectlist):
+        self.bucket = bucket
+        objects = xmldom.Element('objects')
+        for file_object in objectlist:
+            obj_elm = xmldom.Element('object')
+            obj_elm.set('name', file_object.name)
+            obj_elm.set('size', str(file_object.size))
+            objects.append(obj_elm)
+        self.objectlist = objects
+        self.body = xmldom.tostring(objects)
+    
+class BulkPutRequest(AbstractRequest):
+    def __init__(self, bucket, objectlist):
+        super(BulkPutRequest, self).__init__(bucket, objectlist)
+        self.path = self.join_paths('/_rest_/buckets/', self.bucket)
+        self.httpverb = HttpVerb.PUT
+        self.queryparams={"operation": "start_bulk_put"}
+    
+class BulkPutResponse(AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.response = XmlSerializer().to_bulk_put_result(response.read())
         
 class ListAllMyBucketsResult(object):
     def __init__(self):
@@ -323,12 +367,12 @@ class Contents(object):
     
 
 class Bucket(object):
-    def __init__(self, name, creationdate):
+    def __init__(self, name=None, creationdate=None):
         self.name = name
         self.creationdate = creationdate
    
 class Owner(object):
-    def __init__(self, displayname, ownerid):
+    def __init__(self, displayname=None, ownerid=None):
         self.displayname = displayname
         self.ownerid = ownerid
               
@@ -337,7 +381,24 @@ class Ds3Error(object):
         self.code = code
         self.httperrorcode = httperrorcode
         self.message = message
-        
+
+class Object(object):
+    def __init__(self, name, size=None):
+        self.name = name
+        if size == None:
+            self.size = os.path.getsize(name)
+        else:
+            self.size = size
+            
+class MasterObjectList(object):
+    def __init__(self, jobid=None):
+        # This is a list of DS3Objects
+        self.objectlist = []
+        self.jobid = jobid
+    def add_object(self, ds3obj):
+        self.objectlist.append(ds3obj)
+        return
+    
 '''
 ============================================================
 Client
@@ -370,7 +431,9 @@ class Client(object):
     def delete_object(self, request):
         return DeleteObjectResponse(self.netclient.get_response(request))
     
-    def bulk_put(self, bucket, object_list):
+    def bulk_put(self, request):
+        return BulkPutResponse(self.netclient.bulk_put(request))
+    
         """
         objects = xmldom.Element('objects')
         for file_object in object_list:
@@ -408,6 +471,7 @@ class NetworkClient(object):
     def __init__(self, endpoint, credentials):
         self.networkconnection = NetworkConnection(endpoint, credentials.accessId, credentials.key)
         self.credentials = credentials
+        self.maxredirects = 5
     
     def with_http_secure(self):
         return
@@ -419,10 +483,20 @@ class NetworkClient(object):
         else:
             self.proxy = proxy
         
-    def get_networkconnection(self):
-        return self.networkconnection
-   
+    def with_max_redirects(self, maxredirects):
+        self.maxredirects = maxredirects
+        
     def get_response(self, request):
+        cnt = 0
+        r = self.send_request(request)
+        while r.status == 307 and cnt < self.maxredirects:
+            print 'redirecting.....'
+            cnt += 1
+            r = self.send_request(request)
+             
+        return r
+           
+    def send_request(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
@@ -434,7 +508,7 @@ class NetworkClient(object):
         #connection.request(request.get_verb(), urlparse.urljoin(self.networkconnection.endpoint, request.get_path()), headers=headers)
         connection.request(request.httpverb, request.path, headers=headers)
         return connection.getresponse()
-    
+            
     def put(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         #connection = opener.open(self.networkconnection.url)
@@ -448,12 +522,29 @@ class NetworkClient(object):
             verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
             #verb=request.httpverb, date=date, resource=request.path)
         s = request.objectdata.read()
-        print "size of", request.objectname, len(s)
+        print "size of", request.objectkey, len(s)
         connection.request(request.httpverb, request.path, body=s, headers=headers)
         if isinstance(request.objectdata, file) and not request.objectdata.closed:
             request.objectdata.close()
             
         return connection.getresponse()      
+    
+    def bulk_put(self, request):
+        #opener = urllib2.build_opener(VerboseHTTPHandler)
+        #connection = opener.open(self.networkconnection.url)
+        connection = httplib.HTTPConnection(self.networkconnection.endpoint)
+        date = self.get_date()
+        headers = {}
+        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
+        headers['Date'] = date
+        headers['Content-Type'] = 'application/octet-stream'
+        headers['Authorization'] = self.build_authorization(
+            verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
+        path = self.build_path(request.path, request.queryparams)
+            #verb=request.httpverb, date=date, resource=request.path)
+        connection.request(request.httpverb, path, body=request.body, headers=headers)
+            
+        return connection.getresponse()
     
     def build_authorization(self, verb='', date='', content_type='', resource=''):
         signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,

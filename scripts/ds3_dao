@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+
+import os
+import os.path
+import sys
+import signal
+import argparse
+
+import ds3dao
+import ds3
+
+class ArgumentError(Exception):
+    def __init__(self, value):
+        self.value = value
+        
+    def __str__(self):
+        return repr(self.value)
+    
+class Arguments(object):
+    def __init__(self):
+        
+        self.BUCKET = 'buckets'
+        self.OBJECT = 'objects'
+        self.PRIME = 'primes'
+        self.PRIMEOBJECT = 'objectprimes'
+        self.TAPE = 'tapes'
+        self.TAPEBUCKET = 'tapebuckets'
+        self.TAPEOBJECT = 'tapeobjects'
+        self.FINISHEDOBJECT = 'finishedobjects'
+        self.REQUESTHANDLERS = 'requesthandlers'
+        self.RETREIVERS = 'retreivers'
+        
+        parser = argparse.ArgumentParser(description='DS3 DAO List Interface')
+        parser.add_argument('--command', dest='command', required=True, type=str, help='What DOA to retreive', choices=[self.REQUESTHANDLERS, self.RETREIVERS, self.BUCKET, self.OBJECT, self.PRIME, self.PRIMEOBJECT, self.TAPE, self.TAPEBUCKET, self.TAPEOBJECT, self.FINISHEDOBJECT])
+        parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
+        parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
+        parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
+        args = parser.parse_args()
+        
+        self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
+        self.key = os.getenv("DS3_SECRET_KEY", args.key)
+        self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
+        self.proxy = os.getenv("http_proxy", None)
+        self.command = args.command
+ 
+        ''' 
+        elif args.command == self.FINISHEDOBJECTS:
+            self.doa = 'planner.FinishedTransactionObjects'
+        ''' 
+              
+        if not (self.accessId and self.key and self.endpoint):
+            raise ArgumentError('accessId, key, and endpoint must all be set')
+        
+        if not args.command:
+            raise ArgumentError('must specify DAO list command')
+            
+
+def signal_handler(signal, frame):
+    print "Detected Ctrl-C, closing program."
+    sys.exit(0)
+
+def print_dao(result):
+    if result:
+        print "Result for", type(result).__name__
+        for d in result.data:
+            print d
+        
+        if result.child:
+            for c in result.child:
+                print "Child", type(result.child).__name__
+                for d2 in c.data:
+                    print d2
+    
+def main():
+    signal.signal(signal.SIGINT, signal_handler)
+    args = Arguments()
+    
+    credentials = ds3.Credentials(args.accessId, args.key)
+    if credentials.isValid == False:
+        print 'Error: Credentials not valid'
+        sys.exit(1)
+        
+    client = ds3dao.Client(args.endpoint, credentials)
+    
+    try:
+        if args.command == args.REQUESTHANDLERS:
+            response = client.request_handlers(ds3dao.RequestHandlersRequest())
+        if args.command == args.RETREIVERS:
+            response = client.dao_retreivers(ds3dao.DaoRetreiversRequest())
+        elif args.command == args.BUCKET:
+            response = client.dao_bucket(ds3dao.DaoBucketRequest())
+            print_dao(response.result)
+        elif args.command == args.OBJECT:
+            response = client.dao_object(ds3dao.DaoObjectRequest())
+            print_dao(response.result)
+        elif args.command == args.PRIME:
+            response = client.dao_prime(ds3dao.DaoPrimeRequest())
+            print_dao(response.result)
+        elif args.command == args.PRIMEOBJECT:
+            response = client.dao_prime(ds3dao.DaoPrimeObjectRequest())
+            print_dao(response.result)
+        elif args.command == args.TAPE:
+            response = client.dao_tape(ds3dao.DaoTapeRequest())
+            print_dao(response.result)
+        elif args.command == args.TAPEOBJECT:
+            response = client.dao_tape_object(ds3dao.DaoTapeObjectRequest())
+            print_dao(response.result)
+        elif args.command == args.TAPEBUCKET:
+            response = client.dao_tape_bucket(ds3dao.DaoTapeBucketRequest())
+            print_dao(response.result)
+        else:
+            print "DAO Command", args.command, "Not Implemented"
+            sys.exit(1)
+    
+    except ds3.RequestFailed as e:
+        print "\nRequest", cmd, "failed", e
+        print "\nCode: ", e.code
+        print "HttpErrorCode: ", e.httperrorcode
+        print "Message: ", e.message
+    else:
+        print "\nRequest", args.command, "successfully completed..."
+        response.close()
+        
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()

@@ -8,6 +8,18 @@ import ds3
  
 class XmlSerializer(ds3.XmlSerializer):
     
+    def to_print(self, xml_string):
+        ds3.pretty_print_xml(xml_string)
+        return None
+    
+    def to_request_handlers(self, xml_string):
+        ds3.pretty_print_xml(xml_string)
+        return None
+    
+    def to_retreivers(self, xml_string):
+        ds3.pretty_print_xml(xml_string)
+        return None
+        
     def to_dao_prime_object(self, xml_string):
         obj = DaoPrimeObject()
         print xml_string
@@ -74,8 +86,26 @@ class XmlSerializer(ds3.XmlSerializer):
         obj = DaoTapeObject()
         print xml_string
         return obj
+         
+class DaoRetreiversRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/beans_retriever/"
+        self.httpverb = ds3.HttpVerb.GET
+           
+class DaoRetreiversResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_retreivers(response.read())
     
+class RequestHandlersRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = "/_rest_/request_handler/"
+        self.httpverb = ds3.HttpVerb.GET
         
+class RequestHandlersResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_request_handlers(response.read())
     
 class DaoBucketRequest(ds3.AbstractRequest):
     def __init__(self):
@@ -197,7 +227,13 @@ class DaoTapeObject(AbstractDaoRetreiver):
 class Client(ds3.Client):
     def __init__(self, endpoint, credentials):
         self.netclient = NetworkClient(endpoint, credentials)
-        
+ 
+    def request_handlers(self, request):
+        return RequestHandlersResponse(self.netclient.get_response(request))
+                
+    def dao_retreivers(self, request):
+        return DaoRetreiversResponse(self.netclient.get_response(request))
+    
     def dao_bucket(self, request):
         return DaoBucketResponse(self.netclient.get_response(request))
     
