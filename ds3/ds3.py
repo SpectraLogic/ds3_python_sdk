@@ -27,13 +27,14 @@ class XmlSerializer(object):
         return ''
     
     def get_attribute_from_node(self, doc, nodename, attribute):
+        node = doc.getElementsByTagName(nodename)
         
-        return ''
+        return node[0].getAttribute(attribute)
         
     def to_ds3error(self, xml_string):
-        obj = Ds3Error()
         doc = xml.dom.minidom.parseString(xml_string)
-        
+        obj = Ds3Error()
+
         obj.code = self.get_name_from_node(doc, "Code")
         obj.httperrorcode = self.get_name_from_node(doc, "HttpErrorCode")
         obj.message = self.get_name_from_node(doc, "Message")
@@ -41,9 +42,9 @@ class XmlSerializer(object):
         return obj
         
     def to_list_all_my_buckets_result(self, xml_string):
-        obj = ListAllMyBucketsResult()
         doc = xml.dom.minidom.parseString(xml_string)
-        
+        obj = ListAllMyBucketsResult()
+         
         for node in doc.getElementsByTagName("Bucket"):
             bucket = self.get_name_from_node(node, "Name")
             cdate = self.get_name_from_node(node, "CreationDate")
@@ -57,8 +58,8 @@ class XmlSerializer(object):
         return obj
                     
     def to_get_bucket_result(self, xml_string):
-        obj = ListBucketResult()
         doc = xml.dom.minidom.parseString(xml_string)
+        obj = ListBucketResult()
         
         obj.name = self.get_name_from_node(doc, "Name")
         obj.prefix = self.get_name_from_node(doc, "Prefix")
@@ -91,14 +92,23 @@ class XmlSerializer(object):
         return None
     
     def to_bulk_put_result(self, xml_string):
-        obj = ListBucketResult()
         doc = xml.dom.minidom.parseString(xml_string)
-        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
-        
+        obj = MasterObjectList()
         print xml_string
-        return None
-            
+        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        for node in doc.getElementsByTagName("object"):
+                oo = Object()
+                oo.name = node.getAttribute('name').strip()
+                oo.size = node.getAttribute('size')
+                print "Object", oo.name, "Size", oo.size
+                if oo.name and oo.size:
+                    obj.append(oo)
+        
+        return obj
     
+    def to_bulk_get_result(self, xml_string):
+        print xml_string
+            
 def pretty_print_xml(xml_string):
     print xml.dom.minidom.parseString(xml_string).toprettyxml()
 
@@ -243,6 +253,7 @@ class PutBucketRequest(AbstractRequest):
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
+        self.result = XmlSerializer().to_put_bulk_result(response.read())
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -261,8 +272,7 @@ class PutObjectRequest(AbstractRequest):
         
         self.bucket = bucket
         self.objectkey = objectkey
-        print "Put Object", objectkey, "is", os.path.getsize(objectkey)
-        self.objectdata = open(objectkey, "rb") 
+        self.body = open(objectkey, "rb").read() 
         self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.PUT
     
@@ -307,7 +317,7 @@ class BulkRequest(AbstractRequest):
         self.objectlist = objects
         self.body = xmldom.tostring(objects)
     
-class BulkPutRequest(AbstractRequest):
+class BulkPutRequest(BulkRequest):
     def __init__(self, bucket, objectlist):
         super(BulkPutRequest, self).__init__(bucket, objectlist)
         self.path = self.join_paths('/_rest_/buckets/', self.bucket)
@@ -317,7 +327,19 @@ class BulkPutRequest(AbstractRequest):
 class BulkPutResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        self.response = XmlSerializer().to_bulk_put_result(response.read())
+        self.result = XmlSerializer().to_bulk_put_result(response.read())
+        
+class BulkGetRequest(BulkRequest):
+    def __init__(self, bucket, objectlist):
+        super(BulkGetRequest, self).__init__(bucket, objectlist)
+        self.path = self.join_paths('/_rest_/buckets/', self.bucket)
+        self.httpverb = HttpVerb.PUT
+        self.queryparams={"operation": "start_bulk_get"}
+    
+class BulkGetResponse(AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_bulk_get_result(response.read())
         
 class ListAllMyBucketsResult(object):
     def __init__(self):
@@ -383,26 +405,20 @@ class Ds3Error(object):
         self.message = message
 
 class Object(object):
-    def __init__(self, name, size=None):
+    def __init__(self, name=None, size=None):
         self.name = name
-        if size == None:
-            self.size = os.path.getsize(name)
-        else:
-            self.size = size
+        self.size = size
             
 class MasterObjectList(object):
     def __init__(self, jobid=None):
         # This is a list of DS3Objects
         self.objectlist = []
         self.jobid = jobid
-    def add_object(self, ds3obj):
+    def append(self, ds3obj):
         self.objectlist.append(ds3obj)
         return
     
-'''
-============================================================
-Client
-'''
+
 class Client(object):
     def __init__(self, endpoint, credentials):
         self.netclient = NetworkClient(endpoint, credentials)
@@ -432,36 +448,11 @@ class Client(object):
         return DeleteObjectResponse(self.netclient.get_response(request))
     
     def bulk_put(self, request):
-        return BulkPutResponse(self.netclient.bulk_put(request))
-    
-        """
-        objects = xmldom.Element('objects')
-        for file_object in object_list:
-            obj_elm = xmldom.Element('object')
-            obj_elm.set('name', file_object.name)
-            obj_elm.set('size', str(file_object.size))
-            objects.append(obj_elm)
-        response = self.__put(
-            join_paths('/_rest_/buckets/', bucket),
-            xmldom.tostring(objects),
-            query_params={"operation": "start_bulk_put"})
-        return response.read()
-        """
+        return BulkPutResponse(self.netclient.bulk(request))
         
-    def bulk_get(self, bucket, object_list):
-        """
-        objects = xmldom.Element('objects')
-        for file_object in object_list:
-            obj_elm = xmldom.Element('object')
-            obj_elm.set('name', file_object.name)
-            objects.append(obj_elm)
-        response = self.__put(
-            join_paths('/_rest_/buckets/', bucket),
-            xmldom.tostring(objects),
-            query_params={"operation": "start_bulk_get"})
-        return response.read()
-        """
-             
+    def bulk_get(self, request):
+        return BulkGetResponse(self.netclient.bulk(request))
+ 
 '''
 ================================================================
 NetworkClient
@@ -521,15 +512,12 @@ class NetworkClient(object):
         headers['Authorization'] = self.build_authorization(
             verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
             #verb=request.httpverb, date=date, resource=request.path)
-        s = request.objectdata.read()
-        print "size of", request.objectkey, len(s)
-        connection.request(request.httpverb, request.path, body=s, headers=headers)
-        if isinstance(request.objectdata, file) and not request.objectdata.closed:
-            request.objectdata.close()
+        #s = request.objectdata.read()
+        connection.request(request.httpverb, request.path, body=request.body, headers=headers)
             
         return connection.getresponse()      
     
-    def bulk_put(self, request):
+    def bulk(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         #connection = opener.open(self.networkconnection.url)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
