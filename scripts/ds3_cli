@@ -26,15 +26,19 @@ class Arguments(object):
         self.GET_OBJECT = 'get_object'
         self.BULK_PUT = 'bulk_put'
         self.BULK_GET = 'bulk_get'
+        self.GET_JOBS = 'get_jobs'
+        self.GET_JOB = 'get_job'
+        self.DELETE_JOB = 'delete_job'
         
         parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
-        parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=[self.SERVICE_LIST, self.PUT_BUCKET, self.GET_BUCKET, self.DELETE_BUCKET, self.GET_OBJECT, self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT, self.BULK_GET])
+        parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=[self.SERVICE_LIST, self.PUT_BUCKET,self.GET_BUCKET, self.DELETE_BUCKET, self.GET_OBJECT, self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT, self.BULK_GET, self.GET_JOBS, self.GET_JOB, self.DELETE_JOB])
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
         parser.add_argument('--object', dest='objectkey', type=str, help='The filename or directory.  Required for any Object operations')
         parser.add_argument('--destination', dest='destination', type=str, help="Destination for Object. Required for Get Object")
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
+        parser.add_argument('--jobid', dest='jobid', type=str, help='Job (Prime) ID.  Required for any Job Prime Operations')
         args = parser.parse_args()
         
         self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
@@ -45,6 +49,7 @@ class Arguments(object):
         self.bucket = args.bucket
         self.objectkey = args.objectkey
         self.destination = args.destination
+        self.jobid = args.jobid
         self.command = args.command
         
         if not (self.accessId and self.key and self.endpoint):
@@ -57,7 +62,13 @@ class Arguments(object):
             raise ArgumentError('must specify bucket and object for Put and Delete object operations') 
         
         elif (args.command in [self.GET_OBJECT, self.BULK_GET]) and (not args.objectkey or not args.bucket or not args.destination):
-            raise ArgumentError('must specify bucket, object, and destination for Get Object operations') 
+            raise ArgumentError('must specify bucket, object, and destination for Get Object operations')
+        
+        elif (args.command in [self.GET_JOBS] and not args.bucket):
+             raise ArgumentError('must specify bucket in Get Jobs operation')
+         
+        elif (args.command in [self.GET_JOB, self.DELETE_JOB] and not args.jobid):
+             raise ArgumentError('must specify Prime ID in Get and Delete Job operation')       
 
 
 def signal_handler(signal, frame):
@@ -84,7 +95,7 @@ def create_object_list(directory):
         if os.path.isdir(full_path):
             files.append(create_object_list(full_path))
         elif os.path.isfile(full_path):
-            files.append(ds3.Object(full_path, os.path.getsize(full_path)))
+            files.append(ds3.Object(full_path.replace("\\", "/"), os.path.getsize(full_path)))
         else:
             print "Unkown type"
     return files
@@ -110,15 +121,25 @@ def bulk_put(client, bucket, result):
     print "BULK JOB ID", result.jobid
     for putobj in result.objectlist: 
         try:
-            response = client.put_object(ds3.PutObjectRequest(bucket, putobj.name))
+            response = client.put_object(ds3.PutObjectRequest(bucket, putobj.name.replace("\\", "/")))
             print "Put", putobj.name, "DONE"
         except ds3.RequestFailed as e:
             print "Put", putobj.name, "FAILED"
     
 def bulk_get(client, bucket, destinationdir, result):
-    #print "BULK GET JOB ID",
-    for getobj in result.objectlist:
-        print "GET", getobj.name
+    print "BULK GET JOB ID", result.jobid
+    for bulkobj in result.objectlist:
+        try:
+            response = client.get_object(ds3.GetObjectRequest(bucket, bulkobj.name, destinationdir ))
+            print "Get", bulkobj.name, "DONE"
+        except ds3.RequestFailed as e:
+            print "Get", bulkobj.name, "FAILED"      
+        
+def print_jobs(result, bucket):
+    print "Prime Jobs for bucket", bucket
+    for prime in result.primes:
+        print "Created at", prime.createdat, "Active", prime.active, "Id", prime.id, "Type", prime.requesttype  
+        
     
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -152,11 +173,18 @@ def main():
         elif cmd == args.BULK_PUT:
             files = create_object_list(args.objectkey)
             response = client.bulk_put(ds3.BulkPutRequest(args.bucket, files))
-            bulk_put(client, args.bucket, response.result)
+            bulk_put(ds3.Client(args.endpoint, credentials), args.bucket, response.result)
         elif cmd == args.BULK_GET:
             files = create_object_list(args.objectkey)
             response = client.bulk_get(ds3.BulkGetRequest(args.bucket, files))
             bulk_get(client, args.bucket, args.destination, response.result)
+        elif cmd == args.GET_JOBS:
+            response = client.get_jobs(ds3.GetJobsRequest(args.bucket))
+            print_jobs(response.result, args.bucket)
+        elif cmd == args.GET_JOB:
+            response = client.get_job(ds3.GetJobRequest(args.jobid))
+        elif cmd == args.DELETE_JOB:
+            response = client.delete_job(ds3.DeleteJobRequest(args.jobid))
         else:
             print "Request", cmd, "is not handled"
             sys.exit(1)

@@ -14,12 +14,28 @@ import StringIO
 from email.Utils import formatdate
 
 from abc import ABCMeta
- 
+import posixpath
 
 class XmlSerializer(object):
+    def __init__(self, verbose=None):
+        self.verbose = verbose
     
-    def get_name_from_node(self, doc, nodename):
+    def pretty_print_xml(self, xml_string):
+        if xml_string:
+            print xml.dom.minidom.parseString(xml_string).toprettyxml()
+        
+    def parse_string(self, xml_string):
+        if self.verbose:
+            self.pretty_print_xml(xml_string)
+            
+        return xml.dom.minidom.parseString(xml_string)
+    
+    def get_name_from_node(self, doc, nodename, parentname=None):
         for node in doc.getElementsByTagName(nodename):
+            if parentname and not node.parentNode.nodeName == parentname:
+                # this is not the node we are looking for
+                continue
+            
             for node2 in node.childNodes:
                 if node2.nodeType == Node.TEXT_NODE:
                     return node2.data
@@ -98,19 +114,49 @@ class XmlSerializer(object):
         obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
         for node in doc.getElementsByTagName("object"):
                 oo = Object()
-                oo.name = node.getAttribute('name').strip()
+                oo.name = node.getAttribute('name')
                 oo.size = node.getAttribute('size')
-                print "Object", oo.name, "Size", oo.size
                 if oo.name and oo.size:
                     obj.append(oo)
         
         return obj
     
     def to_bulk_get_result(self, xml_string):
+        doc = xml.dom.minidom.parseString(xml_string)
+        obj = MasterObjectList()
         print xml_string
-            
-def pretty_print_xml(xml_string):
-    print xml.dom.minidom.parseString(xml_string).toprettyxml()
+        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        for node in doc.getElementsByTagName("object"):
+                oo = Object()
+                oo.name = node.getAttribute('name')
+                oo.size = node.getAttribute('size')
+                if oo.name and oo.size:
+                    obj.append(oo)
+        
+        return obj
+        
+    def to_get_jobs(self, xml_string):
+        doc = self.parse_string(xml_string)
+        obj = Primes()
+        for node in doc.getElementsByTagName("Prime"):
+                p = Prime()
+                p.active = bool(self.get_name_from_node(node,'Active', 'Prime'))
+                p.id = self.get_name_from_node(node, 'Id', 'Prime')
+                p.bucketid = self.get_name_from_node(node, 'BucketId', 'Prime')
+                p.requesttype = self.get_name_from_node(node,'RequestType', 'Prime')
+                p.createdat = self.get_name_from_node(node,'CreatedAt', 'Prime')
+                obj.append(p)      
+                
+        return obj
+    
+    def to_get_job(self, xml_string):
+        doc = self.parse_string(xml_string)
+        return None
+
+    def to_delete_job(self, xml_string):
+        doc = self.parse_string(xml_string)
+        return None
+
 
 class Credentials(object):
     def __init__(self, accessId, key):
@@ -129,12 +175,9 @@ class Credentials(object):
         else:
             return False             
 
-'''
-====================================================================
-HttpVerb
-  Static class for http verbs
-'''
+
 class HttpVerb(object):
+    """ HttpVerbs as Enums """
     GET = 'GET'
     PUT = 'PUT'
     DELETE = 'DELETE'
@@ -172,7 +215,8 @@ class AbstractRequest(object):
         self.httpverb = HttpVerb.GET
         self.queryparams = {}
         self.body = None
-    
+
+
     def join_paths(self, path1, path2):
         final_path = ''
         if not path1.startswith('/'):
@@ -192,7 +236,7 @@ class AbstractRequest(object):
 
 class AbstractResponse(object):
     __metaclass__ = ABCMeta
-    def __init__(self, response, request=None):
+    def __init__(self, response, request):
         self.request = request
         self.response = response
         self.process_response(response)
@@ -201,13 +245,10 @@ class AbstractResponse(object):
         # this method must be implemented
         raise RequestNotImplemented("Not Implemented")
     
-    def print_xml(self):
-        pretty_print_xml(self.response.read())
-
     def check_status_code(self, expectedcode):
         if self.response.status != expectedcode:
-            ds3error = XmlSerializer().to_ds3error(self.response.read())
             err = "Return Code: Expected %s - Received %s" % (expectedcode, self.response.status)
+            ds3error = XmlSerializer().to_ds3error(self.response.read())
             raise RequestFailed(err, ds3error)
         
     def close(self):
@@ -221,14 +262,12 @@ class GetServiceRequest(AbstractRequest):
 class GetServiceResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        self.result = XmlSerializer().to_list_all_my_buckets_result(response.read())
+        self.result = XmlSerializer(True).to_list_all_my_buckets_result(response.read())
 
         
 class GetBucketRequest(AbstractRequest):
     def __init__(self, bucket):
         self.bucket = bucket
-        #self.nextmarker = ''
-        #self.prefix = ''
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.GET
         
@@ -249,11 +288,12 @@ class PutBucketRequest(AbstractRequest):
         self.bucket = bucket
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.PUT
+        self.body = None
            
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        self.result = XmlSerializer().to_put_bulk_result(response.read())
+        #self.result = XmlSerializer(True).to_put_bucket_result(response.read())
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -266,14 +306,16 @@ class DeleteBucketResponse(AbstractResponse):
         self.check_status_code(204)
         
 class PutObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectkey):
-        if not os.path.isfile(objectkey):
-            raise RequestInvalid("Object %s is not a file" % objectkey)
+    def __init__(self, bucket, filepath):
         
+        if not os.path.isfile(filepath):
+            raise RequestInvalid("Object %s is not a file" % filepath)
+        
+        filename = posixpath.normpath(filepath)
         self.bucket = bucket
-        self.objectkey = objectkey
-        self.body = open(objectkey, "rb").read() 
-        self.path = self.join_paths(self.bucket, self.objectkey)
+        self.objectkey = open(filename, 'rb')
+        self.body = self.objectkey.read() 
+        self.path = self.join_paths(self.bucket, filename)
         self.httpverb = HttpVerb.PUT
     
 class PutObjectResponse(AbstractResponse):
@@ -284,7 +326,11 @@ class GetObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey, destination):
         self.bucket = bucket
         self.objectkey = objectkey
-        self.destination = destination
+        #os.sep
+        self.destination = os.path.join(os.path.normpath(destination), os.path.normpath(objectkey))
+        if not os.path.exists(os.path.dirname(self.destination)):
+            os.makedirs(os.path.dirname(self.destination))
+    
         self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.GET
     
@@ -311,7 +357,7 @@ class BulkRequest(AbstractRequest):
         objects = xmldom.Element('objects')
         for file_object in objectlist:
             obj_elm = xmldom.Element('object')
-            obj_elm.set('name', file_object.name)
+            obj_elm.set('name', posixpath.normpath(file_object.name))
             obj_elm.set('size', str(file_object.size))
             objects.append(obj_elm)
         self.objectlist = objects
@@ -340,6 +386,36 @@ class BulkGetResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
         self.result = XmlSerializer().to_bulk_get_result(response.read())
+        
+class GetJobsRequest(AbstractRequest):
+    def __init__(self, bucket):
+        self.path = '/_rest_/job/'
+        self.queryparams={"bucket", bucket}
+        self.httpverb = HttpVerb.GET
+            
+class GetJobsResponse(AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer(True).to_get_jobs(response.read())
+        
+class GetJobRequest(AbstractRequest):
+    def __init__(self, jobid):
+        self.path = self.join_paths('/_rest_/job/', jobid)
+        self.httpverb = HttpVerb.GET
+            
+class GetJobResponse(AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer(True).to_get_job(response.read())
+        
+class DeleteJobRequest(AbstractRequest):
+    def __init__(self, jobid):
+        self.path = self.join_paths('/_rest_/job/', jobid)
+        self.httpverb = HttpVerb.DELETE
+            
+class DeleteJobResponse(AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(204)
         
 class ListAllMyBucketsResult(object):
     def __init__(self):
@@ -417,7 +493,37 @@ class MasterObjectList(object):
     def append(self, ds3obj):
         self.objectlist.append(ds3obj)
         return
-    
+
+class Primes(object):
+    def __init__(self):
+        self.primes = []
+    def append(self, obj):
+        if isinstance(obj, Prime):
+            self.primes.append(obj)
+        
+class Prime(object):
+    def __init__(self, active=None, requesttype=None, primeid=None, bucketid=None, createdat=None):
+        self.active = active
+        self.requesttype = requesttype
+        self.id = primeid
+        self.bucketid = bucketid
+        self.createdat = createdat
+        
+    def add_bucket(self, bucket):
+        if isinstance(bucket, Bucket):
+            self.bucket = bucket
+            
+class Job(object):
+    def __init__(self, active=None, filesystemid=None, jid=None, orderindex=None, 
+                 primeid=None, size=None, state=None, virtualpageindex=None):
+        self.active = False
+        self.filesystemid = filesystemid
+        self.jid = jid
+        self.orderindex= orderindex
+        self.primeid = primeid
+        self.size = size
+        self.state = state
+        self.virtualpageindex = virtualpageindex
 
 class Client(object):
     def __init__(self, endpoint, credentials):
@@ -427,37 +533,41 @@ class Client(object):
         return self.netclient
     
     def get_service(self, request):
-        return GetServiceResponse(self.netclient.get_response(request))
+        return GetServiceResponse(self.netclient.get_response(request), request)
 
     def get_bucket(self, request):
-        return GetBucketResponse(self.netclient.get_response(request))
+        return GetBucketResponse(self.netclient.get_response(request), request)
 
     def put_bucket(self, request):
-        return PutBucketResponse(self.netclient.get_response(request))
+        return PutBucketResponse(self.netclient.get_response(request), request)
 
     def delete_bucket(self, request):
-        return DeleteBucketResponse(self.netclient.get_response(request))
+        return DeleteBucketResponse(self.netclient.get_response(request), request)
         
     def get_object(self, request):
         return GetObjectResponse(self.netclient.get_response(request), request)
 
     def put_object(self, request):
-        return PutObjectResponse(self.netclient.put(request))
+        return PutObjectResponse(self.netclient.put(request), request)
 
     def delete_object(self, request):
-        return DeleteObjectResponse(self.netclient.get_response(request))
+        return DeleteObjectResponse(self.netclient.get_response(request), request)
     
     def bulk_put(self, request):
-        return BulkPutResponse(self.netclient.bulk(request))
+        return BulkPutResponse(self.netclient.bulk(request), request)
         
     def bulk_get(self, request):
-        return BulkGetResponse(self.netclient.bulk(request))
+        return BulkGetResponse(self.netclient.bulk(request), request)
+    
+    def get_jobs(self, request):
+        return GetJobsResponse(self.netclient.get_response(request), request)
  
-'''
-================================================================
-NetworkClient
-   Network client class
-'''
+    def get_job(self, request):
+        return GetJobResponse(self.netclient.get_response(request), request)
+ 
+    def delete_job(self, request):
+        return DeleteJobResponse(self.netclient.get_response(request), request)
+ 
 class NetworkClient(object):
     def __init__(self, endpoint, credentials):
         self.networkconnection = NetworkConnection(endpoint, credentials.accessId, credentials.key)
@@ -494,10 +604,15 @@ class NetworkClient(object):
         headers = {}
         headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
-        headers['Authorization'] = self.build_authorization(
-            verb=request.httpverb, date=date, resource=request.path)
-        #connection.request(request.get_verb(), urlparse.urljoin(self.networkconnection.endpoint, request.get_path()), headers=headers)
-        connection.request(request.httpverb, request.path, headers=headers)
+        if request.httpverb == HttpVerb.PUT:
+            headers['Content-Type'] = 'application/octet-stream'
+            headers['Authorization'] = self.build_authorization( verb=request.httpverb, date=date, 
+                                                                 content_type='application/octet-stream', resource=request.path)
+            connection.request(request.httpverb, request.path, body=request.body, headers=headers)
+        else:
+            headers['Authorization'] = self.build_authorization(verb=request.httpverb, date=date, resource=request.path)
+            connection.request(request.httpverb, request.path, headers=headers)
+            
         return connection.getresponse()
             
     def put(self, request):
@@ -529,7 +644,6 @@ class NetworkClient(object):
         headers['Authorization'] = self.build_authorization(
             verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
         path = self.build_path(request.path, request.queryparams)
-            #verb=request.httpverb, date=date, resource=request.path)
         connection.request(request.httpverb, path, body=request.body, headers=headers)
             
         return connection.getresponse()
@@ -549,7 +663,6 @@ class NetworkClient(object):
         return self.sign(key, signature_string)
     
     def sign(self, key, contents):
-        print "contents: " + contents
         signer = hmac.new(key.encode('utf-8'), digestmod=sha1)
         signer.update(contents)
         digest = signer.digest()
@@ -587,12 +700,10 @@ class VerboseHTTPHandler(urllib2.HTTPHandler):
         return self.do_open(VerboseHTTPConnection, req)
 
 
-'''
-================================================================
-NetworkConnection
-   This class abstracts the HTTP network connection from the client to the server.
-'''
 class NetworkConnection(object):
+    """
+    This class abstracts the HTTP network connection from the client to the server.
+    """
     def __init__(self, endpoint, accessid, key, proxy=None):
         self.url = urlparse.urlparse(self.ensure_schema(endpoint))
         self.proxy = proxy

@@ -9,20 +9,44 @@ import ds3
 class XmlSerializer(ds3.XmlSerializer):
     
     def to_print(self, xml_string):
-        ds3.pretty_print_xml(xml_string)
+        self.pretty_print_xml(xml_string)
         return None
     
+    def to_users(self, xml_string):
+        doc = self.parse_string(xml_string)
+        obj = DS3Users()
+        for node in doc.getElementsByTagName('User'):
+            user = DS3User()
+            user.authid = self.get_name_from_node(node, 'AuthId')
+            user.id = self.get_name_from_node(node, 'Id')
+            user.name = self.get_name_from_node(node, 'Name')
+            user.secretkey = self.get_name_from_node(node, 'SecretKey')
+            obj.add_user(user)
+            
+        return obj
+        
+    def to_user(self, xml_string):
+        doc = self.parse_string(xml_string)
+        obj = DS3User()
+        for node in doc.getElementsByTagName('Data'):
+            obj.authid = self.get_name_from_node(node, 'AuthId')
+            obj.id = self.get_name_from_node(node, 'Id')
+            obj.name = self.get_name_from_node(node, 'Name')
+            obj.secretkey = self.get_name_from_node(node, 'SecretKey')
+            
+        return obj
+        
     def to_request_handlers(self, xml_string):
-        ds3.pretty_print_xml(xml_string)
+        self.pretty_print_xml(xml_string)
         return None
     
     def to_retreivers(self, xml_string):
-        ds3.pretty_print_xml(xml_string)
+        self.pretty_print_xml(xml_string)
         return None
         
     def to_dao_prime_object(self, xml_string):
         obj = DaoPrimeObject()
-        print xml_string
+        self.pretty_print_xml(xml_string)
         
         return obj
         
@@ -74,17 +98,17 @@ class XmlSerializer(ds3.XmlSerializer):
     
     def to_dao_tape(self, xml_string):
         obj = DaoTape()
-        print xml_string
+        self.pretty_print_xml(xml_string)
         return obj
     
     def to_dao_tape_bucket(self, xml_string):
         obj = DaoTapeBucket()
-        print xml_string
+        self.pretty_print_xml(xml_string)
         return obj
     
     def to_dao_tape_object(self, xml_string):
         obj = DaoTapeObject()
-        print xml_string
+        self.pretty_print_xml(xml_string)
         return obj
          
 class DaoRetreiversRequest(ds3.AbstractRequest):
@@ -107,6 +131,26 @@ class RequestHandlersResponse(ds3.AbstractResponse):
         self.check_status_code(200)
         self.result = XmlSerializer().to_request_handlers(response.read())
     
+class GetUsersRequest(ds3.AbstractRequest):
+    def __init__(self):
+        self.path = '/_rest_/user/'
+        self.httpverb = ds3.HttpVerb.GET
+        
+class GetUsersResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_users(response.read())
+    
+class GetUserRequest(ds3.AbstractRequest):
+    def __init__(self, userid):
+        self.path = self.join_paths('/_rest_/user/', userid)
+        self.httpverb = ds3.HttpVerb.GET
+
+class GetUserResponse(ds3.AbstractResponse):
+    def process_response(self, response):
+        self.check_status_code(200)
+        self.result = XmlSerializer().to_user(response.read())
+        
 class DaoBucketRequest(ds3.AbstractRequest):
     def __init__(self):
         self.path = "/_rest_/beans_retriever/com.spectralogic.s3.dao.domain.ds3.Bucket"
@@ -223,37 +267,58 @@ class DaoTapeObject(AbstractDaoRetreiver):
     def __init__(self):
         super(DaoTapeObject, self).__init__()      
 
+class DS3User(object):
+    def __init__(self):
+        self.authid = ''
+        self.secretkey = ''
+        self.name = ''
+        self.id = ''
 
+class DS3Users(object):
+    def __init__(self):
+        self.list = []
+        
+    def add_user(self, user):
+        self.list.append(user)
+    def get_users(self):
+        return self.list
+    
 class Client(ds3.Client):
-    def __init__(self, endpoint, credentials):
-        self.netclient = NetworkClient(endpoint, credentials)
- 
+    def __init__(self, endpoint):
+        self.netclient = NetworkClient(endpoint)
+    
+    def get_users(self, request):
+        return GetUsersResponse(self.netclient.get_response(request), request)
+    
+    def get_user(self, request):
+        return GetUserResponse(self.netclient.get_response(request), request)
+    
     def request_handlers(self, request):
-        return RequestHandlersResponse(self.netclient.get_response(request))
+        return RequestHandlersResponse(self.netclient.get_response(request), request)
                 
     def dao_retreivers(self, request):
-        return DaoRetreiversResponse(self.netclient.get_response(request))
+        return DaoRetreiversResponse(self.netclient.get_response(request), request)
     
     def dao_bucket(self, request):
-        return DaoBucketResponse(self.netclient.get_response(request))
+        return DaoBucketResponse(self.netclient.get_response(request), request)
     
     def dao_object(self, request):
-        return DaoObjectResponse(self.netclient.get_response(request))
+        return DaoObjectResponse(self.netclient.get_response(request), request)
     
     def dao_prime(self, request):
-        return DaoPrimeResponse(self.netclient.get_response(request))
+        return DaoPrimeResponse(self.netclient.get_response(request), request)
     
     def dao_prime_object(self, request):
-        return DaoPrimeObjectResponse(self.netclient.get_response(request))
+        return DaoPrimeObjectResponse(self.netclient.get_response(request), request)
     
     def dao_tape(self, request):
-        return DaoTapeResponse(self.netclient.get_response(request))
+        return DaoTapeResponse(self.netclient.get_response(request), request)
     
     def dao_tape_bucket(self, request):
-        return DaoTapeBucketResponse(self.netclient.get_response(request))
+        return DaoTapeBucketResponse(self.netclient.get_response(request), request)
     
     def dao_tape_object(self, request):
-        return DaoTapeObjectResponse(self.netclient.get_response(request))
+        return DaoTapeObjectResponse(self.netclient.get_response(request), request)
         
 '''
 ================================================================
@@ -261,9 +326,8 @@ NetworkClient
    Network client class
 '''
 class NetworkClient(ds3.NetworkClient):
-    def __init__(self, endpoint, credentials):
-        self.networkconnection = ds3.NetworkConnection(endpoint, credentials.accessId, credentials.key)
-        self.credentials = credentials
+    def __init__(self, endpoint):
+        self.networkconnection = ds3.NetworkConnection(endpoint, 'not', 'used')
         
     def get_response(self, request):
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
@@ -272,9 +336,7 @@ class NetworkClient(ds3.NetworkClient):
         headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
         headers['Internal-Request'] = "1"
-        headers['Authorization'] = self.build_authorization(
-            verb=request.httpverb, date=date, resource=request.path)
-        #connection.request(request.get_verb(), urlparse.urljoin(self.networkconnection.endpoint, request.get_path()), headers=headers)
+        
         connection.request(request.httpverb, request.path, headers=headers)
         return connection.getresponse()
         

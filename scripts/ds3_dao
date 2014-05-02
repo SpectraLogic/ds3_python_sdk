@@ -33,12 +33,8 @@ class Arguments(object):
         parser = argparse.ArgumentParser(description='DS3 DAO List Interface')
         parser.add_argument('--command', dest='command', required=True, type=str, help='What DOA to retreive', choices=[self.REQUESTHANDLERS, self.RETREIVERS, self.BUCKET, self.OBJECT, self.PRIME, self.PRIMEOBJECT, self.TAPE, self.TAPEBUCKET, self.TAPEOBJECT, self.FINISHEDOBJECT])
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
-        parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
-        parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
         args = parser.parse_args()
         
-        self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
-        self.key = os.getenv("DS3_SECRET_KEY", args.key)
         self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
         self.proxy = os.getenv("http_proxy", None)
         self.command = args.command
@@ -48,8 +44,8 @@ class Arguments(object):
             self.doa = 'planner.FinishedTransactionObjects'
         ''' 
               
-        if not (self.accessId and self.key and self.endpoint):
-            raise ArgumentError('accessId, key, and endpoint must all be set')
+        if not self.endpoint:
+            raise ArgumentError('endpoint must be set')
         
         if not args.command:
             raise ArgumentError('must specify DAO list command')
@@ -74,13 +70,8 @@ def print_dao(result):
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     args = Arguments()
-    
-    credentials = ds3.Credentials(args.accessId, args.key)
-    if credentials.isValid == False:
-        print 'Error: Credentials not valid'
-        sys.exit(1)
         
-    client = ds3dao.Client(args.endpoint, credentials)
+    client = ds3dao.Client(args.endpoint)
     
     try:
         if args.command == args.REQUESTHANDLERS:
