@@ -570,7 +570,7 @@ class Client(object):
  
 class NetworkClient(object):
     def __init__(self, endpoint, credentials):
-        self.networkconnection = NetworkConnection(endpoint, credentials.accessId, credentials.key)
+        self.networkconnection = NetworkConnection(endpoint)
         self.credentials = credentials
         self.maxredirects = 5
     
