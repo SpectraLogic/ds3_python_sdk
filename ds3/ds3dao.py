@@ -327,7 +327,7 @@ NetworkClient
 '''
 class NetworkClient(ds3.NetworkClient):
     def __init__(self, endpoint):
-        self.networkconnection = ds3.NetworkConnection(endpoint, 'not', 'used')
+        self.networkconnection = ds3.NetworkConnection(endpoint)
         
     def get_response(self, request):
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)

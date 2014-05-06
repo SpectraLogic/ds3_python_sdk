@@ -704,7 +704,7 @@ class NetworkConnection(object):
     """
     This class abstracts the HTTP network connection from the client to the server.
     """
-    def __init__(self, endpoint, accessid, key, proxy=None):
+    def __init__(self, endpoint, proxy=None):
         self.url = urlparse.urlparse(self.ensure_schema(endpoint))
         self.proxy = proxy
         self.hostname = self.url.hostname
