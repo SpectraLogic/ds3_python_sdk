@@ -256,8 +256,7 @@ class AbstractResponse(object):
      
 class GetServiceRequest(AbstractRequest):
     def __init__(self):
-        self.path = '/'
-        self.httpverb = HttpVerb.GET
+        super(GetServiceRequest, self).__init__()
     
 class GetServiceResponse(AbstractResponse):
     def process_response(self, response):
@@ -267,6 +266,7 @@ class GetServiceResponse(AbstractResponse):
         
 class GetBucketRequest(AbstractRequest):
     def __init__(self, bucket):
+        super(GetBucketRequest, self).__init__()
         self.bucket = bucket
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.GET
@@ -285,10 +285,10 @@ class GetBucketResponse(AbstractResponse):
  
 class PutBucketRequest(AbstractRequest):
     def __init__(self, bucket):
+        super(PutBucketRequest, self).__init__()
         self.bucket = bucket
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.PUT
-        self.body = None
            
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
@@ -297,6 +297,7 @@ class PutBucketResponse(AbstractResponse):
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
+        super(DeleteBucketRequest, self).__init__()
         self.bucket = bucket
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.DELETE
@@ -310,6 +311,8 @@ class PutObjectRequest(AbstractRequest):
         
         if not os.path.isfile(filepath):
             raise RequestInvalid("Object %s is not a file" % filepath)
+
+        super(PutObjectRequest, self).__init__()
         
         filename = posixpath.normpath(filepath)
         self.bucket = bucket
@@ -324,6 +327,7 @@ class PutObjectResponse(AbstractResponse):
 
 class GetObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey, destination):
+        super(GetObjectRequest, self).__init__()
         self.bucket = bucket
         self.objectkey = objectkey
         #os.sep
@@ -342,6 +346,7 @@ class GetObjectResponse(AbstractResponse):
         
 class DeleteObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey):
+        super(DeleteObjectRequest, self).__init__()
         self.bucket = bucket
         self.objectkey = objectkey
         self.path = self.join_paths(self.bucket, self.objectkey)
@@ -548,16 +553,18 @@ class Client(object):
         return GetObjectResponse(self.netclient.get_response(request), request)
 
     def put_object(self, request):
-        return PutObjectResponse(self.netclient.put(request), request)
+        return PutObjectResponse(self.netclient.get_response(request), request)
 
     def delete_object(self, request):
         return DeleteObjectResponse(self.netclient.get_response(request), request)
     
     def bulk_put(self, request):
-        return BulkPutResponse(self.netclient.bulk(request), request)
+        #return BulkPutResponse(self.netclient.bulk(request), request)
+        return BulkPutResponse(self.netclient.get_response(request), request)
         
     def bulk_get(self, request):
-        return BulkGetResponse(self.netclient.bulk(request), request)
+        #return BulkGetResponse(self.netclient.bulk(request), request)
+        return BulkGetResponse(self.netclient.get_response(request), request)
     
     def get_jobs(self, request):
         return GetJobsResponse(self.netclient.get_response(request), request)
@@ -601,6 +608,10 @@ class NetworkClient(object):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
+        path = request.path
+        if request.queryparams:
+            path = self.build_path(request.path, request.queryparams)
+            
         headers = {}
         headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
@@ -608,13 +619,14 @@ class NetworkClient(object):
             headers['Content-Type'] = 'application/octet-stream'
             headers['Authorization'] = self.build_authorization( verb=request.httpverb, date=date, 
                                                                  content_type='application/octet-stream', resource=request.path)
-            connection.request(request.httpverb, request.path, body=request.body, headers=headers)
+            connection.request(request.httpverb, path, body=request.body, headers=headers)
         else:
             headers['Authorization'] = self.build_authorization(verb=request.httpverb, date=date, resource=request.path)
-            connection.request(request.httpverb, request.path, headers=headers)
+            connection.request(request.httpverb, path, headers=headers)
             
         return connection.getresponse()
-            
+     
+    '''       
     def put(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         #connection = opener.open(self.networkconnection.url)
@@ -631,7 +643,8 @@ class NetworkClient(object):
         connection.request(request.httpverb, request.path, body=request.body, headers=headers)
             
         return connection.getresponse()      
-    
+    '''
+    '''
     def bulk(self, request):
         #opener = urllib2.build_opener(VerboseHTTPHandler)
         #connection = opener.open(self.networkconnection.url)
@@ -647,6 +660,7 @@ class NetworkClient(object):
         connection.request(request.httpverb, path, body=request.body, headers=headers)
             
         return connection.getresponse()
+    '''
     
     def build_authorization(self, verb='', date='', content_type='', resource=''):
         signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,
