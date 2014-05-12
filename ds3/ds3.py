@@ -277,6 +277,9 @@ class GetBucketRequest(AbstractRequest):
     def with_prefix(self, prefix):
         self.queryparams['prefix'] = prefix
         
+    def with_max_keys(self, maxkeys):
+        self.queryparams['max-keys'] = maxkeys
+        
     
 class GetBucketResponse(AbstractResponse):
     def process_response(self, response):
@@ -559,11 +562,9 @@ class Client(object):
         return DeleteObjectResponse(self.netclient.get_response(request), request)
     
     def bulk_put(self, request):
-        #return BulkPutResponse(self.netclient.bulk(request), request)
         return BulkPutResponse(self.netclient.get_response(request), request)
         
     def bulk_get(self, request):
-        #return BulkGetResponse(self.netclient.bulk(request), request)
         return BulkGetResponse(self.netclient.get_response(request), request)
     
     def get_jobs(self, request):
@@ -626,41 +627,6 @@ class NetworkClient(object):
             
         return connection.getresponse()
      
-    '''       
-    def put(self, request):
-        #opener = urllib2.build_opener(VerboseHTTPHandler)
-        #connection = opener.open(self.networkconnection.url)
-        connection = httplib.HTTPConnection(self.networkconnection.endpoint)
-        date = self.get_date()
-        headers = {}
-        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
-        headers['Date'] = date
-        headers['Content-Type'] = 'application/octet-stream'
-        headers['Authorization'] = self.build_authorization(
-            verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
-            #verb=request.httpverb, date=date, resource=request.path)
-        #s = request.objectdata.read()
-        connection.request(request.httpverb, request.path, body=request.body, headers=headers)
-            
-        return connection.getresponse()      
-    '''
-    '''
-    def bulk(self, request):
-        #opener = urllib2.build_opener(VerboseHTTPHandler)
-        #connection = opener.open(self.networkconnection.url)
-        connection = httplib.HTTPConnection(self.networkconnection.endpoint)
-        date = self.get_date()
-        headers = {}
-        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
-        headers['Date'] = date
-        headers['Content-Type'] = 'application/octet-stream'
-        headers['Authorization'] = self.build_authorization(
-            verb=request.httpverb, date=date, content_type='application/octet-stream', resource=request.path)
-        path = self.build_path(request.path, request.queryparams)
-        connection.request(request.httpverb, path, body=request.body, headers=headers)
-            
-        return connection.getresponse()
-    '''
     
     def build_authorization(self, verb='', date='', content_type='', resource=''):
         signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,
