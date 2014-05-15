@@ -163,13 +163,8 @@ class Credentials(object):
         self.accessId = accessId.strip()
         self.key = key.strip()
         
-    def get_accessId(self):
-        return self.accessId
         
-    def get_key(self):
-        return self.key
-        
-    def isValid(self):
+    def is_valid(self):
         if self.accessId and self.key:
             return True
         else:
@@ -271,8 +266,8 @@ class GetBucketRequest(AbstractRequest):
         self.path = self.join_paths('/', self.bucket)
         self.httpverb = HttpVerb.GET
         
-    def with_next_marker(self, nextMarker):
-        self.queryparams['marker'] = nextMarker
+    def with_marker(self, marker):
+        self.queryparams['marker'] = marker
         
     def with_prefix(self, prefix):
         self.queryparams['prefix'] = prefix
