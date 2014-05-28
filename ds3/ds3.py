@@ -572,10 +572,10 @@ class Client(object):
         return DeleteJobResponse(self.netclient.get_response(request), request)
  
 class NetworkClient(object):
-    def __init__(self, endpoint, credentials):
+    def __init__(self, endpoint, credentials, maxredirects=5):
         self.networkconnection = NetworkConnection(endpoint)
         self.credentials = credentials
-        self.maxredirects = 5
+        self.maxredirects = maxredirects
     
     def with_http_secure(self):
         return
