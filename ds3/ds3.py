@@ -93,9 +93,9 @@ class XmlSerializer(object):
             content.etag = self.get_name_from_node(node, "ETag")
             content.size = self.get_name_from_node(node, "Size")
             content.storageclass = self.get_name_from_node(node, "StorageClass")
-            for node3 in node.getElementsByTagName("Owner"):
-                displayname = self.get_name_from_node(node3, "DisplayName")
-                ownerid = self.get_name_from_node(node3, "ID")
+            for ownernode in node.getElementsByTagName("Owner"):
+                displayname = self.get_name_from_node(ownernode, "DisplayName")
+                ownerid = self.get_name_from_node(ownernode, "ID")
                 content.add_owner(Owner(displayname, ownerid))
             
             obj.add_contents(content)
