@@ -594,7 +594,6 @@ class NetworkClient(object):
         cnt = 0
         r = self.send_request(request)
         while r.status == 307 and cnt < self.maxredirects:
-            print 'redirecting.....'
             cnt += 1
             r = self.send_request(request)
              
