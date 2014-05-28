@@ -36,9 +36,9 @@ class XmlSerializer(object):
                 # this is not the node we are looking for
                 continue
             
-            for node2 in node.childNodes:
-                if node2.nodeType == Node.TEXT_NODE:
-                    return node2.data
+            for childnode in node.childNodes:
+                if childnode.nodeType == Node.TEXT_NODE:
+                    return childnode.data
                 
         return ''
     
