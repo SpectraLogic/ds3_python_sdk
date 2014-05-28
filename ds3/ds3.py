@@ -86,14 +86,14 @@ class XmlSerializer(object):
         obj.delimiter = self.get_name_from_node(doc, "Delimiter")
         obj.nextmarker = self.get_name_from_node(doc, "NextMarker")
         
-        for node in doc.getElementsByTagName("Contents"):
+        for contentnode in doc.getElementsByTagName("Contents"):
             content = Contents()
-            content.key = self.get_name_from_node(node, "Key")
-            content.lastmodified = self.get_name_from_node(node, "LastModified")
-            content.etag = self.get_name_from_node(node, "ETag")
-            content.size = self.get_name_from_node(node, "Size")
-            content.storageclass = self.get_name_from_node(node, "StorageClass")
-            for ownernode in node.getElementsByTagName("Owner"):
+            content.key = self.get_name_from_node(contentnode, "Key")
+            content.lastmodified = self.get_name_from_node(contentnode, "LastModified")
+            content.etag = self.get_name_from_node(contentnode, "ETag")
+            content.size = self.get_name_from_node(contentnode, "Size")
+            content.storageclass = self.get_name_from_node(contentnode, "StorageClass")
+            for ownernode in contentnode.getElementsByTagName("Owner"):
                 displayname = self.get_name_from_node(ownernode, "DisplayName")
                 ownerid = self.get_name_from_node(ownernode, "ID")
                 content.add_owner(Owner(displayname, ownerid))
