@@ -568,8 +568,8 @@ class NetworkClient(object):
         self.credentials = credentials
         self.maxredirects = maxredirects
     
-    def with_http_secure(self):
-        return
+    def with_secure(self):
+        return self
     
     def with_proxy(self, proxy):
         index = proxy.find('://')
@@ -577,6 +577,7 @@ class NetworkClient(object):
             self.proxy = proxy[index+3:]
         else:
             self.proxy = proxy
+        return self
         
     def with_max_redirects(self, maxredirects):
         self.maxredirects = maxredirects
