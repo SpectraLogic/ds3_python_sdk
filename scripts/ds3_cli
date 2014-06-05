@@ -39,6 +39,10 @@ class Arguments(object):
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
         parser.add_argument('--jobid', dest='jobid', type=str, help='Job (Prime) ID.  Required for any Job Prime Operations')
+        parser.add_argument('--prefix', dest='prefix', type=str, help='Prefix for Get Bucket.')
+        parser.add_argument('--maxkeys', dest='maxkeys', type=str, help='Max-Keys for Get Bucket.')
+        parser.add_argument('--marker', dest='marker', type=str, help='Starting Marker for Get Bucket.')
+
         args = parser.parse_args()
         
         self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
@@ -51,6 +55,10 @@ class Arguments(object):
         self.destination = args.destination
         self.jobid = args.jobid
         self.command = args.command
+        self.prefix = args.prefix
+        self.maxkeys = args.maxkeys
+        self.marker = args.marker
+        self.prefix = args.prefix
         
         if not (self.accessId and self.key and self.endpoint):
             raise ArgumentError('accessId, key, and endpoint must all be set')
@@ -146,7 +154,7 @@ def main():
     args = Arguments()
     
     credentials = ds3.Credentials(args.accessId, args.key)
-    if credentials.isValid == False:
+    if credentials.is_valid == False:
         print 'Error: Credentials not valid'
         sys.exit(1)
         
@@ -162,7 +170,15 @@ def main():
         elif cmd == args.DELETE_BUCKET:
             response = client.delete_bucket(ds3.DeleteBucketRequest(args.bucket))
         elif cmd == args.GET_BUCKET:
-            response = client.get_bucket(ds3.GetBucketRequest(args.bucket))
+            request = ds3.GetBucketRequest(args.bucket)
+            if args.prefix:
+                request.with_prefix(args.prefix)
+            if args.marker:
+                request.with_marker(args.marker)
+            if args.maxkeys:
+                request.with_maxkeys(args.maxkeys)
+    
+            response = client.get_bucket(request)
             print_get_bucket_result(response.result)
         elif cmd == args.PUT_OBJECT:
             response = client.put_object(ds3.PutObjectRequest(args.bucket, args.objectkey))

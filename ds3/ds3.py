@@ -110,28 +110,20 @@ class XmlSerializer(object):
     def to_bulk_put_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
         obj = MasterObjectList()
-        print xml_string
         obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
         for node in doc.getElementsByTagName("object"):
-                oo = Object()
-                oo.name = node.getAttribute('name')
-                oo.size = node.getAttribute('size')
-                if oo.name and oo.size:
-                    obj.append(oo)
+                oo = Object(node.getAttribute('name'), node.getAttribute('size'))
+                obj.append(oo)
         
         return obj
     
     def to_bulk_get_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
         obj = MasterObjectList()
-        print xml_string
         obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
         for node in doc.getElementsByTagName("object"):
-                oo = Object()
-                oo.name = node.getAttribute('name')
-                oo.size = node.getAttribute('size')
-                if oo.name and oo.size:
-                    obj.append(oo)
+                oo = Object(node.getAttribute('name'), node.getAttribute('size'))
+                obj.append(oo)
         
         return obj
         
@@ -144,7 +136,7 @@ class XmlSerializer(object):
                 p.id = self.get_name_from_node(node, 'Id', 'Prime')
                 p.bucketid = self.get_name_from_node(node, 'BucketId', 'Prime')
                 p.requesttype = self.get_name_from_node(node,'RequestType', 'Prime')
-                p.createdat = self.get_name_from_node(node,'CreatedAt', 'Prime')
+                p.createdate = self.get_name_from_node(node,'CreatedAt', 'Prime')
                 obj.append(p)      
                 
         return obj
@@ -162,7 +154,6 @@ class Credentials(object):
     def __init__(self, accessId, key):
         self.accessId = accessId.strip()
         self.key = key.strip()
-        
         
     def is_valid(self):
         if self.accessId and self.key:
@@ -468,12 +459,12 @@ class Contents(object):
     
 
 class Bucket(object):
-    def __init__(self, name=None, creationdate=None):
+    def __init__(self, name, creationdate=None):
         self.name = name
         self.creationdate = creationdate
    
 class Owner(object):
-    def __init__(self, displayname=None, ownerid=None):
+    def __init__(self, displayname, ownerid):
         self.displayname = displayname
         self.ownerid = ownerid
               
@@ -484,7 +475,7 @@ class Ds3Error(object):
         self.message = message
 
 class Object(object):
-    def __init__(self, name=None, size=None):
+    def __init__(self, name, size):
         self.name = name
         self.size = size
             
@@ -505,12 +496,12 @@ class Primes(object):
             self.primes.append(obj)
         
 class Prime(object):
-    def __init__(self, active=None, requesttype=None, primeid=None, bucketid=None, createdat=None):
+    def __init__(self, active=None, requesttype=None, primeid=None, bucketid=None, createdate=None):
         self.active = active
         self.requesttype = requesttype
         self.id = primeid
         self.bucketid = bucketid
-        self.createdat = createdat
+        self.createdate = createdate
         
     def add_bucket(self, bucket):
         if isinstance(bucket, Bucket):
