@@ -109,8 +109,8 @@ class XmlSerializer(object):
     
     def to_bulk_put_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        obj = MasterObjectList()
-        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        obj = MasterObjectList(jobid)
         for node in doc.getElementsByTagName("object"):
                 oo = Object(node.getAttribute('name'), node.getAttribute('size'))
                 obj.append(oo)
@@ -119,8 +119,8 @@ class XmlSerializer(object):
     
     def to_bulk_get_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        obj = MasterObjectList()
-        obj.jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        obj = MasterObjectList(jobid)
         for node in doc.getElementsByTagName("object"):
                 oo = Object(node.getAttribute('name'), node.getAttribute('size'))
                 obj.append(oo)
@@ -581,6 +581,7 @@ class NetworkClient(object):
         
     def with_max_redirects(self, maxredirects):
         self.maxredirects = maxredirects
+        return self
         
     def get_response(self, request):
         cnt = 0
