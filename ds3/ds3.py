@@ -591,7 +591,6 @@ class NetworkClient(object):
         return r
            
     def send_request(self, request):
-        #opener = urllib2.build_opener(VerboseHTTPHandler)
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
         path = request.path
