@@ -223,7 +223,7 @@ class AbstractResponse(object):
         # this method must be implemented
         raise NotImplementedError("Request Implemented")
     
-    def check_status_code(self, expectedcode):
+    def __check_status_code__(self, expectedcode):
         if self.response.status != expectedcode:
             err = "Return Code: Expected %s - Received %s" % (expectedcode, self.response.status)
             ds3error = XmlSerializer().to_ds3error(self.response.read())
@@ -238,7 +238,7 @@ class GetServiceRequest(AbstractRequest):
     
 class GetServiceResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer(True).to_list_all_my_buckets_result(response.read())
 
         
@@ -261,7 +261,7 @@ class GetBucketRequest(AbstractRequest):
     
 class GetBucketResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer().to_get_bucket_result(response.read())
  
 class PutBucketRequest(AbstractRequest):
@@ -273,7 +273,7 @@ class PutBucketRequest(AbstractRequest):
            
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -284,7 +284,7 @@ class DeleteBucketRequest(AbstractRequest):
         
 class DeleteBucketResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(204)
+        self.__check_status_code__(204)
         
 class PutObjectRequest(AbstractRequest):
     def __init__(self, bucket, filepath):
@@ -303,7 +303,7 @@ class PutObjectRequest(AbstractRequest):
     
 class PutObjectResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
 
 class GetObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey, destination):
@@ -319,7 +319,7 @@ class GetObjectRequest(AbstractRequest):
     
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         output = open(self.request.destination, 'wb')
         output.write(self.response.read())
         
@@ -333,7 +333,7 @@ class DeleteObjectRequest(AbstractRequest):
     
 class DeleteObjectResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(204)
+        self.__check_status_code__(204)
         
 class BulkRequest(AbstractRequest):
     def __init__(self, bucket, objectlist):
@@ -356,7 +356,7 @@ class BulkPutRequest(BulkRequest):
     
 class BulkPutResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer().to_bulk_put_result(response.read())
         
 class BulkGetRequest(BulkRequest):
@@ -368,7 +368,7 @@ class BulkGetRequest(BulkRequest):
     
 class BulkGetResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer().to_bulk_get_result(response.read())
         
 class GetJobsRequest(AbstractRequest):
@@ -379,7 +379,7 @@ class GetJobsRequest(AbstractRequest):
             
 class GetJobsResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer(True).to_get_jobs(response.read())
         
 class GetJobRequest(AbstractRequest):
@@ -389,7 +389,7 @@ class GetJobRequest(AbstractRequest):
             
 class GetJobResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(200)
+        self.__check_status_code__(200)
         self.result = XmlSerializer(True).to_get_job(response.read())
         
 class DeleteJobRequest(AbstractRequest):
@@ -399,7 +399,7 @@ class DeleteJobRequest(AbstractRequest):
             
 class DeleteJobResponse(AbstractResponse):
     def process_response(self, response):
-        self.check_status_code(204)
+        self.__check_status_code__(204)
         
 class ListAllMyBucketsResult(object):
     def __init__(self):
