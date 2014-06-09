@@ -288,7 +288,6 @@ class DeleteBucketResponse(AbstractResponse):
         
 class PutObjectRequest(AbstractRequest):
     def __init__(self, bucket, filepath):
-        
         super(PutObjectRequest, self).__init__()
         
         if not os.path.isfile(filepath):
@@ -484,6 +483,8 @@ class Primes(object):
     def append(self, obj):
         if isinstance(obj, Prime):
             self.primes.append(obj)
+        else:
+            raise TypeError("Can only append Prime Objects")
         
 class Prime(object):
     def __init__(self, active=None, requesttype=None, primeid=None, bucketid=None, createdate=None):
@@ -496,6 +497,8 @@ class Prime(object):
     def add_bucket(self, bucket):
         if isinstance(bucket, Bucket):
             self.bucket = bucket
+        else:
+            raise TypeError("Can only append Bucket Objects")
             
 class Job(object):
     def __init__(self, active=None, filesystemid=None, jid=None, orderindex=None, 
