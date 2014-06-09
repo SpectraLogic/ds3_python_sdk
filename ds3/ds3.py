@@ -17,7 +17,7 @@ from abc import ABCMeta
 import posixpath
 
 class XmlSerializer(object):
-    def __init__(self, verbose=None):
+    def __init__(self, verbose=False):
         self.verbose = verbose
     
     def pretty_print_xml(self, xml_string):
@@ -110,8 +110,8 @@ class XmlSerializer(object):
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
         obj = MasterObjectList(jobid)
-        for node in doc.getElementsByTagName("object"):
-                oo = Object(node.getAttribute('name'), node.getAttribute('size'))
+        for object_node in doc.getElementsByTagName("object"):
+                oo = Object(object_node.getAttribute('name'), object_node.getAttribute('size'))
                 obj.append(oo)
         
         return obj
@@ -120,8 +120,8 @@ class XmlSerializer(object):
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
         obj = MasterObjectList(jobid)
-        for node in doc.getElementsByTagName("object"):
-                oo = Object(node.getAttribute('name'), node.getAttribute('size'))
+        for object_node in doc.getElementsByTagName("object"):
+                oo = Object(object_node.getAttribute('name'), object_node.getAttribute('size'))
                 obj.append(oo)
         
         return obj
@@ -129,24 +129,26 @@ class XmlSerializer(object):
     def to_get_jobs(self, xml_string):
         doc = self.parse_string(xml_string)
         obj = Primes()
-        for node in doc.getElementsByTagName("Prime"):
+        for prime_node in doc.getElementsByTagName("Prime"):
                 p = Prime()
-                p.active = bool(self.get_name_from_node(node,'Active', 'Prime'))
-                p.id = self.get_name_from_node(node, 'Id', 'Prime')
-                p.bucketid = self.get_name_from_node(node, 'BucketId', 'Prime')
-                p.requesttype = self.get_name_from_node(node,'RequestType', 'Prime')
-                p.createdate = self.get_name_from_node(node,'CreatedAt', 'Prime')
+                p.active = bool(self.get_name_from_node(prime_node,'Active', 'Prime'))
+                p.id = self.get_name_from_node(prime_node, 'Id', 'Prime')
+                p.bucketid = self.get_name_from_node(prime_node, 'BucketId', 'Prime')
+                p.requesttype = self.get_name_from_node(prime_node,'RequestType', 'Prime')
+                p.createdate = self.get_name_from_node(prime_node,'CreatedAt', 'Prime')
                 obj.append(p)      
                 
         return obj
     
     def to_get_job(self, xml_string):
         doc = self.parse_string(xml_string)
-        return None
+        job = Job()
+        return job
 
     def to_delete_job(self, xml_string):
         doc = self.parse_string(xml_string)
-        return None
+        job = Job()
+        return job
 
 
 class Credentials(object):
@@ -155,10 +157,7 @@ class Credentials(object):
         self.key = key.strip()
         
     def is_valid(self):
-        if self.accessId and self.key:
-            return True
-        else:
-            return False             
+        return True if self.accessId and self.key else False
 
 
 class HttpVerb(object):
@@ -192,6 +191,7 @@ class AbstractRequest(object):
         self.path = '/'
         self.httpverb = HttpVerb.GET
         self.queryparams = {}
+        self.headers = {}
         self.body = None
 
 
@@ -274,7 +274,6 @@ class PutBucketRequest(AbstractRequest):
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.check_status_code(200)
-        #self.result = XmlSerializer(True).to_put_bucket_result(response.read())
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
