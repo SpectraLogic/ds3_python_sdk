@@ -210,7 +210,7 @@ def main():
         print "\nCode: ", e.code
         print "HttpErrorCode: ", e.httperrorcode
         print "Message: ", e.message
-    except ds3.RequestNotImplemented:
+    except NotImplementedError:
         print "Request", cmd, "is not implemented in the SDK"
     else:
         print "\nRequest", cmd, "successfully completed..."

@@ -49,11 +49,10 @@ class XmlSerializer(object):
         
     def to_ds3error(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        obj = Ds3Error()
-
-        obj.code = self.get_name_from_node(doc, "Code")
-        obj.httperrorcode = self.get_name_from_node(doc, "HttpErrorCode")
-        obj.message = self.get_name_from_node(doc, "Message")
+        code = self.get_name_from_node(doc, "Code")
+        httperrorcode = self.get_name_from_node(doc, "HttpErrorCode")
+        message = self.get_name_from_node(doc, "Message") 
+        obj = Ds3Error(code, httperrorcode, message)
         
         return obj
         
@@ -187,13 +186,6 @@ class RequestFailed(Exception):
     def __str__(self):
         return repr(self.summary)
     
-class RequestNotImplemented(Exception):
-    def __init__(self, summary):
-        self.summary = summary
-        
-    def __str__(self):
-        return repr(self.summary)
-    
 class AbstractRequest(object):
     __metaclass__ = ABCMeta
     def __init__(self):
@@ -229,7 +221,7 @@ class AbstractResponse(object):
     
     def process_response(self, response):
         # this method must be implemented
-        raise RequestNotImplemented("Not Implemented")
+        raise NotImplementedError("Request Implemented")
     
     def check_status_code(self, expectedcode):
         if self.response.status != expectedcode:
@@ -298,11 +290,11 @@ class DeleteBucketResponse(AbstractResponse):
 class PutObjectRequest(AbstractRequest):
     def __init__(self, bucket, filepath):
         
+        super(PutObjectRequest, self).__init__()
+        
         if not os.path.isfile(filepath):
             raise RequestInvalid("Object %s is not a file" % filepath)
 
-        super(PutObjectRequest, self).__init__()
-        
         filename = posixpath.normpath(filepath)
         self.bucket = bucket
         self.objectkey = open(filename, 'rb')
@@ -319,7 +311,6 @@ class GetObjectRequest(AbstractRequest):
         super(GetObjectRequest, self).__init__()
         self.bucket = bucket
         self.objectkey = objectkey
-        #os.sep
         self.destination = os.path.join(os.path.normpath(destination), os.path.normpath(objectkey))
         if not os.path.exists(os.path.dirname(self.destination)):
             os.makedirs(os.path.dirname(self.destination))
@@ -424,7 +415,7 @@ class ListAllMyBucketsResult(object):
     def add_owner(self, displayname, ownerid):
         self.owner = Owner(displayname, ownerid)
         
-    def len(self):
+    def __len__(self):
         return len(self.buckets)
     
     
@@ -469,7 +460,7 @@ class Owner(object):
         self.ownerid = ownerid
               
 class Ds3Error(object):
-    def __init__(self, code=None, httperrorcode=None, message=None):
+    def __init__(self, code, httperrorcode, message):
         self.code = code
         self.httperrorcode = httperrorcode
         self.message = message
