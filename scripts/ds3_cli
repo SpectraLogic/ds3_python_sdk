@@ -33,8 +33,8 @@ class Arguments(object):
         parser = argparse.ArgumentParser(description='DS3 Command Line Interface')
         parser.add_argument('--command', dest='command', required=True, type=str, help='What command to perform', choices=[self.SERVICE_LIST, self.PUT_BUCKET,self.GET_BUCKET, self.DELETE_BUCKET, self.GET_OBJECT, self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT, self.BULK_GET, self.GET_JOBS, self.GET_JOB, self.DELETE_JOB])
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name.  Required for any operations that target a bucket')
-        parser.add_argument('--object', dest='objectkey', type=str, help='The filename or directory.  Required for any Object operations')
-        parser.add_argument('--destination', dest='destination', type=str, help="Destination for Object. Required for Get Object")
+        parser.add_argument('--object', dest='objectkey', type=str, help='The Object filename.  Required for any Object operations')
+        parser.add_argument('--directory', dest='directory', type=str, help="Directory for Bulk and Get commands.")
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
@@ -52,7 +52,7 @@ class Arguments(object):
   
         self.bucket = args.bucket
         self.objectkey = args.objectkey
-        self.destination = args.destination
+        self.directory = args.directory
         self.jobid = args.jobid
         self.command = args.command
         self.prefix = args.prefix
@@ -66,10 +66,13 @@ class Arguments(object):
         if (args.command in [self.PUT_BUCKET, self.DELETE_BUCKET, self.GET_BUCKET]) and not args.bucket:
             raise ArgumentError('must specify bucket for bucket operations')
         
-        elif (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT, self.BULK_PUT]) and (not args.objectkey or not args.bucket):
+        elif (args.command in [self.PUT_OBJECT, self.DELETE_OBJECT]) and (not args.objectkey or not args.bucket):
             raise ArgumentError('must specify bucket and object for Put and Delete object operations') 
         
-        elif (args.command in [self.GET_OBJECT, self.BULK_GET]) and (not args.objectkey or not args.bucket or not args.destination):
+        elif (args.command in [self.BULK_PUT, self.BULK_GET]) and (not args.directory or not args.bucket):
+            raise ArgumentError('must specify bucket and directory for Bulk PUT or GET operations') 
+        
+        elif (args.command in [self.GET_OBJECT]) and (not args.objectkey or not args.bucket or not args.destination):
             raise ArgumentError('must specify bucket, object, and destination for Get Object operations')
         
         elif (args.command in [self.GET_JOBS] and not args.bucket):
@@ -185,13 +188,13 @@ def main():
         elif cmd == args.DELETE_OBJECT:
             response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.objectkey))
         elif cmd == args.GET_OBJECT:
-            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.objectkey, args.destination))
+            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.objectkey, args.directory))
         elif cmd == args.BULK_PUT:
-            files = create_object_list(args.objectkey)
+            files = create_object_list(args.directory)
             response = client.bulk_put(ds3.BulkPutRequest(args.bucket, files))
             bulk_put(ds3.Client(args.endpoint, credentials), args.bucket, response.result)
         elif cmd == args.BULK_GET:
-            files = create_object_list(args.objectkey)
+            files = create_object_list(args.directory)
             response = client.bulk_get(ds3.BulkGetRequest(args.bucket, files))
             bulk_get(client, args.bucket, args.destination, response.result)
         elif cmd == args.GET_JOBS:

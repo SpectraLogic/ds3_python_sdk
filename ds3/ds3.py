@@ -107,21 +107,22 @@ class XmlSerializer(object):
         return None
     
     def to_bulk_put_result(self, xml_string):
+        self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
-        jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
         obj = MasterObjectList(jobid)
-        for object_node in doc.getElementsByTagName("object"):
-                oo = Object(object_node.getAttribute('name'), object_node.getAttribute('size'))
+        for object_node in doc.getElementsByTagName('Object'):
+                oo = Object(object_node.getAttribute('Name'), object_node.getAttribute('Size'))
                 obj.append(oo)
         
         return obj
     
     def to_bulk_get_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        jobid = self.get_attribute_from_node(doc, 'masterobjectlist', 'jobid')
+        jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
         obj = MasterObjectList(jobid)
-        for object_node in doc.getElementsByTagName("object"):
-                oo = Object(object_node.getAttribute('name'), object_node.getAttribute('size'))
+        for object_node in doc.getElementsByTagName("Object"):
+                oo = Object(object_node.getAttribute('Name'), object_node.getAttribute('Size'))
                 obj.append(oo)
         
         return obj
@@ -349,7 +350,7 @@ class BulkRequest(AbstractRequest):
 class BulkPutRequest(BulkRequest):
     def __init__(self, bucket, objectlist):
         super(BulkPutRequest, self).__init__(bucket, objectlist)
-        self.path = self.join_paths('/_rest_/buckets/', self.bucket)
+        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
         self.httpverb = HttpVerb.PUT
         self.queryparams={"operation": "start_bulk_put"}
     
@@ -361,7 +362,7 @@ class BulkPutResponse(AbstractResponse):
 class BulkGetRequest(BulkRequest):
     def __init__(self, bucket, objectlist):
         super(BulkGetRequest, self).__init__(bucket, objectlist)
-        self.path = self.join_paths('/_rest_/buckets/', self.bucket)
+        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
         self.httpverb = HttpVerb.PUT
         self.queryparams={"operation": "start_bulk_get"}
     
