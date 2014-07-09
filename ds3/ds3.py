@@ -31,7 +31,7 @@ class XmlSerializer(object):
     def get_name_from_node(self, doc, nodename, parentname=None):
         for node in doc.getElementsByTagName(nodename):
             if parentname and not node.parentNode.nodeName == parentname:
-                # this is not the node we are looking for
+                # this is not the node you are looking for
                 continue
             
             for childnode in node.childNodes:
@@ -42,7 +42,6 @@ class XmlSerializer(object):
     
     def get_attribute_from_node(self, doc, nodename, attribute):
         node = doc.getElementsByTagName(nodename)
-        
         return node[0].getAttribute(attribute)
         
     def to_ds3error(self, xml_string):
@@ -108,41 +107,59 @@ class XmlSerializer(object):
         self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
-        obj = MasterObjectList(jobid)
+        mobjlist = MasterObjectList(jobid)
         for object_node in doc.getElementsByTagName('Object'):
-                oo = Object(object_node.getAttribute('Name'), object_node.getAttribute('Size'))
-                obj.append(oo)
+            # add each DS3 object to the master object list
+            mobjlist.append(Object(object_node.getAttribute('Name'), object_node.getAttribute('Size')))
         
-        return obj
+        return mobjlist
     
     def to_bulk_get_result(self, xml_string):
         self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
-        obj = MasterObjectList(jobid)
+        mobjlist = MasterObjectList(jobid)
         for object_node in doc.getElementsByTagName("Object"):
-                oo = Object(object_node.getAttribute('Name'), object_node.getAttribute('Size'))
-                obj.append(oo)
+            # add each DS3 object to the master object list
+            mobjlist.append(Object(object_node.getAttribute('Name'), object_node.getAttribute('Size')))
         
-        return obj
+        return mobjlist
         
     def to_get_jobs(self, xml_string):
         doc = self.parse_string(xml_string)
         jobs = Jobs()
         for job_node in doc.getElementsByTagName("Job"):
-                
-                jli = JobInfo(job_node.getAttribute('BucketName'),
+            jobinfo = JobInfo(job_node.getAttribute('BucketName'),
                                   job_node.getAttribute('JobId'),
                                   job_node.getAttribute('Priority'),
                                   job_node.getAttribute('RequestType'),
                                   job_node.getAttribute('StartDate'))
-                jobs.append(jli)
+            jobs.append(jobinfo)
                 
         return jobs
     
     def to_get_job(self, xml_string):
         doc = self.parse_string(xml_string)
-        job = Job()
+        for job_node in doc.getElementsByTagName("Job"):
+            jobinfo = JobInfo(job_node.getAttribute('BucketName'),
+                              job_node.getAttribute('JobId'),
+                              job_node.getAttribute('Priority'),
+                              job_node.getAttribute('RequestType'),
+                              job_node.getAttribute('StartDate'))
+            job = Job(jobinfo)
+        
+        # parse the objects on a per chunk basis
+        for objs_node in doc.getElementsByTagName("Objects"):
+            chunk = objs_node.getAttribute('ChunkNumber')
+            serverid = objs_node.getAttribute('ServerId')
+            jobjlist = JobObjectList(chunk, serverid)
+            for jobj in objs_node.getElementsByTagName("Object"):
+                jobjlist.append(JobObject(jobj.getAttribute('Name'), 
+                                         jobj.getAttribute('Size'),
+                                         jobj.getAttribute('State')))
+        
+            job.append(jobjlist)
+            
         return job
 
     def to_delete_job(self, xml_string):
@@ -183,7 +200,7 @@ class RequestFailed(Exception):
         self.message = ds3error.message
         
     def __str__(self):
-        return repr(self.summary)
+        return '{0} \n Code={1} \n HttpError={2} \n {3}'.format(self.summary, self.code, self.httperrorcode, self.message)
     
 class AbstractRequest(object):
     __metaclass__ = ABCMeta
@@ -364,6 +381,7 @@ class BulkGetResponse(AbstractResponse):
         
 class GetJobsRequest(AbstractRequest):
     def __init__(self, bucket):
+        super(GetJobsRequest, self).__init__()
         self.path = '/_rest_/job/'
         self.queryparams={"bucket": bucket}
         self.httpverb = HttpVerb.GET
@@ -375,6 +393,7 @@ class GetJobsResponse(AbstractResponse):
         
 class GetJobRequest(AbstractRequest):
     def __init__(self, jobid):
+        super(GetJobRequest, self).__init__() # to init quertyparams{}
         self.path = self.join_paths('/_rest_/job/', jobid)
         self.httpverb = HttpVerb.GET
             
@@ -391,7 +410,10 @@ class DeleteJobRequest(AbstractRequest):
 class DeleteJobResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(204)
-        
+     
+   
+
+
 class ListAllMyBucketsResult(object):
     def __init__(self):
         self.buckets = []
@@ -411,6 +433,16 @@ class ListAllMyBucketsResult(object):
     
 class ListBucketResult(object):
     def __init__(self):
+        '''
+        obj.name = self.get_name_from_node(doc, "Name")
+        obj.prefix = self.get_name_from_node(doc, "Prefix")
+        obj.marker = self.get_name_from_node(doc, "Marker")
+        obj.maxkeys = self.get_name_from_node(doc, "MaxKeys")
+        obj.istruncated = self.get_name_from_node(doc, "IsTruncated")
+        obj.creationdate = self.get_name_from_node(doc, "CreationDate")
+        obj.delimiter = self.get_name_from_node(doc, "Delimiter")
+        obj.nextmarker = self.get_name_from_node(doc, "NextMarker")
+        '''
         self.name = ''
         self.prefix = ''
         self.marker = ''
@@ -443,11 +475,17 @@ class Bucket(object):
     def __init__(self, name, creationdate=None):
         self.name = name
         self.creationdate = creationdate
+        
+    def __str__(self):
+        return 'Name={0} CreationDate={1}'.format(self.name, self.creationdate)
    
 class Owner(object):
     def __init__(self, displayname, ownerid):
         self.displayname = displayname
         self.ownerid = ownerid
+        
+    def __str__(self):
+        return 'DisplayName={0} OwnerId={1}'.format(self.displayname, self.ownerid)
               
 class Ds3Error(object):
     def __init__(self, code, httperrorcode, message):
@@ -456,28 +494,33 @@ class Ds3Error(object):
         self.message = message
 
 class Object(object):
+    """DS3 Object is metadata"""
     def __init__(self, name, size):
         self.name = name
         self.size = size
+        
+    def __str__(self):
+        return 'Name={0} Size={1}'.format(self.name, self.size)
             
 class MasterObjectList(object):
     def __init__(self, jobid=None):
-        # This is a list of DS3Objects
+        # This is a list of DS3 Objects
         self.objectlist = []
         self.jobid = jobid
     def append(self, ds3obj):
+        if not isinstance(ds3obj, Object):
+            raise TypeError("Can only append a DS3 Object")
         self.objectlist.append(ds3obj)
-        return
                    
 class Jobs(object):
     def __init__(self):
         self.joblist = []
         
     def append(self, obj):
-        if isinstance(obj, JobInfo):
-            self.joblist.append(obj)
-        else:
+        if not isinstance(obj, JobInfo):
             raise TypeError("Can only append JobInfo Objects")
+            
+        self.joblist.append(obj)
     
 class JobInfo(object):
     def __init__(self, bucketname, jobid, priority, jobtype, startdate):
@@ -488,18 +531,49 @@ class JobInfo(object):
         self.startdate = startdate
     def __str__(self):
         return 'BucketName={0} JobId={1} Priority={2} StartDate={3}'.format(self.bucketname, self.jobid, self.priority, self.startdate)
+   
+class JobObjectList(object):
+    """JobObjectList is a container for DS3 JobObjects.   
+        The DS3 object container has attributes for Chunk number and DS3 server hostname/address.  
+    """
+    def __init__(self, chunk, serverid):
+        self.chunknumber = chunk
+        self.serverid = serverid
+        self.jobobjects = []
+    def append(self, ds3obj):
+        if not isinstance(ds3obj, JobObject):
+            raise TypeError("Can only append a DS3 JobObject")
         
-class Job(object):
-    def __init__(self, active=None, filesystemid=None, jid=None, orderindex=None, 
-                 primeid=None, size=None, state=None, virtualpageindex=None):
-        self.active = False
-        self.filesystemid = filesystemid
-        self.jid = jid
-        self.orderindex= orderindex
-        self.primeid = primeid
+        self.jobobjects.append(ds3obj)
+        
+    def __str__(self):
+        return 'ChunkNumber={0} ServerId={1} JobObjects={2}'.format(self.chunknumber, self.serverid, len(self.jobobjects))
+ 
+class JobObject(object):
+    """DS3 Job Object metadata"""
+    def __init__(self, name, size, state):
+        self.name = name
         self.size = size
         self.state = state
-        self.virtualpageindex = virtualpageindex
+        
+    def __str__(self):
+        return 'Name={0} Size={1} State={2}'.format(self.name, self.size, self.state)
+        
+class Job(object):
+    def __init__(self, jobinfo):
+        if not isinstance(jobinfo, JobInfo):
+            raise TypeError("Can only init a Job with a JobInfo object")
+        
+        self.jobinfo = jobinfo
+        self.jobobjectlists = []  # list of ObjectList
+    def append(self, jobjlist):
+        if not isinstance(jobjlist, JobObjectList):
+            raise TypeError("Can only append JobObjectList Objects")
+            
+        self.jobobjectlists.append(jobjlist)
+        
+    def __str__(self):
+        return '{0}, JobObjectLists={1}'.format(self.jobinfo, len(self.jobobjectlists))
 
 class Client(object):
     def __init__(self, endpoint, credentials):

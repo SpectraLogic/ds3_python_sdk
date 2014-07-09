@@ -157,6 +157,15 @@ def print_jobs(result, bucket):
     for job in result.joblist:
         print job
     
+def print_job(result):
+    print "\n", result
+    for objlist in result.objectlists:
+        print "\n", objlist
+        for obj in objlist.objects:
+            print "\t", obj
+            
+        print "\n"
+        
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     args = Arguments()
@@ -208,6 +217,7 @@ def main():
             print_jobs(response.result, args.bucket)
         elif cmd == args.GET_JOB:
             response = client.get_job(ds3.GetJobRequest(args.jobid))
+            print_job(response.result)
         elif cmd == args.DELETE_JOB:
             response = client.delete_job(ds3.DeleteJobRequest(args.jobid))
         else:
