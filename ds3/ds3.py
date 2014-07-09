@@ -55,19 +55,15 @@ class XmlSerializer(object):
         
     def to_list_all_my_buckets_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        obj = ListAllMyBucketsResult()
+        owner_node = doc.getElementsByTagName("Owner")
+        servlist = ListAllMyBucketsResult(Owner(self.get_name_from_node(owner_node[0], "DisplayName"),
+                                           self.get_name_from_node(owner_node[0], "ID")))
          
-        for node in doc.getElementsByTagName("Bucket"):
-            bucket = self.get_name_from_node(node, "Name")
-            cdate = self.get_name_from_node(node, "CreationDate")
-            obj.add_bucket(bucket, cdate)
+        for bucket_node in doc.getElementsByTagName("Bucket"):
+            servlist.append(Bucket(self.get_name_from_node(bucket_node, "Name"),
+                                   self.get_name_from_node(bucket_node, "CreationDate")))
             
-        for node in doc.getElementsByTagName("Owner"):
-            name = self.get_name_from_node(node, "DisplayName")
-            oid = self.get_name_from_node(node, "ID")
-            obj.add_owner(name, oid)
-            
-        return obj
+        return servlist
                     
     def to_get_bucket_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
@@ -98,7 +94,6 @@ class XmlSerializer(object):
             
         return obj
     
-        
     def to_get_object_result(self, xml_string):
         print xml_string
         return None
@@ -413,19 +408,16 @@ class DeleteJobResponse(AbstractResponse):
      
    
 
-
 class ListAllMyBucketsResult(object):
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
         self.buckets = []
-    
-    def add_bucket(self, name, creationdate):
-        self.buckets.append(Bucket(name, creationdate))
-    
-    def get_buckets(self):
-        return self.buckets
-    
-    def add_owner(self, displayname, ownerid):
-        self.owner = Owner(displayname, ownerid)
+        
+    def append(self, bucket):
+        if not isinstance(bucket, Bucket):
+            raise TypeError("Can only append a DS3 Bucket")
+        
+        self.buckets.append(bucket)
         
     def __len__(self):
         return len(self.buckets)
@@ -480,6 +472,7 @@ class Bucket(object):
         return 'Name={0} CreationDate={1}'.format(self.name, self.creationdate)
    
 class Owner(object):
+    """Bucket Owner meta data"""
     def __init__(self, displayname, ownerid):
         self.displayname = displayname
         self.ownerid = ownerid
