@@ -131,7 +131,7 @@ class XmlSerializer(object):
         jobs = Jobs()
         for job_node in doc.getElementsByTagName("Job"):
                 
-                jli = JobListItem(job_node.getAttribute('BucketName'),
+                jli = JobInfo(job_node.getAttribute('BucketName'),
                                   job_node.getAttribute('JobId'),
                                   job_node.getAttribute('Priority'),
                                   job_node.getAttribute('RequestType'),
@@ -468,41 +468,18 @@ class MasterObjectList(object):
     def append(self, ds3obj):
         self.objectlist.append(ds3obj)
         return
-
-class Primes(object):
-    def __init__(self):
-        self.primes = []
-    def append(self, obj):
-        if isinstance(obj, Prime):
-            self.primes.append(obj)
-        else:
-            raise TypeError("Can only append Prime Objects")
-        
-class Prime(object):
-    def __init__(self, active=None, requesttype=None, primeid=None, bucketid=None, createdate=None):
-        self.active = active
-        self.requesttype = requesttype
-        self.id = primeid
-        self.bucketid = bucketid
-        self.createdate = createdate
-        
-    def add_bucket(self, bucket):
-        if isinstance(bucket, Bucket):
-            self.bucket = bucket
-        else:
-            raise TypeError("Can only append Bucket Objects")
-            
+                   
 class Jobs(object):
     def __init__(self):
         self.joblist = []
         
     def append(self, obj):
-        if isinstance(obj, JobListItem):
+        if isinstance(obj, JobInfo):
             self.joblist.append(obj)
         else:
-            raise TypeError("Can only append JobListItem Objects")
+            raise TypeError("Can only append JobInfo Objects")
     
-class JobListItem(object):
+class JobInfo(object):
     def __init__(self, bucketname, jobid, priority, jobtype, startdate):
         self.bucketname = bucketname
         self.jobid = jobid
