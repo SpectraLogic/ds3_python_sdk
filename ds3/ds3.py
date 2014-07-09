@@ -67,32 +67,29 @@ class XmlSerializer(object):
                     
     def to_get_bucket_result(self, xml_string):
         doc = xml.dom.minidom.parseString(xml_string)
-        obj = ListBucketResult()
-        
-        obj.name = self.get_name_from_node(doc, "Name")
-        obj.prefix = self.get_name_from_node(doc, "Prefix")
-        obj.marker = self.get_name_from_node(doc, "Marker")
-        obj.maxkeys = self.get_name_from_node(doc, "MaxKeys")
-        obj.istruncated = self.get_name_from_node(doc, "IsTruncated")
-        obj.creationdate = self.get_name_from_node(doc, "CreationDate")
-        obj.delimiter = self.get_name_from_node(doc, "Delimiter")
-        obj.nextmarker = self.get_name_from_node(doc, "NextMarker")
+        listbucket = ListBucketResult(self.get_name_from_node(doc, "Name"),
+                                      self.get_name_from_node(doc, "Prefix"),
+                                      self.get_name_from_node(doc, "Marker"),
+                                      self.get_name_from_node(doc, "MaxKeys"),
+                                      self.get_name_from_node(doc, "IsTruncated"),
+                                      self.get_name_from_node(doc, "CreationDate"),
+                                      self.get_name_from_node(doc, "Delimiter"),
+                                      self.get_name_from_node(doc, "NextMarker"))
         
         for contentnode in doc.getElementsByTagName("Contents"):
-            content = Contents()
-            content.key = self.get_name_from_node(contentnode, "Key")
-            content.lastmodified = self.get_name_from_node(contentnode, "LastModified")
-            content.etag = self.get_name_from_node(contentnode, "ETag")
-            content.size = self.get_name_from_node(contentnode, "Size")
-            content.storageclass = self.get_name_from_node(contentnode, "StorageClass")
-            for ownernode in contentnode.getElementsByTagName("Owner"):
-                displayname = self.get_name_from_node(ownernode, "DisplayName")
-                ownerid = self.get_name_from_node(ownernode, "ID")
-                content.add_owner(Owner(displayname, ownerid))
+            ownernode = contentnode.getElementsByTagName("Owner")  # only one owner pwer Content data 
+            owner = Owner(self.get_name_from_node(ownernode[0], "DisplayName"),
+                          self.get_name_from_node(ownernode[0], "ID"))
+            contents = Contents(owner,
+                               self.get_name_from_node(contentnode, "Key"),
+                               self.get_name_from_node(contentnode, "LastModified"),
+                               self.get_name_from_node(contentnode, "ETag"),
+                               self.get_name_from_node(contentnode, "Size"),
+                               self.get_name_from_node(contentnode, "StorageClass"))
             
-            obj.add_contents(content)
+            listbucket.append(contents)
             
-        return obj
+        return listbucket
     
     def to_get_object_result(self, xml_string):
         print xml_string
@@ -195,7 +192,8 @@ class RequestFailed(Exception):
         self.message = ds3error.message
         
     def __str__(self):
-        return '{0} \n Code={1} \n HttpError={2} \n {3}'.format(self.summary, self.code, self.httperrorcode, self.message)
+        return '{0} \n Code={1} \n HttpError={2} \n {3}'.format(self.summary, self.code, 
+                                                                self.httperrorcode, self.message)
     
 class AbstractRequest(object):
     __metaclass__ = ABCMeta
@@ -252,7 +250,7 @@ class GetServiceRequest(AbstractRequest):
 class GetServiceResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
-        self.result = XmlSerializer(True).to_list_all_my_buckets_result(response.read())
+        self.result = XmlSerializer().to_list_all_my_buckets_result(response.read())
 
         
 class GetBucketRequest(AbstractRequest):
@@ -275,7 +273,7 @@ class GetBucketRequest(AbstractRequest):
 class GetBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
-        self.result = XmlSerializer().to_get_bucket_result(response.read())
+        self.result = XmlSerializer(True).to_get_bucket_result(response.read())
  
 class PutBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -424,45 +422,45 @@ class ListAllMyBucketsResult(object):
     
     
 class ListBucketResult(object):
-    def __init__(self):
-        '''
-        obj.name = self.get_name_from_node(doc, "Name")
-        obj.prefix = self.get_name_from_node(doc, "Prefix")
-        obj.marker = self.get_name_from_node(doc, "Marker")
-        obj.maxkeys = self.get_name_from_node(doc, "MaxKeys")
-        obj.istruncated = self.get_name_from_node(doc, "IsTruncated")
-        obj.creationdate = self.get_name_from_node(doc, "CreationDate")
-        obj.delimiter = self.get_name_from_node(doc, "Delimiter")
-        obj.nextmarker = self.get_name_from_node(doc, "NextMarker")
-        '''
-        self.name = ''
-        self.prefix = ''
-        self.marker = ''
-        self.maxkeys = ''
-        self.istruncated = False
-        self.creationdate = ''
-        self.delimiter = ''
-        self.nextmarker = ''
+    def __init__(self, name, prefix, marker, maxkeys, istruncated, creationdate, delimiter, nextmarker):
+        self.name = name
+        self.prefix = prefix
+        self.marker = marker
+        self.maxkeys = maxkeys
+        self.istruncated = istruncated
+        self.creationdate = creationdate
+        self.delimiter = delimiter
+        self.nextmarker = nextmarker
         self.contentslist = []
         
-    def add_contents(self, contents):
+    def append(self, contents):
+        if not isinstance(contents, Contents):
+            raise TypeError("Can only append a DS3 Contents Object")
+        
         self.contentslist.append(contents)
         
-    def get_contents(self):
-        return self.contentslist
+    def __str__(self):
+        return 'Name={0} Prefix={1} Marker={2} MaxKeys={3} isTruncated={4} ' \
+                'CreationDate={5} Delimiter={6} NextMarker={7}'.format(self.name, self.prefix, self.marker, self.maxkeys, 
+                                                                       self.istruncated, self.creationdate, self.delimiter, 
+                                                                       self.nextmarker, len(self.contentslist))  
   
 class Contents(object):
-    def __init__(self):
-        self.key = ''
-        self.lastmodified = ''
-        self.etag = ''
-        self.size = 0
-        self.storageclass = ''
-        
-    def add_owner(self, owner):
+    def __init__(self, owner, key, lastmodified, etag, size, storageclass):
+        if not isinstance(owner, Owner):
+            raise TypeError("Contents must be created with Owner object")
+ 
         self.owner = owner
-    
-
+        self.key = key
+        self.lastmodified = lastmodified
+        self.etag = etag
+        self.size = size
+        self.storageclass = storageclass
+        
+    def __str__(self):
+        return '{0} Key={1} LastModified={2} Etag={3} Size={4} StorageClass={5}'.format(self.owner, self.key, self.lastmodified, 
+                                                                                        self.etag, self.size, self.storageclass)
+        
 class Bucket(object):
     def __init__(self, name, creationdate=None):
         self.name = name
