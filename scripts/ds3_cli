@@ -137,25 +137,25 @@ def bulk_put(client, bucket, result):
     print "BULK JOB ID", result.jobid
     for putobj in result.objectlist: 
         try:
-            response = client.put_object(ds3.PutObjectRequest(bucket, putobj.name.replace("\\", "/")))
+            response = client.put_object(ds3.PutObjectRequest(bucket, putobj.name.replace("\\", "/"), open(putobj.name)))
             print "Put", putobj.name, "DONE"
         except ds3.RequestFailed as e:
             print "Put", putobj.name, "FAILED"
     
-def bulk_get(client, bucket, destinationdir, result):
+def bulk_get(client, bucket, dest, result):
     print "BULK GET JOB ID", result.jobid
     for bulkobj in result.objectlist:
         try:
-            response = client.get_object(ds3.GetObjectRequest(bucket, bulkobj.name, destinationdir ))
+            response = client.get_object(ds3.GetObjectRequest(bucket, bulkobj.name))
+            place_file(os.path.join(os.path.normpath(dest), os.path.normpath(bulkobj.name)), response.objectdata)
             print "Get", bulkobj.name, "DONE"
         except ds3.RequestFailed as e:
             print "Get", bulkobj.name, "FAILED"      
         
 def print_jobs(result, bucket):
-    print "Prime Jobs for bucket", bucket
-    for prime in result.primes:
-        print "Created at", prime.createdat, "Active", prime.active, "Id", prime.id, "Type", prime.requesttype  
-        
+    print "Jobs for bucket", bucket
+    for job in result.joblist:
+        print job
     
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -189,11 +189,12 @@ def main():
             response = client.get_bucket(request)
             print_get_bucket_result(response.result)
         elif cmd == args.PUT_OBJECT:
-            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.objectkey))
+            response = client.put_object(ds3.PutObjectRequest(args.bucket, args.objectkey, open(args.objectkey)))
         elif cmd == args.DELETE_OBJECT:
             response = client.delete_object(ds3.DeleteObjectRequest(args.bucket, args.objectkey))
         elif cmd == args.GET_OBJECT:
-            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.objectkey, args.directory))
+            response = client.get_object(ds3.GetObjectRequest(args.bucket, args.objectkey))
+            place_file(os.path.join(os.path.normpath(args.destination), os.path.normpath(args.objectkey)), response.objectdata)
         elif cmd == args.BULK_PUT:
             files = create_object_list(args.directory)
             response = client.bulk_put(ds3.BulkPutRequest(args.bucket, files))

@@ -1,5 +1,3 @@
-import os.path
-
 import hmac
 import base64
 import xml.dom.minidom
@@ -118,6 +116,7 @@ class XmlSerializer(object):
         return obj
     
     def to_bulk_get_result(self, xml_string):
+        self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
         obj = MasterObjectList(jobid)
@@ -129,17 +128,17 @@ class XmlSerializer(object):
         
     def to_get_jobs(self, xml_string):
         doc = self.parse_string(xml_string)
-        obj = Primes()
-        for prime_node in doc.getElementsByTagName("Prime"):
-                p = Prime()
-                p.active = bool(self.get_name_from_node(prime_node,'Active', 'Prime'))
-                p.id = self.get_name_from_node(prime_node, 'Id', 'Prime')
-                p.bucketid = self.get_name_from_node(prime_node, 'BucketId', 'Prime')
-                p.requesttype = self.get_name_from_node(prime_node,'RequestType', 'Prime')
-                p.createdate = self.get_name_from_node(prime_node,'CreatedAt', 'Prime')
-                obj.append(p)      
+        jobs = Jobs()
+        for job_node in doc.getElementsByTagName("Job"):
                 
-        return obj
+                jli = JobListItem(job_node.getAttribute('BucketName'),
+                                  job_node.getAttribute('JobId'),
+                                  job_node.getAttribute('Priority'),
+                                  job_node.getAttribute('RequestType'),
+                                  job_node.getAttribute('StartDate'))
+                jobs.append(jli)
+                
+        return jobs
     
     def to_get_job(self, xml_string):
         doc = self.parse_string(xml_string)
@@ -218,6 +217,7 @@ class AbstractResponse(object):
     def __init__(self, response, request):
         self.request = request
         self.response = response
+        self.objectdata = None
         self.process_response(response)
     
     def process_response(self, response):
@@ -288,16 +288,11 @@ class DeleteBucketResponse(AbstractResponse):
         self.__check_status_code__(204)
         
 class PutObjectRequest(AbstractRequest):
-    def __init__(self, bucket, filepath):
+    def __init__(self, bucket, filename, filedata):
         super(PutObjectRequest, self).__init__()
-        
-        if not os.path.isfile(filepath):
-            raise RequestInvalid("Object %s is not a file" % filepath)
-
-        filename = posixpath.normpath(filepath)
+  
         self.bucket = bucket
-        self.objectkey = open(filename, 'rb')
-        self.body = self.objectkey.read() 
+        self.body = filedata
         self.path = self.join_paths(self.bucket, filename)
         self.httpverb = HttpVerb.PUT
     
@@ -306,13 +301,10 @@ class PutObjectResponse(AbstractResponse):
         self.__check_status_code__(200)
 
 class GetObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectkey, destination):
+    def __init__(self, bucket, objectkey):
         super(GetObjectRequest, self).__init__()
         self.bucket = bucket
         self.objectkey = objectkey
-        self.destination = os.path.join(os.path.normpath(destination), os.path.normpath(objectkey))
-        if not os.path.exists(os.path.dirname(self.destination)):
-            os.makedirs(os.path.dirname(self.destination))
     
         self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.GET
@@ -320,8 +312,7 @@ class GetObjectRequest(AbstractRequest):
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
         self.__check_status_code__(200)
-        output = open(self.request.destination, 'wb')
-        output.write(self.response.read())
+        self.objectdata = self.response.read()
         
 class DeleteObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey):
@@ -374,13 +365,13 @@ class BulkGetResponse(AbstractResponse):
 class GetJobsRequest(AbstractRequest):
     def __init__(self, bucket):
         self.path = '/_rest_/job/'
-        self.queryparams={"bucket", bucket}
+        self.queryparams={"bucket": bucket}
         self.httpverb = HttpVerb.GET
             
 class GetJobsResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
-        self.result = XmlSerializer(True).to_get_jobs(response.read())
+        self.result = XmlSerializer().to_get_jobs(response.read())
         
 class GetJobRequest(AbstractRequest):
     def __init__(self, jobid):
@@ -501,6 +492,26 @@ class Prime(object):
         else:
             raise TypeError("Can only append Bucket Objects")
             
+class Jobs(object):
+    def __init__(self):
+        self.joblist = []
+        
+    def append(self, obj):
+        if isinstance(obj, JobListItem):
+            self.joblist.append(obj)
+        else:
+            raise TypeError("Can only append JobListItem Objects")
+    
+class JobListItem(object):
+    def __init__(self, bucketname, jobid, priority, jobtype, startdate):
+        self.bucketname = bucketname
+        self.jobid = jobid
+        self.priority = priority
+        self.jobtype = jobtype
+        self.startdate = startdate
+    def __str__(self):
+        return 'BucketName={0} JobId={1} Priority={2} StartDate={3}'.format(self.bucketname, self.jobid, self.priority, self.startdate)
+        
 class Job(object):
     def __init__(self, active=None, filesystemid=None, jid=None, orderindex=None, 
                  primeid=None, size=None, state=None, virtualpageindex=None):
