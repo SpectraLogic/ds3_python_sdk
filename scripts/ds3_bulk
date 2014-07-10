@@ -56,16 +56,17 @@ def place_file(file_name, file_data):
     output_file.close()
 
 
-def create_object_list(directory):
-    files = []
+def create_object_list(directory, files):
+    ###create a DS3 object for each file found and add it to the list###
     for entry in os.listdir(directory):
         full_path = os.path.join(directory, entry)
         if os.path.isdir(full_path):
-            files.append(create_object_list(full_path))
+            create_object_list(full_path, files)
         elif os.path.isfile(full_path):
             files.append(ds3.Object(full_path.replace("\\", "/"), os.path.getsize(full_path)))
         else:
-            print "Unkown type"
+            print "Unkown file type for ", full_path
+            
     return files
 
     
@@ -102,7 +103,8 @@ def main():
     
     try:
         #send the request to the DS3 server
-        files = create_object_list(args.source)
+        files = []
+        create_object_list(args.source, files)
         response = client.bulk_put(ds3.BulkPutRequest(args.bucket, files))
         bulk_put(ds3.Client(args.endpoint, credentials), args.bucket, response.result)
         

@@ -348,6 +348,7 @@ class BulkRequest(AbstractRequest):
             objects.append(obj_elm)
         self.objectlist = objects
         self.body = xmldom.tostring(objects)
+        self.headers = {}
     
 class BulkPutRequest(BulkRequest):
     def __init__(self, bucket, objectlist):
