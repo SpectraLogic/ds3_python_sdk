@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
-This python SDK test program to display contents of a bucket
+This python SDK test program to test put object
 """
 import os
 import os.path
 import sys
 import signal
 import argparse
+from operator import xor
 
 import ds3
 
@@ -21,9 +22,8 @@ class Arguments(object):
     def __init__(self):
         parser = argparse.ArgumentParser(description='List a Bucket')
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name')
-        parser.add_argument('--maxkeys', dest='maxkeys', type=str, help='Max Keys returned')
-        parser.add_argument('--marker', dest='marker', type=str, help='Starting marker for keys returned')
-        parser.add_argument('--prefix', dest='prefix', type=str, help='Starting prefix')
+        parser.add_argument('--object', dest='object', type=str, help='The Object name')
+        parser.add_argument('--destination', dest='destination', type=str, help='The destination directory')          
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
@@ -35,17 +35,14 @@ class Arguments(object):
         self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
         self.proxy = os.getenv("http_proxy", None)
         self.bucket = args.bucket
-        self.maxkeys = args.maxkeys
-        self.prefix = args.prefix
-        self.marker = args.marker
+        self.object = args.object
 
-        if not (self.accessId and self.key and self.endpoint and self.bucket):
-            raise ArgumentError('accessId, key, endpoint, and bucket must all be set')
-  
+        if not (self.accessId and self.key and self.endpoint and self.object and self.bucket):
+            raise ArgumentError('accessId, key, endpoint, object, and bucket must all be set')
+ 
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
     sys.exit(0)
-
         
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -56,36 +53,22 @@ def main():
         print 'Error: Credentials not valid'
         sys.exit(1)
         
+    # client handles details of connetion to the DS3 server
     client = ds3.Client(args.endpoint, credentials)
     
     try:
-        # create the request
-        request = ds3.GetBucketRequest(args.bucket)
+        #create the request to the DS3 server
+        request = ds3.PutObjectRequest(args.bucket, args.object.replace("\\", "/"), open(args.object))
         
-        #add query params as needed
-        if args.maxkeys:
-            request.with_max_keys(args.maxkeys)
-            
-        if args.marker:
-            request.with_marker(args.marker)
-            
-        if args.prefix:
-            request.with_prefix(args.prefix)
-    
+        # send the request
+        response = client.put_object(request)
         
-        #send the request to the DS3 server
-        response = client.get_bucket(request)
         
-        #print the result
-        print "\nList Bucket\n", response.result
-        for content in response.result.contentslist:
-            print "\t", content
-
         # close the connection for DS3 server
         response.close()
             
     except ds3.RequestFailed as e:
-        print "\nGet Bucket failed", e
+        print "\nGet Object", e
  
         
     sys.exit(0)
