@@ -315,6 +315,9 @@ class GetObjectRequest(AbstractRequest):
     
         self.path = self.join_paths(self.bucket, self.objectkey)
         self.httpverb = HttpVerb.GET
+        
+    def with_range(self, startbyte, endbyte):
+        self.headers['Range'] = 'bytes={0}-{1}'.format(startbyte, endbyte)
     
 class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
@@ -631,6 +634,7 @@ class NetworkClient(object):
     def get_response(self, request):
         cnt = 0
         r = self.send_request(request)
+        # handle 307 redirects 
         while r.status == 307 and cnt < self.maxredirects:
             cnt += 1
             r = self.send_request(request)
@@ -647,6 +651,10 @@ class NetworkClient(object):
         headers = {}
         headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
         headers['Date'] = date
+        # add additonal header information if specficied in the request. This might be a byte range for example
+        if request.headers:
+            headers.update(request.headers)
+            
         if request.httpverb == HttpVerb.PUT:
             headers['Content-Type'] = 'application/octet-stream'
             headers['Authorization'] = self.build_authorization( verb=request.httpverb, date=date, 
@@ -660,11 +668,13 @@ class NetworkClient(object):
      
     
     def build_authorization(self, verb='', date='', content_type='', resource=''):
+        ###Build the S3 authorization###
         signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,
                                   date=date, canonicalized_resource=resource)
         return 'AWS ' + self.credentials.accessId + ':' + signature
     
     def aws_signature(self, key, verb='GET', md5='', content_type='', date='', canonicalized_amz_header='', canonicalized_resource=''):
+        ###compute and sign S3 signature###
         signature_string = verb + '\n'
         signature_string += md5 + '\n'
         signature_string += content_type+ '\n'

@@ -65,7 +65,7 @@ def main():
         response.close()
             
     except ds3.RequestFailed as e:
-        print "\nService List failed", e
+        print "\nGet Bucket failed", e
  
         
     sys.exit(0)
