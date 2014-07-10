@@ -93,7 +93,6 @@ class XmlSerializer(object):
     
     
     def to_bulk_put_result(self, xml_string):
-        self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
         mobjlist = MasterObjectList(jobid)
@@ -104,7 +103,6 @@ class XmlSerializer(object):
         return mobjlist
     
     def to_bulk_get_result(self, xml_string):
-        self.pretty_print_xml(xml_string)
         doc = xml.dom.minidom.parseString(xml_string)
         jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
         mobjlist = MasterObjectList(jobid)
@@ -149,11 +147,6 @@ class XmlSerializer(object):
         
             job.append(jobjlist)
             
-        return job
-
-    def to_delete_job(self, xml_string):
-        doc = self.parse_string(xml_string)
-        job = Job()
         return job
 
 
@@ -660,17 +653,19 @@ class NetworkClient(object):
     def with_max_redirects(self, maxredirects):
         self.maxredirects = maxredirects
         return self
-        
+    
     def get_response(self, request):
-        cnt = 0
-        r = self.send_request(request)
-        # handle 307 redirects 
-        while r.status == 307 and cnt < self.maxredirects:
-            cnt += 1
-            r = self.send_request(request)
+        retrycnt = 0
+        
+        response = self.send_request(request)
+        
+        # if needed, loop to handle 307 redirects 
+        while response.status == 307 and retrycnt < self.maxredirects:
+            retrycnt += 1
+            response = self.send_request(request)
              
-        return r
-           
+        return response
+    
     def send_request(self, request):
         connection = httplib.HTTPConnection(self.networkconnection.endpoint)
         date = self.get_date()
