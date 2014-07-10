@@ -91,9 +91,6 @@ class XmlSerializer(object):
             
         return listbucket
     
-    def to_get_object_result(self, xml_string):
-        print xml_string
-        return None
     
     def to_bulk_put_result(self, xml_string):
         self.pretty_print_xml(xml_string)
@@ -337,6 +334,7 @@ class DeleteObjectResponse(AbstractResponse):
         self.__check_status_code__(204)
         
 class BulkRequest(AbstractRequest):
+    """Base class for handling bulk gets and puts"""
     def __init__(self, bucket, objectlist):
         self.bucket = bucket
         objects = xmldom.Element('objects')
