@@ -69,7 +69,7 @@ def main():
         response.close()
             
     except ds3.RequestFailed as e:
-        print "\nget_jobs failed", e
+        print "\nget_job failed", e
  
         
     sys.exit(0)

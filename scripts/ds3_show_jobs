@@ -32,7 +32,7 @@ class Arguments(object):
         self.bucket = args.bucket
 
         if not (self.accessId and self.key and self.endpoint and self.bucket):
-            raise ArgumentError('accessId, key, and endpoint must all be set')
+            raise ArgumentError('accessId, key, endpoint, and bucket must all be set')
   
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
