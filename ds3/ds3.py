@@ -239,6 +239,7 @@ class AbstractResponse(object):
         raise NotImplementedError("Request Implemented")
     
     def __check_status_code__(self, expectedcode):
+        self.statuscode = self.response.status
         if self.response.status != expectedcode:
             err = "Return Code: Expected %s - Received %s" % (expectedcode, self.response.status)
             ds3error = XmlSerializer().to_ds3error(self.response.read())
@@ -310,6 +311,7 @@ class HeadBucketRequest(AbstractRequest):
         
 class HeadBucketResponse(AbstractResponse):
     def process_response(self, response):
+        self.statuscode = self.response.status
         if self.response.status == 200:
             self.result = HeadBucketStatus.EXISTS
         elif self.response.status == 403:

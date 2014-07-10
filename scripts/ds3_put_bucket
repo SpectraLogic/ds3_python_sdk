@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 """
-This python SDK test program to test put object
+This python SDK test program to put (create) a bucket
 """
 import os
 import os.path
 import sys
 import signal
 import argparse
-from operator import xor
 
 import ds3
 
@@ -20,10 +19,8 @@ class ArgumentError(Exception):
     
 class Arguments(object):
     def __init__(self):
-        parser = argparse.ArgumentParser(description='List a Bucket')
+        parser = argparse.ArgumentParser(description='Create a Bucket')
         parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name')
-        parser.add_argument('--object', dest='object', type=str, help='The Object name')
-        parser.add_argument('--destination', dest='destination', type=str, help='The destination directory')          
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
@@ -35,14 +32,14 @@ class Arguments(object):
         self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
         self.proxy = os.getenv("http_proxy", None)
         self.bucket = args.bucket
-        self.object = args.object
 
-        if not (self.accessId and self.key and self.endpoint and self.object and self.bucket):
-            raise ArgumentError('accessId, key, endpoint, object, and bucket must all be set')
- 
+        if not (self.accessId and self.key and self.endpoint and self.bucket):
+            raise ArgumentError('accessId, key, endpoint, and bucket must all be set')
+  
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
     sys.exit(0)
+
         
 def main():
     signal.signal(signal.SIGINT, signal_handler)
@@ -53,23 +50,21 @@ def main():
         print 'Error: Credentials not valid'
         sys.exit(1)
         
-    # client handles details of connetion to the DS3 server
     client = ds3.Client(args.endpoint, credentials)
     
     try:
-        #create the request to the DS3 server
-        request = ds3.PutObjectRequest(args.bucket, args.object.replace("\\", "/"), open(args.object))
         
-        # send the request
-        response = client.put_object(request)
+        #send the request to the DS3 server
+        response = client.put_bucket(ds3.PutBucketRequest(args.bucket))
         
-        print "\nPut Object status code: ", response.statuscode
-        
+        #print the result
+        print "\nPut Bucket status code: ", response.statuscode
+
         # close the connection for DS3 server
         response.close()
             
     except ds3.RequestFailed as e:
-        print "\nGet Object", e
+        print "\nPut Bucket failed", e
  
         
     sys.exit(0)
