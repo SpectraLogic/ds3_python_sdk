@@ -21,6 +21,7 @@ class Arguments(object):
     def __init__(self):
         parser = argparse.ArgumentParser(description='Print information for a job')
         parser.add_argument('--jobid', dest='jobid', type=str, help='DS3 Job ID')
+        parser.add_argument('--cancel', action='store_true', help='Cancel Job')
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
@@ -32,6 +33,7 @@ class Arguments(object):
         self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
         self.proxy = os.getenv("http_proxy", None)
         self.jobid = args.jobid
+        self.cancel = args.cancel
 
         if not (self.accessId and self.key and self.endpoint and self.jobid):
             raise ArgumentError('accessId, key, endpoint, and jobid must all be set')
@@ -54,16 +56,22 @@ def main():
     
     try:
         #send the request to the DS3 server
-        response = client.get_job(ds3.GetJobRequest(args.jobid))
-        
-        #print the result
-        print "\n", response.result
-        for jobjlist in response.result.jobobjectlists:
-            print "\n", jobjlist
-            for obj in jobjlist.jobobjects:
-                print "\t", obj
+        if args.cancel:
+            response = client.delete_job(ds3.CancelJobRequest(args.jobid))
             
-            print "\n"
+            print "\nCancel Job Status code: ", response.statuscode
+            
+        else:
+            response = client.get_job(ds3.GetJobRequest(args.jobid))
+        
+            #print the result
+            print "\n", response.result
+            for jobjlist in response.result.jobobjectlists:
+                print "\n", jobjlist
+                for obj in jobjlist.jobobjects:
+                    print "\t", obj
+            
+                    print "\n"
 
         # close the connection for DS3 server
         response.close()

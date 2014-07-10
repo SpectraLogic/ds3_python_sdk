@@ -423,14 +423,14 @@ class GetJobResponse(AbstractResponse):
         self.__check_status_code__(200)
         self.result = XmlSerializer(True).to_get_job(response.read())
         
-class DeleteJobRequest(AbstractRequest):
+class CancelJobRequest(AbstractRequest):
     def __init__(self, jobid):
         self.path = self.join_paths('/_rest_/job/', jobid)
         self.httpverb = HttpVerb.DELETE
             
-class DeleteJobResponse(AbstractResponse):
+class CancelJobResponse(AbstractResponse):
     def process_response(self, response):
-        self.__check_status_code__(204)
+        self.__check_status_code__(200)
      
    
 
@@ -637,8 +637,8 @@ class Client(object):
     def get_job(self, request):
         return GetJobResponse(self.netclient.get_response(request), request)
  
-    def delete_job(self, request):
-        return DeleteJobResponse(self.netclient.get_response(request), request)
+    def cancel_job(self, request):
+        return CancelJobResponse(self.netclient.get_response(request), request)
  
 class NetworkClient(object):
     def __init__(self, endpoint, credentials, maxredirects=5):
