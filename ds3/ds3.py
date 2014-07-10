@@ -174,6 +174,13 @@ class HttpVerb(object):
     HEAD = 'HEAD'
     POST = 'POST'
     
+class HeadBucketStatus(object):
+    """Head bucket return values"""
+    EXISTS = 'EXISTS'  # 200
+    NOTAUTHORIZED = 'NOTAUTHORIZED' # 403
+    DOESNTEXIST = 'DOESNTEXIST' # 404
+    UNKNOWN = 'UNKNOWN'
+    
 class RequestInvalid(Exception):
     def __init__(self, summary):
         self.summary = summary
@@ -294,10 +301,27 @@ class DeleteBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(204)
         
+class HeadBucketRequest(AbstractRequest):
+    def __init__(self, bucket):
+        super(HeadBucketRequest, self).__init__()
+        self.bucket = bucket
+        self.path = self.join_paths('/', self.bucket)
+        self.httpverb = HttpVerb.HEAD
+        
+class HeadBucketResponse(AbstractResponse):
+    def process_response(self, response):
+        if self.response.status == 200:
+            self.result = HeadBucketStatus.EXISTS
+        elif self.response.status == 403:
+            self.result = HeadBucketStatus.NOTAUTHORIZED
+        elif self.response.status == 404:
+            self.result = HeadBucketStatus.DOESNTEXIST
+        else:
+            self.result = HeadBucketStatus.UNKNOWN
+        
 class PutObjectRequest(AbstractRequest):
     def __init__(self, bucket, filename, filedata):
         super(PutObjectRequest, self).__init__()
-  
         self.bucket = bucket
         self.body = filedata
         self.path = self.join_paths(self.bucket, filename)
@@ -580,6 +604,9 @@ class Client(object):
 
     def get_bucket(self, request):
         return GetBucketResponse(self.netclient.get_response(request), request)
+  
+    def head_bucket(self, request):
+        return HeadBucketResponse(self.netclient.get_response(request), request)
 
     def put_bucket(self, request):
         return PutBucketResponse(self.netclient.get_response(request), request)
