@@ -148,6 +148,9 @@ class XmlSerializer(object):
             job.append(jobjlist)
             
         return job
+    
+    def to_eject_bucket(self, xml_string):
+        self.pretty_print_xml(xml_string)
 
 
 class Credentials(object):
@@ -286,6 +289,7 @@ class PutBucketRequest(AbstractRequest):
 class PutBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
+        self.result = None
                 
 class DeleteBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -297,6 +301,7 @@ class DeleteBucketRequest(AbstractRequest):
 class DeleteBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(204)
+        self.result = None
         
 class HeadBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -328,6 +333,7 @@ class PutObjectRequest(AbstractRequest):
 class PutObjectResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
+        self.result = None
 
 class GetObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey):
@@ -345,6 +351,7 @@ class GetObjectResponse(AbstractResponse):
     def process_response(self, reponse):
         self.__check_status_code__(200)
         self.objectdata = self.response.read()
+        self.result = None
         
 class DeleteObjectRequest(AbstractRequest):
     def __init__(self, bucket, objectkey):
@@ -357,6 +364,7 @@ class DeleteObjectRequest(AbstractRequest):
 class DeleteObjectResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(204)
+        self.result = None
         
 class BulkRequest(AbstractRequest):
     """Base class for handling bulk gets and puts"""
@@ -440,6 +448,19 @@ class ModifyJobResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
         self.result = XmlSerializer().to_get_job(response.read())
+        
+class EjectBucketRequest(AbstractRequest):
+    def __init__(self, bucket):
+        super(EjectBucketRequest, self).__init__()
+        self.bucket = bucket
+        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
+        self.queryparams={'operation': 'eject'}
+        self.httpverb = HttpVerb.PUT
+            
+class EjectBucketResponse(AbstractResponse):
+    def process_response(self, response):
+        self.__check_status_code__(204)
+        self.result = None
    
 
 class ListAllMyBucketsResult(object):
@@ -650,6 +671,9 @@ class Client(object):
  
     def modify_job(self, request):
         return ModifyJobResponse(self.netclient.get_response(request), request)
+    
+    def eject_bucket(self, request):
+        return EjectBucketResponse(self.netclient.get_response(request), request)
     
 class NetworkClient(object):
     def __init__(self, endpoint, credentials):
