@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
-This python SDK test program prints information about a single DS3 job
+This python SDK test program prints information about a single DS3 job.
+Use --cancel to cancel the job
+Use --modify to call 
 """
 import os
 import os.path
@@ -22,6 +24,8 @@ class Arguments(object):
         parser = argparse.ArgumentParser(description='Print information for a job')
         parser.add_argument('--jobid', dest='jobid', type=str, help='DS3 Job ID')
         parser.add_argument('--cancel', action='store_true', help='Cancel Job')
+        parser.add_argument('--modify', action='store_true', help='Modify Job')
+        parser.add_argument('--priority', dest='priority', type=str, help='Job priority')
         parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
         parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
         parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
@@ -34,9 +38,18 @@ class Arguments(object):
         self.proxy = os.getenv("http_proxy", None)
         self.jobid = args.jobid
         self.cancel = args.cancel
+        self.modify = args.modify
+        self.priority = args.priority
 
         if not (self.accessId and self.key and self.endpoint and self.jobid):
             raise ArgumentError('accessId, key, endpoint, and jobid must all be set')
+        
+        if self.modify and not self.priority:
+            raise ArgumentError('must specify priority when doing modify job')
+        
+        if self.cancel and self.modify:
+            raise ArgumentError('Cannot modify and cancel a job')
+            
   
 def signal_handler(signal, frame):
     print "Detected Ctrl-C, closing program."
@@ -60,6 +73,11 @@ def main():
             response = client.delete_job(ds3.CancelJobRequest(args.jobid))
             
             print "\nCancel Job Status code: ", response.statuscode
+            
+        elif args.modify:
+            response = client.modify_job(ds3.ModifyJobRequest(args.jobid, args.priority))
+            
+            print "\nModify Job Status code: ", response.statuscode 
             
         else:
             response = client.get_job(ds3.GetJobRequest(args.jobid))

@@ -259,19 +259,22 @@ class GetBucketRequest(AbstractRequest):
         self.httpverb = HttpVerb.GET
         
     def with_marker(self, marker):
+        """Key to start when listing objects"""
         self.queryparams['marker'] = marker
         
     def with_prefix(self, prefix):
+        """Limits the objects to only those that start with this prefix"""
         self.queryparams['prefix'] = prefix
         
     def with_max_keys(self, maxkeys):
+        """Max_keys limits the number of objects returned"""
         self.queryparams['max-keys'] = maxkeys
         
     
 class GetBucketResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
-        self.result = XmlSerializer(True).to_get_bucket_result(response.read())
+        self.result = XmlSerializer().to_get_bucket_result(response.read())
  
 class PutBucketRequest(AbstractRequest):
     def __init__(self, bucket):
@@ -397,7 +400,7 @@ class GetJobsRequest(AbstractRequest):
     def __init__(self, bucket):
         super(GetJobsRequest, self).__init__()
         self.path = '/_rest_/job/'
-        self.queryparams={"bucket": bucket}
+        self.queryparams={'bucket': bucket}
         self.httpverb = HttpVerb.GET
             
 class GetJobsResponse(AbstractResponse):
@@ -407,17 +410,18 @@ class GetJobsResponse(AbstractResponse):
         
 class GetJobRequest(AbstractRequest):
     def __init__(self, jobid):
-        super(GetJobRequest, self).__init__() # to init quertyparams{}
+        super(GetJobRequest, self).__init__()
         self.path = self.join_paths('/_rest_/job/', jobid)
         self.httpverb = HttpVerb.GET
             
 class GetJobResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
-        self.result = XmlSerializer(True).to_get_job(response.read())
+        self.result = XmlSerializer().to_get_job(response.read())
         
 class CancelJobRequest(AbstractRequest):
     def __init__(self, jobid):
+        super(CancelJobRequest, self).__init__()
         self.path = self.join_paths('/_rest_/job/', jobid)
         self.httpverb = HttpVerb.DELETE
             
@@ -425,6 +429,17 @@ class CancelJobResponse(AbstractResponse):
     def process_response(self, response):
         self.__check_status_code__(200)
      
+class ModifyJobRequest(AbstractRequest):
+    def __init__(self, jobid, priority):
+        super(ModifyJobRequest, self).__init__()
+        self.path = self.join_paths('/_rest_/job/', jobid)
+        self.queryparams={'priority': priority}
+        self.httpverb = HttpVerb.GET
+            
+class ModifyJobResponse(AbstractResponse):
+    def process_response(self, response):
+        self.__check_status_code__(200)
+        self.result = XmlSerializer().to_get_job(response.read())
    
 
 class ListAllMyBucketsResult(object):
@@ -633,16 +648,24 @@ class Client(object):
     def cancel_job(self, request):
         return CancelJobResponse(self.netclient.get_response(request), request)
  
+    def modify_job(self, request):
+        return ModifyJobResponse(self.netclient.get_response(request), request)
+    
 class NetworkClient(object):
-    def __init__(self, endpoint, credentials, maxredirects=5):
+    def __init__(self, endpoint, credentials):
         self.networkconnection = NetworkConnection(endpoint)
         self.credentials = credentials
-        self.maxredirects = maxredirects
+        self.maxredirects = 5
+        self.secure = False  # the default is HTTP. If true use HTTPS
+        self.proxy = None
     
-    def with_secure(self):
+    def with_secure(self, secure):
+        """If true the client will use HTTPS instead of HTTP."""
+        self.secure = secure
         return self
     
     def with_proxy(self, proxy):
+        """Set HTTP proxy"""
         index = proxy.find('://')
         if index >= 0:
             self.proxy = proxy[index+3:]
@@ -651,12 +674,12 @@ class NetworkClient(object):
         return self
         
     def with_max_redirects(self, maxredirects):
+        """Set the maximum 307 redirects the SDK will automatically handle before throwing an exception.""" 
         self.maxredirects = maxredirects
         return self
     
     def get_response(self, request):
         retrycnt = 0
-        
         response = self.send_request(request)
         
         # if needed, loop to handle 307 redirects 
@@ -667,7 +690,16 @@ class NetworkClient(object):
         return response
     
     def send_request(self, request):
-        connection = httplib.HTTPConnection(self.networkconnection.endpoint)
+        """create http or https connectiong and send the DS3 request."""
+        if self.secure:
+            connection = httplib.HTTPSConnection(self.networkconnection.endpoint)
+        else:
+            connection = httplib.HTTPConnection(self.networkconnection.endpoint)
+            
+        #use proxy if one was specified
+        if self.proxy:
+            connection.set_tunnel(self.proxy)
+            
         date = self.get_date()
         path = request.path
         if request.queryparams:
@@ -730,9 +762,8 @@ class NetworkConnection(object):
     """
     This class abstracts the HTTP network connection from the client to the server.
     """
-    def __init__(self, endpoint, proxy=None):
+    def __init__(self, endpoint):
         self.url = urlparse.urlparse(self.ensure_schema(endpoint))
-        self.proxy = proxy
         self.hostname = self.url.hostname
         self.port = self.url.port
         self.endpoint = endpoint

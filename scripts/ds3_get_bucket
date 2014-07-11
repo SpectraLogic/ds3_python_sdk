@@ -77,7 +77,7 @@ def main():
         response = client.get_bucket(request)
         
         #print the result
-        print "\nList Bucket\n", response.result
+        print "\nList Bucket\n", response.result, " Status ", response.statuscode
         for content in response.result.contentslist:
             print "\t", content
 
