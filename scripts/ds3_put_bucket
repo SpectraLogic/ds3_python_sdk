@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+"""
+This python SDK test program to put (create) a bucket
+"""
+import os
+import os.path
+import sys
+import signal
+import argparse
+
+import ds3
+
+class ArgumentError(Exception):
+    def __init__(self, value):
+        self.value = value
+        
+    def __str__(self):
+        return repr(self.value)
+    
+class Arguments(object):
+    def __init__(self):
+        parser = argparse.ArgumentParser(description='Create a Bucket')
+        parser.add_argument('--bucket', dest='bucket', type=str, help='The bucket name')
+        parser.add_argument('--endpoint', dest='endpoint', type=str, help='The DS3 endpoint.  Optionally you can set the environment variable "DS3_ENDPOINT"')
+        parser.add_argument('--accessId', dest='accessId', type=str, help='The DS3 access id.  Optionally you can set the environment variable "DS3_ACCESS_KEY"')
+        parser.add_argument('--key', dest='key', type=str, help='The DS3 secret key.  Optionally you can set the environment variable "DS3_SECRET_KEY"')
+
+        args = parser.parse_args()
+        
+        self.accessId = os.getenv("DS3_ACCESS_KEY", args.accessId)
+        self.key = os.getenv("DS3_SECRET_KEY", args.key)
+        self.endpoint = os.getenv("DS3_ENDPOINT", args.endpoint)
+        self.proxy = os.getenv("http_proxy", None)
+        self.bucket = args.bucket
+
+        if not (self.accessId and self.key and self.endpoint and self.bucket):
+            raise ArgumentError('accessId, key, endpoint, and bucket must all be set')
+  
+def signal_handler(signal, frame):
+    print "Detected Ctrl-C, closing program."
+    sys.exit(0)
+
+        
+def main():
+    signal.signal(signal.SIGINT, signal_handler)
+    args = Arguments()
+    
+    credentials = ds3.Credentials(args.accessId, args.key)
+    if credentials.is_valid == False:
+        print 'Error: Credentials not valid'
+        sys.exit(1)
+        
+    client = ds3.Client(args.endpoint, credentials)
+    
+    try:
+        
+        #send the request to the DS3 server
+        response = client.put_bucket(ds3.PutBucketRequest(args.bucket))
+        
+        #print the result
+        print "\nPut Bucket status code: ", response.statuscode
+
+        # close the connection for DS3 server
+        response.close()
+            
+    except ds3.RequestFailed as e:
+        print "\nPut Bucket failed", e
+ 
+        
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()
