@@ -22,9 +22,10 @@ The SDK provides an interface for a user to add DS3 functionality to their exist
 
 ```python
 
-from ds3 import ds3 #1
+from ds3 import ds3
 
-ds3_connection = ds3.Client("hostname:8080", ds3.Credentials("access_id", "key")) #2
+ds3_connection = ds3.Client("hostname:8080", ds3.Credentials("access_id", "key"))
 
-
+for bucket in ds3_connection:
+    print bucket.name
 ```
