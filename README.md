@@ -24,8 +24,8 @@ The SDK provides an interface for a user to add DS3 functionality to their exist
 
 from ds3 import ds3
 
-ds3_connection = ds3.Client("hostname:8080", ds3.Credentials("access_id", "key"))
+client = ds3.Client("hostname:8080", ds3.Credentials("access_id", "key"))
 
-for bucket in ds3_connection:
+for bucket in client.getService():
     print bucket.name
 ```
