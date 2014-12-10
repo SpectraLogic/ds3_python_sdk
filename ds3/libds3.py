@@ -2,6 +2,18 @@ from ctypes import *
 
 lib = cdll.LoadLibrary("libds3.so")
 
+def asCList(orig):
+    cList = (ctypes.c_char_p * len(orig))()
+    cList[:] = orig
+    return cList
+
+def toDs3BulkObjectList(fileList):
+    bulkList = lib.ds3_init_bulk_object_list(len(fileList))
+    bulkContents = bulkList.contents
+    for i in xrange(len(fileList)):
+        bulkContents.list[i].name = lib.ds3_str_init(fileList[i])
+    return bulkList
+
 class LibDs3Str(Structure):
     _fields_ = [("value", c_char_p), ("size", c_size_t)]
 
@@ -77,6 +89,8 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
+lib.ds3_str_init.restype = POINTER(LibDs3Str)
+
 lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
@@ -102,3 +116,5 @@ lib.ds3_put_object.restype = POINTER(LibDs3Error)
 
 lib.ds3_write_to_file.restype = c_size_t
 lib.ds3_read_from_file.restype = c_size_t
+
+lib.ds3_convert_file_list.restype = POINTER(LibDs3BulkObjectList)
