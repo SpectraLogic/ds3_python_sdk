@@ -1,6 +1,6 @@
 from ctypes import *
 
-libds3 = cdll.LoadLibrary("libds3.so")
+lib = cdll.LoadLibrary("libds3.so")
 
 class LibDs3Str(Structure):
     _fields_ = [("value", c_char_p), ("size", c_size_t)]
@@ -77,45 +77,28 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
-libds3.ds3_create_creds.restype = POINTER(LibDs3Creds)
-libds3.ds3_create_client.restype = POINTER(LibDs3Client)
-libds3.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
-libds3.ds3_init_get_service.restype = POINTER(LibDs3Request)
-libds3.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
-libds3.ds3_init_get_object.restype = POINTER(LibDs3Requet)
-libds3.ds3_init_put_bucket.restype = POINTER(LibDs3Request)
-libds3.ds3_init_put_object.restype = POINTER(LibDs3Request)
-libds3.ds3_init_delete_bucket.restype = POINTER(LibDs3Request)
-libds3.ds3_init_delete_object.restype = POINTER(LibDs3Request)
-libds3.ds3_init_allocate_chunk.restype = POINTER(LibDs3Request)
-libds3.ds3_init_get_available_chunks.restype = POINTER(LibDs3Request)
-libds3.ds3_init_put_bulk.restype = POINTER(LibDs3Request)
-libds3.ds3_init_get_bulk.restype = POINTER(LibDs3Request)
-libds3.ds3_client_proxy.restype = c_void
-libds3.ds3_request_set_prefix.restype = c_void
-libds3.ds3_request_set_delimiter.restype = c_void
-libds3.ds3_request_set_marker.restype = c_void
-libds3.ds3_request_set_max_keys.restype = c_void
-libds3.ds3_get_service.restype = POINTER(LibDs3Error)
-libds3.ds3_get_bucket.restype = POINTER(LibDs3Error)
-libds3.ds3_get_object.restype = POINTER(LibDs3Error)
-libds3.ds3_bulk.restype = POINTER(LibDs3Error)
-libds3.ds3_allocate_chunk.restype = POINTER(LibDs3Error)
-libds3.ds3_get_available_chunks.restype = POINTER(LibDs3Error)
-libds3.ds3_delete_bucket.restype = POINTER(LibDs3Error)
-libds3.ds3_put_object.restype = POINTER(LibDs3Error)
-libds3.ds3_free_error.restype = c_void
-libds3.ds3_free_service_response.restype = c_void
-libds3.ds3_free_bucket_response.restype = c_void
-libds3.ds3_free_bulk_response.restype = c_void
-libds3.ds3_free_allocate_chunk_response.restype = c_void
-libds3.ds3_free_available_chunks_response.restype = c_void
-libds3.ds3_free_owner.restype = c_void
-libds3.ds3_free_creds.restype = c_void
-libds3.ds3_free_client.restype = c_void
-libds3.ds3_free_request.restype = c_void
-libds3.ds3_free_bulk_object_list.restype = c_void
-libds3.ds3_cleanup.restype = c_void
+lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
+lib.ds3_create_client.restype = POINTER(LibDs3Client)
+lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
+lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
+lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
+lib.ds3_init_get_object.restype = POINTER(LibDs3Request)
+lib.ds3_init_put_bucket.restype = POINTER(LibDs3Request)
+lib.ds3_init_put_object.restype = POINTER(LibDs3Request)
+lib.ds3_init_delete_bucket.restype = POINTER(LibDs3Request)
+lib.ds3_init_delete_object.restype = POINTER(LibDs3Request)
+lib.ds3_init_allocate_chunk.restype = POINTER(LibDs3Request)
+lib.ds3_init_get_available_chunks.restype = POINTER(LibDs3Request)
+lib.ds3_init_put_bulk.restype = POINTER(LibDs3Request)
+lib.ds3_init_get_bulk.restype = POINTER(LibDs3Request)
+lib.ds3_get_service.restype = POINTER(LibDs3Error)
+lib.ds3_get_bucket.restype = POINTER(LibDs3Error)
+lib.ds3_get_object.restype = POINTER(LibDs3Error)
+lib.ds3_bulk.restype = POINTER(LibDs3Error)
+lib.ds3_allocate_chunk.restype = POINTER(LibDs3Error)
+lib.ds3_get_available_chunks.restype = POINTER(LibDs3Error)
+lib.ds3_delete_bucket.restype = POINTER(LibDs3Error)
+lib.ds3_put_object.restype = POINTER(LibDs3Error)
 
-libds3.ds3_write_to_file.restype = c_size_t
-libds3.ds3_read_from_file.restype = c_size_t
+lib.ds3_write_to_file.restype = c_size_t
+lib.ds3_read_from_file.restype = c_size_t
