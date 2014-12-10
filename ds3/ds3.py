@@ -4,6 +4,7 @@ import libds3
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
         self.message = libds3Error.contents.message.value
+        libds3.lib.ds3_free_error(libds3Error)
 
 class Credentials(object):
     def __init__(self, accessKey, secretKey):
@@ -25,9 +26,12 @@ class Ds3Client(object):
         response = POINTER(libds3.LibDs3GetServiceResponse)()
         request = libds3.lib.ds3_init_get_service()
         error = libds3.lib.ds3_get_service(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
         contents = response.contents
 
         for i in xrange(0, response.contents.num_buckets):
             yield Ds3Bucket(contents.buckets[i])
+
+        libds3.lib.ds3_free_service_response(response)
