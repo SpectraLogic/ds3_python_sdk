@@ -121,9 +121,17 @@ class Ds3Client(object):
 
         libds3.lib.ds3_free_service_response(response)
 
-    def getBucket(self, bucketName):
+    def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
         response = POINTER(libds3.LibDs3GetBucketResponse)()
         request = libds3.lib.ds3_init_get_bucket(bucketName)
+        if prefix:
+            libds3.lib.ds3_request_set_prefix(request, prefix)
+        if nextMarker:
+            libds3.lib.ds3_request_set_marker(request, nextMarker)
+        if delimiter:
+            libds3.lib.ds3_request_set_delimiter(request, delimiter)
+        if maxKeys:
+            libds3.lib.ds3_request_set_max_keys(request, maxKeys)
         error = libds3.lib.ds3_get_bucket(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
         if error:
@@ -150,10 +158,13 @@ class Ds3Client(object):
 
         return bulkResponse
 
-    def getBulk(self, bucketName, fileNameList):
+    def getBulk(self, bucketName, fileNameList, chunkOrdering = True):
         bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
         response = POINTER(libds3.LibDs3BulkResponse)()
-        request = libds3.lib.ds3_init_get_bulk(bucketName, bulkObjs)
+        chunkOrderingValue = libds3.LibDs3ChunkOrdering.IN_ORDER
+        if not chunkOrdering:
+            chunkOrderingValue = libds3.LibDs3ChunkOrdering.NONE
+        request = libds3.lib.ds3_init_get_bulk(bucketName, bulkObjs, chunkOrderingValue)
         error = libds3.lib.ds3_bulk(self._client, request, byref(request))
         libds3.lib.ds3_free_request(request)
         if error:
