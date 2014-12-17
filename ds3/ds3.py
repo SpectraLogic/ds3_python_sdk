@@ -3,7 +3,7 @@ import libds3
 
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
-        self.message = libds3Error.contents.message.value
+        self.message = libds3Error.message.contents.value
         libds3.lib.ds3_free_error(libds3Error)
 
 class Credentials(object):
@@ -101,8 +101,23 @@ class Ds3BulkPlan(object):
         for i in xrange(0, contents.list_size):
             self.chunks.append(Ds3CacheList(contents.list[i]))
 
+def createClientFromEnv():
+    libDs3Client = POINTER(libds3.LibDs3Client)()
+    error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
+    if error:
+        raise Ds3Error(error)
+    clientContents = libDs3Client.contents
+    clientCreds = clientContents.creds.contents
+    creds = Credentials(clientCreds.access_id.contents.value, clientCreds.secret_key.contents.value)
+    proxyValue = None
+    if clientContents.proxy:
+        proxyValue = clientContents.proxy.contents.value
+    client = Ds3Client(clientContents.endpoint.contents.value, creds, proxyValue)
+
+    return client
+
 class Ds3Client(object):
-    def __init__(self, endpoint, credentials):
+    def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
         self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
         self.credentials = credentials
@@ -142,6 +157,13 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bucket_response(response)
 
         return bucket
+
+    def putBucket(self, bucketName):
+        request = libds3.lib.ds3_init_put_bucket(bucketName)
+        error = libds3.lib.ds3_put_bucket(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
 
     def putBulk(self, bucketName, fileNameList):
         bulkObjs = libds3.lib.ds3_convert_file_list(libds3.asCList(fileNameList))

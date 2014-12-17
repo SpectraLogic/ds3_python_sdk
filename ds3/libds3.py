@@ -1,6 +1,12 @@
 from ctypes import *
+import platform
 
-lib = cdll.LoadLibrary("libds3.so")
+lib = None
+
+if platform.system() == "Darwin":
+    lib = cdll.LoadLibrary("libds3.dylib")
+else:
+    lib = cdll.LoadLibrary("libds3.so")
 
 def asCList(orig):
     cList = (ctypes.c_char_p * len(orig))()
@@ -94,6 +100,7 @@ lib.ds3_str_init.restype = POINTER(LibDs3Str)
 lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
+lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_object.restype = POINTER(LibDs3Request)
@@ -115,6 +122,7 @@ lib.ds3_bulk.restype = POINTER(LibDs3Error)
 lib.ds3_allocate_chunk.restype = POINTER(LibDs3Error)
 lib.ds3_get_available_chunks.restype = POINTER(LibDs3Error)
 lib.ds3_delete_bucket.restype = POINTER(LibDs3Error)
+lib.ds3_put_bucket.restype = POINTER(LibDs3Error)
 lib.ds3_put_object.restype = POINTER(LibDs3Error)
 lib.ds3_get_job.restype = POINTER(LibDs3Error)
 lib.ds3_put_job.restype = POINTER(LibDs3Error)
