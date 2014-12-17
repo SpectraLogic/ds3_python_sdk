@@ -178,15 +178,42 @@ class Ds3Client(object):
 
     def deleteObject(self, bucketName, objName):
         request = libds3.lib.ds3_init_delete_object(bucketName, objName)
-        error = libds3.lib.ds3_delete_object(request)
+        error = libds3.lib.ds3_delete_object(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
 
     def deleteBucket(self, bucketName):
         request = libds3.lib.ds3_init_delete_bucket(bucketName)
-        error = libds3.lib.ds3_delete_bucket(request)
+        error = libds3.lib.ds3_delete_bucket(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
 
+    def _sendJobRequest(self, func, request):
+        response = POINTER(libds3.LibDs3BulkResponse)()
+        error = func(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        bulkResponse = Ds3BulkPlan(response)
+
+        libds3.lib.ds3_free_bulk_response(response)
+
+        return bulkResponse
+
+    def getJob(self, jobId):
+        request = libds3.lib.ds3_init_get_job(jobId)
+        return self._sendJobRequest(libds3.lib.ds3_get_job, request)
+
+    def putJob(self, jobId):
+        request = libds3.lib.ds3_init_put_job(jobId)
+        return self._sendJobRequest(libds3.lib.ds3_put_job, request)
+
+    def deleteJob(self, jobId):
+        request = libds3.lib.ds3_init_delete_job(jobId)
+        error = libds3.lib.ds3_delete_job(jobId)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
