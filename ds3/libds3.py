@@ -106,6 +106,7 @@ lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_object.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_object.restype = POINTER(LibDs3Request)
+lib.ds3_init_put_object_for_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_object.restype = POINTER(LibDs3Request)
 lib.ds3_init_allocate_chunk.restype = POINTER(LibDs3Request)
@@ -130,5 +131,8 @@ lib.ds3_delete_job.restype = POINTER(LibDs3Error)
 
 lib.ds3_write_to_file.restype = c_size_t
 lib.ds3_read_from_file.restype = c_size_t
+lib.ds3_write_to_fd.restype = c_size_t
+lib.ds3_read_from_fd.restype = c_size_t
 
+lib.ds3_init_bulk_object_list.restype = POINTER(LibDs3BulkObjectList)
 lib.ds3_convert_file_list.restype = POINTER(LibDs3BulkObjectList)

@@ -3,8 +3,30 @@ import libds3
 
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
-        self.message = libds3Error.message.contents.value
+        self.reason = libds3Error.contents.message.contents.value
+        response = libds3Error.contents.error
+        self._hasResponse = False
+        if response:
+            self._hasResponse = True
+            self.statusCode = response.contents.status_code
+            self.statusMessage = response.contents.status_message.contents.value
+            if response.contents.error_body:
+                self.message = response.contents.error_body.contents.value
+            else:
+                self.message = None
+
         libds3.lib.ds3_free_error(libds3Error)
+    def __str__(self):
+        errorMessage = "Reason: " + self.reason
+        if self._hasResponse:
+            errorMessage += " | StatusCode: " + str(self.statusCode)
+            errorMessage += " | StatusMessage: " + self.statusMessage
+            if self.message:
+                errorMessage += " | Message: " + self.message
+
+        return errorMessage
+    def __repr__(self):
+        return self.__str__()
 
 class Credentials(object):
     def __init__(self, accessKey, secretKey):
@@ -79,8 +101,14 @@ class Ds3CacheList(object):
     def __init__(self, bulkObjectList):
         contents = bulkObjectList.contents
         self.chunkNumber = contents.chunk_number
-        self.nodeId = contents.node_id.contents.value
-        self.serverId = contents.server_id.contents.value
+        if contents.node_id:
+            self.nodeId = contents.node_id.contents.value
+        else:
+            self.nodeId = None
+        if contents.server_id:
+            self.serverId = contents.server_id.contents.value
+        else:
+            self.serverId = None
         self.chunkId = contents.chunk_id.contents.value
         self.objects = []
         for i in xrange(0, contents.size):
@@ -98,8 +126,24 @@ class Ds3BulkPlan(object):
         self.userId = contents.user_id.contents.value
         self.userName = contents.user_name.contents.value
         self.chunks = []
+        print "Bulk Response has " + str(contents.list_size) + " chunks"
         for i in xrange(0, contents.list_size):
+            print "Got a chunk"
             self.chunks.append(Ds3CacheList(contents.list[i]))
+    def __str__(self):
+        response = "JobId: " + self.jobId
+        response += " | BucketName: " + self.bucketName
+        response += " | UserName: " + self.userName
+        response += " | Chunks: " + str(self.chunks)
+        return response
+    def __repr__(self):
+        return self.__str__()
+
+class Ds3AllocateChunkResponse(object):
+    def __init__(self, ds3AllocateChunkResponse):
+        contents = ds3AllocateChunkResponse.contents
+        self.retryAfter = contents.retry_after
+        self.chunk = Ds3CacheList(contents.objects)
 
 def createClientFromEnv():
     libDs3Client = POINTER(libds3.LibDs3Client)()
@@ -113,7 +157,8 @@ def createClientFromEnv():
     if clientContents.proxy:
         proxyValue = clientContents.proxy.contents.value
     client = Ds3Client(clientContents.endpoint.contents.value, creds, proxyValue)
-
+    libds3.lib.ds3_free_creds(clientContents.creds)
+    libds3.lib.ds3_free_client(libDs3Client)
     return client
 
 class Ds3Client(object):
@@ -165,8 +210,34 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-    def putBulk(self, bucketName, fileNameList):
-        bulkObjs = libds3.lib.ds3_convert_file_list(libds3.asCList(fileNameList))
+    def putObject(self, bucketName, objectName, size, jobId, realFileName = None):
+        '''
+        Puts an object to the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
+        Use `realFileName` when the `objectName` that you are putting to ds3 does not match what is on the local filesystem.
+        '''
+        effectiveFileName = objectName
+        if realFileName:
+            effectiveFileName = realFileName
+        request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, size, jobId)
+        localFile = open(effectiveFileName, "r")
+        error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
+        localFile.close()
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def putBulk(self, bucketName, fileInfoList):
+        '''
+        Initiates a start bulk put with the remote ds3 endpoint.  The fileInfoList is a list of (objectName, size) tuples.
+        `objectName` does not have to be the actual name on the local file system, but it will be the name that you must
+        initiate a single object put to later.
+        '''
+        bulkObjs = libds3.lib.ds3_init_bulk_object_list(len(fileInfoList))
+        bulkObjsList = bulkObjs.contents.list
+        for i in xrange(0, len(fileInfoList)):
+            bulkObjsList[i].name = libds3.lib.ds3_str_init(fileInfoList[i][0])
+            bulkObjsList[i].length = fileInfoList[i][1]
+            print "Size is: " + str(bulkObjsList[i].length)
         response = POINTER(libds3.LibDs3BulkResponse)()
         request = libds3.lib.ds3_init_put_bulk(bucketName, bulkObjs)
         error = libds3.lib.ds3_bulk(self._client, request, byref(response))
@@ -197,6 +268,19 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
+
+    def allocateChunk(self, chunkId):
+        request = libds3.lib.ds3_init_allocate_chunk(chunkId)
+        response = POINTER(libds3.LibDs3AllocateChunkResponse)()
+        error = libds3.lib.ds3_allocate_chunk(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+        result = Ds3AllocateChunkResponse(response)
+
+        libds3.lib.ds3_free_allocate_chunk_response(response)
+
+        return result
 
     def deleteObject(self, bucketName, objName):
         request = libds3.lib.ds3_init_delete_object(bucketName, objName)
