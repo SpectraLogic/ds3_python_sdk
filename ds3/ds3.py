@@ -126,9 +126,7 @@ class Ds3BulkPlan(object):
         self.userId = contents.user_id.contents.value
         self.userName = contents.user_name.contents.value
         self.chunks = []
-        print "Bulk Response has " + str(contents.list_size) + " chunks"
         for i in xrange(0, contents.list_size):
-            print "Got a chunk"
             self.chunks.append(Ds3CacheList(contents.list[i]))
     def __str__(self):
         response = "JobId: " + self.jobId
@@ -144,6 +142,12 @@ class Ds3AllocateChunkResponse(object):
         contents = ds3AllocateChunkResponse.contents
         self.retryAfter = contents.retry_after
         self.chunk = Ds3CacheList(contents.objects)
+
+class Ds3AvailableChunksResponse(object):
+    def __init__(self, ds3AvailableChunksResponse):
+        contents = ds3AvailableChunksResponse.contents
+        self.retryAfter = contents.retry_after
+        self.bulkPlan = Ds3BulkPlan(contents.object_list)
 
 def createClientFromEnv():
     libDs3Client = POINTER(libds3.LibDs3Client)()
@@ -176,7 +180,6 @@ class Ds3Client(object):
             raise Ds3Error(error)
         contents = response.contents
 
-        for i in xrange(0, response.contents.num_buckets):
             yield Ds3Bucket(contents.buckets[i])
 
         libds3.lib.ds3_free_service_response(response)
@@ -203,6 +206,23 @@ class Ds3Client(object):
 
         return bucket
 
+    def getObject(self, bucketName, objectName, jobId, realFileName = None):
+        '''
+        Gets an object from the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
+        Use `realFileName` when the `objectName` that you are getting to ds3 does not match what will be on the local filesystem
+        '''
+        effectiveFileName = objectName
+        if realFileName:
+            effectiveFileName = realFileName
+        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, jobId)
+        localFile = open(effectiveFileName, "w")
+        error = libds3.lib.ds3_get_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd)
+        localFile.close()
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+
     def putBucket(self, bucketName):
         request = libds3.lib.ds3_init_put_bucket(bucketName)
         error = libds3.lib.ds3_put_bucket(self._client, request)
@@ -226,6 +246,20 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
+    def deleteObject(self, bucketName, objName):
+        request = libds3.lib.ds3_init_delete_object(bucketName, objName)
+        error = libds3.lib.ds3_delete_object(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def deleteBucket(self, bucketName):
+        request = libds3.lib.ds3_init_delete_bucket(bucketName)
+        error = libds3.lib.ds3_delete_bucket(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
     def putBulk(self, bucketName, fileInfoList):
         '''
         Initiates a start bulk put with the remote ds3 endpoint.  The fileInfoList is a list of (objectName, size) tuples.
@@ -237,7 +271,6 @@ class Ds3Client(object):
         for i in xrange(0, len(fileInfoList)):
             bulkObjsList[i].name = libds3.lib.ds3_str_init(fileInfoList[i][0])
             bulkObjsList[i].length = fileInfoList[i][1]
-            print "Size is: " + str(bulkObjsList[i].length)
         response = POINTER(libds3.LibDs3BulkResponse)()
         request = libds3.lib.ds3_init_put_bulk(bucketName, bulkObjs)
         error = libds3.lib.ds3_bulk(self._client, request, byref(response))
@@ -258,7 +291,7 @@ class Ds3Client(object):
         if not chunkOrdering:
             chunkOrderingValue = libds3.LibDs3ChunkOrdering.NONE
         request = libds3.lib.ds3_init_get_bulk(bucketName, bulkObjs, chunkOrderingValue)
-        error = libds3.lib.ds3_bulk(self._client, request, byref(request))
+        error = libds3.lib.ds3_bulk(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
@@ -282,19 +315,20 @@ class Ds3Client(object):
 
         return result
 
-    def deleteObject(self, bucketName, objName):
-        request = libds3.lib.ds3_init_delete_object(bucketName, objName)
-        error = libds3.lib.ds3_delete_object(self._client, request)
+    def getAvailableChunks(self, jobId):
+        request = libds3.lib.ds3_init_get_available_chunks(jobId)
+        response = POINTER(libds3.LibDs3GetAvailableChunksResponse)()
+        error = libds3.lib.ds3_get_available_chunks(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
+
         if error:
             raise Ds3Error(error)
 
-    def deleteBucket(self, bucketName):
-        request = libds3.lib.ds3_init_delete_bucket(bucketName)
-        error = libds3.lib.ds3_delete_bucket(self._client, request)
-        libds3.lib.ds3_free_request(request)
-        if error:
-            raise Ds3Error(error)
+        result = Ds3AvailableChunksResponse(response)
+
+        libds3.lib.ds3_free_available_chunks_response(response)
+
+        return result
 
     def _sendJobRequest(self, func, request):
         response = POINTER(libds3.LibDs3BulkResponse)()
