@@ -41,7 +41,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def setUp(self):
         self.client = createClientFromEnv()
 
-    def test_create_bucket(self):
+    def testCreateBucket(self):
         self.client.putBucket(bucketName)
 
         bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
@@ -50,7 +50,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         clearBucket(self.client, bucketName)
 
-    def test_bulk_put(self):
+    def testBulkPut(self):
         popluateTestData(self.client, bucketName)
 
         bucketContents = self.client.getBucket(bucketName)
@@ -59,7 +59,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         clearBucket(self.client, bucketName)
 
-    def test_bulk_get(self):
+    def testBulkGet(self):
         popluateTestData(self.client, bucketName)
 
         bucketContents = self.client.getBucket(bucketName)
@@ -90,11 +90,39 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         clearBucket(self.client, bucketName)
 
-    def prefix(self):
-        populateTestData(self.client, bucketName)
+    def testPrefix(self):
+        popluateTestData(self.client, bucketName)
 
         bucketContents = self.client.getBucket(bucketName, prefix = "beo")
 
         self.assertEqual(len(bucketContents.objects), 1)
+
+        clearBucket(self.client, bucketName)
+
+    def testPagination(self):
+        fileList = []
+        for i in xrange(0, 15):
+            fileList.append(("file" + str(i), 0))
+
+        self.client.putBucket(bucketName)
+        self.client.putBulk(bucketName, fileList)
+
+        bucketResult = self.client.getBucket(bucketName, maxKeys = 5)
+
+        self.assertEqual(len(bucketResult.objects), 5)
+        self.assertTrue(bucketResult.nextMarker != None)
+        self.assertEqual(bucketResult.objects[4].name[4:6], "12")
+
+        bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
+
+        self.assertEqual(len(bucketResult.objects), 5)
+        self.assertTrue(bucketResult.nextMarker != None)
+        self.assertEqual(bucketResult.objects[4].name[4], "4")
+
+        bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
+
+        self.assertEqual(len(bucketResult.objects), 5)
+        self.assertTrue(bucketResult.nextMarker == None)
+        self.assertEqual(bucketResult.objects[4].name[4], "9")
 
         clearBucket(self.client, bucketName)

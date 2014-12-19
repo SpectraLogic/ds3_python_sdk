@@ -37,12 +37,20 @@ class Ds3Bucket(object):
     def __init__(self, ds3Bucket):
         self.name = ds3Bucket.name.contents.value
         self.creationDate = ds3Bucket.creation_date.contents.value
+    def __str__(self):
+        return "Name: " + self.name + " | Creation Date: " + self.creationDate
+    def __repr__(self):
+        return self.__str__()
 
 class Ds3Owner(object):
     def __init__(self, ds3Owner):
         ownerContents = ds3Owner.contents
         self.name = ownerContents.name.contents.value
         self.id = ownerContents.id.contents.value
+    def __str__(self):
+        return "Name: " + self.name + " | ID: " + self.id
+    def __repr__(self):
+        return self.__str__()
 
 class Ds3Object(object):
     def __init__(self, ds3Object):
@@ -53,6 +61,10 @@ class Ds3Object(object):
             self.etag = None
         self.size = ds3Object.size
         self.owner = Ds3Owner(ds3Object.owner)
+    def __str__(self):
+        return "Name: " + self.name + " | Size: " + str(self.size) + " | Etag: " + str(self.etag) + " | Owner: " + str(self.owner)
+    def __repr__(self):
+        return self.__str__()
 
 class Ds3BucketDetails(object):
     def __init__(self, ds3Bucket):
