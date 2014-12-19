@@ -15,7 +15,7 @@ Follow the instructions for installing the [ds3_c_sdk](https://github.com/Spectr
 
 To install the ds3_python_sdk, either clone the latest code, or download a release bundle from [Releases](http://github.com/SpectraLogic/ds3_python_sdk/releases).  Once the code has been download, cd into the bundle, and install it with `sudo python setup.py install`
 
-Once `setup.py` completes the ds3_python_sdk should be installed and available to be imported in python scripts.
+Once `setup.py` completes the ds3_python_sdk should be installed and available to be imported into python scripts.
 
 SDK
 ---
@@ -53,4 +53,4 @@ client = ds3.Ds3Client("endpoint", ds3.Credentials("access_key", "secret_key"))
 
 ```
 
-The proxy url can be passed in with the named parameter `proxy`.
+The proxy url can be passed in as the named parameter `proxy` to `Ds3Client()`.
