@@ -96,7 +96,7 @@ class Ds3BucketDetails(object):
         self.commonPrefixes = []
         if bucketContents.num_common_prefixes > 0:
             for i in xrange(0, bucketContents.num_common_prefixes):
-                self.commonePrefixes.append(bucketContents.common_prefixes[i].contents.value)
+                self.commonPrefixes.append(bucketContents.common_prefixes[i].contents.value)
         self.objects = []
         if bucketContents.num_objects > 0:
             for i in xrange(0, bucketContents.num_objects):

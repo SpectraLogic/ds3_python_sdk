@@ -126,3 +126,25 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         self.assertEqual(bucketResult.objects[4].name[4], "9")
 
         clearBucket(self.client, bucketName)
+
+    def testDelimiter(self):
+        fileList = []
+
+        for i in xrange(0, 10):
+            fileList.append(("dir/file" + str(i), 0))
+
+        for i in xrange(0, 10):
+            fileList.append(("file" + str(i), 0))
+
+        self.client.putBucket(bucketName)
+
+        self.client.putBulk(bucketName, fileList)
+
+        bucketResult = self.client.getBucket(bucketName, delimiter = "/")
+
+        self.assertEqual(len(bucketResult.objects), 10)
+
+        self.assertEqual(len(bucketResult.commonPrefixes), 1)
+        self.assertEqual(bucketResult.commonPrefixes[0], "dir/")
+
+        clearBucket(self.client, bucketName)
