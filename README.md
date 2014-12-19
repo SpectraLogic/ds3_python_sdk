@@ -13,7 +13,7 @@ Installing
 
 Follow the instructions for installing the [ds3_c_sdk](https://github.com/SpectraLogic/ds3_c_sdk) first.  The ds3_python_sdk uses the ds3_c_sdk to communicate with a DS3 endpoint, and will not function without it.
 
-To install the ds3_python_sdk, either clone the latest code, or download a release bundle from [Releases](http://github.com/SpectraLogic/ds3_python_sdk/releases).  Once the code has been download, install it with `sudo python setup.py install`
+To install the ds3_python_sdk, either clone the latest code, or download a release bundle from [Releases](http://github.com/SpectraLogic/ds3_python_sdk/releases).  Once the code has been download, cd into the bundle, and install it with `sudo python setup.py install`
 
 Once `setup.py` completes the ds3_python_sdk should be installed and available to be imported in python scripts.
 
