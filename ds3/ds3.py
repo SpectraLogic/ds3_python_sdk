@@ -1,799 +1,371 @@
-import hmac
-import base64
-import xml.dom.minidom
-from xml.dom.minidom import Node
-import xml.etree.ElementTree as xmldom
+from ctypes import *
+import libds3
 
-from hashlib import sha1
-import httplib
-import urllib2
-import urlparse
-import StringIO
-from email.Utils import formatdate
+class Ds3Error(Exception):
+    def __init__(self, libds3Error):
+        self.reason = libds3Error.contents.message.contents.value
+        response = libds3Error.contents.error
+        self._hasResponse = False
+        if response:
+            self._hasResponse = True
+            self.statusCode = response.contents.status_code
+            self.statusMessage = response.contents.status_message.contents.value
+            if response.contents.error_body:
+                self.message = response.contents.error_body.contents.value
+            else:
+                self.message = None
 
-from abc import ABCMeta
-import posixpath
+        libds3.lib.ds3_free_error(libds3Error)
+    def __str__(self):
+        errorMessage = "Reason: " + self.reason
+        if self._hasResponse:
+            errorMessage += " | StatusCode: " + str(self.statusCode)
+            errorMessage += " | StatusMessage: " + self.statusMessage
+            if self.message:
+                errorMessage += " | Message: " + self.message
 
-class XmlSerializer(object):
-    def __init__(self, verbose=False):
-        self.verbose = verbose
-    
-    def pretty_print_xml(self, xml_string):
-        if xml_string:
-            print xml.dom.minidom.parseString(xml_string).toprettyxml()
-        
-    def parse_string(self, xml_string):
-        if self.verbose:
-            self.pretty_print_xml(xml_string)
-            
-        return xml.dom.minidom.parseString(xml_string)
-    
-    def get_name_from_node(self, doc, nodename, parentname=None):
-        for node in doc.getElementsByTagName(nodename):
-            if parentname and not node.parentNode.nodeName == parentname:
-                # this is not the node you are looking for
-                continue
-            
-            for childnode in node.childNodes:
-                if childnode.nodeType == Node.TEXT_NODE:
-                    return childnode.data
-                
-        return ''
-    
-    def get_attribute_from_node(self, doc, nodename, attribute):
-        node = doc.getElementsByTagName(nodename)
-        return node[0].getAttribute(attribute)
-        
-    def to_ds3error(self, xml_string):
-        doc = xml.dom.minidom.parseString(xml_string)
-        code = self.get_name_from_node(doc, "Code")
-        httperrorcode = self.get_name_from_node(doc, "HttpErrorCode")
-        message = self.get_name_from_node(doc, "Message") 
-        obj = Ds3Error(code, httperrorcode, message)
-        
-        return obj
-        
-    def to_list_all_my_buckets_result(self, xml_string):
-        doc = xml.dom.minidom.parseString(xml_string)
-        owner_node = doc.getElementsByTagName("Owner")
-        servlist = ListAllMyBucketsResult(Owner(self.get_name_from_node(owner_node[0], "DisplayName"),
-                                           self.get_name_from_node(owner_node[0], "ID")))
-         
-        for bucket_node in doc.getElementsByTagName("Bucket"):
-            servlist.append(Bucket(self.get_name_from_node(bucket_node, "Name"),
-                                   self.get_name_from_node(bucket_node, "CreationDate")))
-            
-        return servlist
-                    
-    def to_get_bucket_result(self, xml_string):
-        doc = xml.dom.minidom.parseString(xml_string)
-        listbucket = ListBucketResult(self.get_name_from_node(doc, "Name"),
-                                      self.get_name_from_node(doc, "Prefix"),
-                                      self.get_name_from_node(doc, "Marker"),
-                                      self.get_name_from_node(doc, "MaxKeys"),
-                                      self.get_name_from_node(doc, "IsTruncated"),
-                                      self.get_name_from_node(doc, "CreationDate"),
-                                      self.get_name_from_node(doc, "Delimiter"),
-                                      self.get_name_from_node(doc, "NextMarker"))
-        
-        for contentnode in doc.getElementsByTagName("Contents"):
-            ownernode = contentnode.getElementsByTagName("Owner")  # only one owner pwer Content data 
-            owner = Owner(self.get_name_from_node(ownernode[0], "DisplayName"),
-                          self.get_name_from_node(ownernode[0], "ID"))
-            contents = Contents(owner,
-                               self.get_name_from_node(contentnode, "Key"),
-                               self.get_name_from_node(contentnode, "LastModified"),
-                               self.get_name_from_node(contentnode, "ETag"),
-                               self.get_name_from_node(contentnode, "Size"),
-                               self.get_name_from_node(contentnode, "StorageClass"))
-            
-            listbucket.append(contents)
-            
-        return listbucket
-    
-    
-    def to_bulk_put_result(self, xml_string):
-        doc = xml.dom.minidom.parseString(xml_string)
-        jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
-        mobjlist = MasterObjectList(jobid)
-        for object_node in doc.getElementsByTagName('Object'):
-            # add each DS3 object to the master object list
-            mobjlist.append(Object(object_node.getAttribute('Name'), object_node.getAttribute('Size')))
-        
-        return mobjlist
-    
-    def to_bulk_get_result(self, xml_string):
-        doc = xml.dom.minidom.parseString(xml_string)
-        jobid = self.get_attribute_from_node(doc, 'MasterObjectList', 'JobId')
-        mobjlist = MasterObjectList(jobid)
-        for object_node in doc.getElementsByTagName("Object"):
-            # add each DS3 object to the master object list
-            mobjlist.append(Object(object_node.getAttribute('Name'), object_node.getAttribute('Size')))
-        
-        return mobjlist
-        
-    def to_get_jobs(self, xml_string):
-        doc = self.parse_string(xml_string)
-        jobs = Jobs()
-        for job_node in doc.getElementsByTagName("Job"):
-            jobinfo = JobInfo(job_node.getAttribute('BucketName'),
-                                  job_node.getAttribute('JobId'),
-                                  job_node.getAttribute('Priority'),
-                                  job_node.getAttribute('RequestType'),
-                                  job_node.getAttribute('StartDate'))
-            jobs.append(jobinfo)
-                
-        return jobs
-    
-    def to_get_job(self, xml_string):
-        doc = self.parse_string(xml_string)
-        for job_node in doc.getElementsByTagName("Job"):
-            jobinfo = JobInfo(job_node.getAttribute('BucketName'),
-                              job_node.getAttribute('JobId'),
-                              job_node.getAttribute('Priority'),
-                              job_node.getAttribute('RequestType'),
-                              job_node.getAttribute('StartDate'))
-            job = Job(jobinfo)
-        
-        # parse the objects on a per chunk basis
-        for objs_node in doc.getElementsByTagName("Objects"):
-            chunk = objs_node.getAttribute('ChunkNumber')
-            serverid = objs_node.getAttribute('ServerId')
-            jobjlist = JobObjectList(chunk, serverid)
-            for jobj in objs_node.getElementsByTagName("Object"):
-                jobjlist.append(JobObject(jobj.getAttribute('Name'), 
-                                         jobj.getAttribute('Size'),
-                                         jobj.getAttribute('State')))
-        
-            job.append(jobjlist)
-            
-        return job
-    
-    def to_eject_bucket(self, xml_string):
-        self.pretty_print_xml(xml_string)
-
+        return errorMessage
+    def __repr__(self):
+        return self.__str__()
 
 class Credentials(object):
-    def __init__(self, accessId, key):
-        self.accessId = accessId.strip()
-        self.key = key.strip()
-        
-    def is_valid(self):
-        return True if self.accessId and self.key else False
+    def __init__(self, accessKey, secretKey):
+        self.accessKey = accessKey
+        self.secretKey = secretKey
 
-
-class HttpVerb(object):
-    """ HttpVerbs as Enums """
-    GET = 'GET'
-    PUT = 'PUT'
-    DELETE = 'DELETE'
-    HEAD = 'HEAD'
-    POST = 'POST'
-    
-class HeadBucketStatus(object):
-    """Head bucket return values"""
-    EXISTS = 'EXISTS'  # 200
-    NOTAUTHORIZED = 'NOTAUTHORIZED' # 403
-    DOESNTEXIST = 'DOESNTEXIST' # 404
-    UNKNOWN = 'UNKNOWN'
-    
-class RequestInvalid(Exception):
-    def __init__(self, summary):
-        self.summary = summary
-        
+class Ds3Bucket(object):
+    def __init__(self, ds3Bucket):
+        self.name = ds3Bucket.name.contents.value
+        self.creationDate = ds3Bucket.creation_date.contents.value
     def __str__(self):
-        return repr(self.summary)
-      
-class RequestFailed(Exception):
-    def __init__(self, summary, ds3error):
-        self.summary = summary
-        self.code = ds3error.code
-        self.httperrorcode = ds3error.httperrorcode
-        self.message = ds3error.message
-        
+        return "Name: " + self.name + " | Creation Date: " + self.creationDate
+    def __repr__(self):
+        return self.__str__()
+
+class Ds3Owner(object):
+    def __init__(self, ds3Owner):
+        ownerContents = ds3Owner.contents
+        self.name = ownerContents.name.contents.value
+        self.id = ownerContents.id.contents.value
     def __str__(self):
-        return '{0} \n Code={1} \n HttpError={2} \n {3}'.format(self.summary, self.code, 
-                                                                self.httperrorcode, self.message)
-    
-class AbstractRequest(object):
-    __metaclass__ = ABCMeta
-    def __init__(self):
-        self.path = '/'
-        self.httpverb = HttpVerb.GET
-        self.queryparams = {}
-        self.headers = {}
-        self.body = None
+        return "Name: " + self.name + " | ID: " + self.id
+    def __repr__(self):
+        return self.__str__()
 
-
-    def join_paths(self, path1, path2):
-        final_path = ''
-        if not path1.startswith('/'):
-            final_path += '/'
-            final_path += path1
+class Ds3Object(object):
+    def __init__(self, ds3Object):
+        self.name = ds3Object.name.contents.value
+        if ds3Object.etag:
+            self.etag = ds3Object.etag.contents.value
         else:
-            final_path += path1
+            self.etag = None
+        self.size = ds3Object.size
+        self.owner = Ds3Owner(ds3Object.owner)
+    def __str__(self):
+        return "Name: " + self.name + " | Size: " + str(self.size) + " | Etag: " + str(self.etag) + " | Owner: " + str(self.owner)
+    def __repr__(self):
+        return self.__str__()
 
-        if path1.endswith('/') and path2.startswith('/'):
-            final_path += path2[1:]
-        elif path1.endswith('/'):
-            final_path += path2
+class Ds3BucketDetails(object):
+    def __init__(self, ds3Bucket):
+        bucketContents = ds3Bucket.contents
+        self.name = bucketContents.name.contents.value
+        if bucketContents.creation_date:
+            self.creationDate = bucketContents.creation_date.contents.value
         else:
-            final_path += '/' + path2
-        return final_path
+            self.creation_date = None
 
-
-class AbstractResponse(object):
-    __metaclass__ = ABCMeta
-    def __init__(self, response, request):
-        self.request = request
-        self.response = response
-        self.objectdata = None
-        self.process_response(response)
-    
-    def process_response(self, response):
-        # this method must be implemented
-        raise NotImplementedError("Request Implemented")
-    
-    def __check_status_code__(self, expectedcode):
-        self.statuscode = self.response.status
-        if self.response.status != expectedcode:
-            err = "Return Code: Expected %s - Received %s" % (expectedcode, self.response.status)
-            ds3error = XmlSerializer().to_ds3error(self.response.read())
-            raise RequestFailed(err, ds3error)
-        
-    def close(self):
-        self.response.close()
-     
-class GetServiceRequest(AbstractRequest):
-    def __init__(self):
-        super(GetServiceRequest, self).__init__()
-    
-class GetServiceResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_list_all_my_buckets_result(response.read())
-
-        
-class GetBucketRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(GetBucketRequest, self).__init__()
-        self.bucket = bucket
-        self.path = self.join_paths('/', self.bucket)
-        self.httpverb = HttpVerb.GET
-        
-    def with_marker(self, marker):
-        """Key to start when listing objects"""
-        self.queryparams['marker'] = marker
-        
-    def with_prefix(self, prefix):
-        """Limits the objects to only those that start with this prefix"""
-        self.queryparams['prefix'] = prefix
-        
-    def with_max_keys(self, maxkeys):
-        """Max_keys limits the number of objects returned"""
-        self.queryparams['max-keys'] = maxkeys
-        
-    
-class GetBucketResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_get_bucket_result(response.read())
- 
-class PutBucketRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(PutBucketRequest, self).__init__()
-        self.bucket = bucket
-        self.path = self.join_paths('/', self.bucket)
-        self.httpverb = HttpVerb.PUT
-           
-class PutBucketResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = None
-                
-class DeleteBucketRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(DeleteBucketRequest, self).__init__()
-        self.bucket = bucket
-        self.path = self.join_paths('/', self.bucket)
-        self.httpverb = HttpVerb.DELETE
-        
-class DeleteBucketResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(204)
-        self.result = None
-        
-class HeadBucketRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(HeadBucketRequest, self).__init__()
-        self.bucket = bucket
-        self.path = self.join_paths('/', self.bucket)
-        self.httpverb = HttpVerb.HEAD
-        
-class HeadBucketResponse(AbstractResponse):
-    def process_response(self, response):
-        self.statuscode = self.response.status
-        if self.response.status == 200:
-            self.result = HeadBucketStatus.EXISTS
-        elif self.response.status == 403:
-            self.result = HeadBucketStatus.NOTAUTHORIZED
-        elif self.response.status == 404:
-            self.result = HeadBucketStatus.DOESNTEXIST
+        self.isTruncated = bool(bucketContents.is_truncated)
+        if bucketContents.marker:
+            self.marker = bucketContents.marker.contents.value
         else:
-            self.result = HeadBucketStatus.UNKNOWN
-        
-class PutObjectRequest(AbstractRequest):
-    def __init__(self, bucket, filename, filedata):
-        super(PutObjectRequest, self).__init__()
-        self.bucket = bucket
-        self.body = filedata
-        self.path = self.join_paths(self.bucket, filename)
-        self.httpverb = HttpVerb.PUT
-    
-class PutObjectResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = None
-
-class GetObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectkey):
-        super(GetObjectRequest, self).__init__()
-        self.bucket = bucket
-        self.objectkey = objectkey
-    
-        self.path = self.join_paths(self.bucket, self.objectkey)
-        self.httpverb = HttpVerb.GET
-        
-    def with_range(self, startbyte, endbyte):
-        self.headers['Range'] = 'bytes={0}-{1}'.format(startbyte, endbyte)
-    
-class GetObjectResponse(AbstractResponse):
-    def process_response(self, reponse):
-        self.__check_status_code__(200)
-        self.objectdata = self.response.read()
-        self.result = None
-        
-class DeleteObjectRequest(AbstractRequest):
-    def __init__(self, bucket, objectkey):
-        super(DeleteObjectRequest, self).__init__()
-        self.bucket = bucket
-        self.objectkey = objectkey
-        self.path = self.join_paths(self.bucket, self.objectkey)
-        self.httpverb = HttpVerb.DELETE
-    
-class DeleteObjectResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(204)
-        self.result = None
-        
-class BulkRequest(AbstractRequest):
-    """Base class for handling bulk gets and puts"""
-    def __init__(self, bucket, objectlist):
-        self.bucket = bucket
-        objects = xmldom.Element('objects')
-        for file_object in objectlist:
-            obj_elm = xmldom.Element('object')
-            obj_elm.set('name', posixpath.normpath(file_object.name))
-            obj_elm.set('size', str(file_object.size))
-            objects.append(obj_elm)
-        self.objectlist = objects
-        self.body = xmldom.tostring(objects)
-        self.headers = {}
-    
-class BulkPutRequest(BulkRequest):
-    def __init__(self, bucket, objectlist):
-        super(BulkPutRequest, self).__init__(bucket, objectlist)
-        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
-        self.httpverb = HttpVerb.PUT
-        self.queryparams={"operation": "start_bulk_put"}
-    
-class BulkPutResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_bulk_put_result(response.read())
-        
-class BulkGetRequest(BulkRequest):
-    def __init__(self, bucket, objectlist):
-        super(BulkGetRequest, self).__init__(bucket, objectlist)
-        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
-        self.httpverb = HttpVerb.PUT
-        self.queryparams={"operation": "start_bulk_get"}
-    
-class BulkGetResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_bulk_get_result(response.read())
-        
-class GetJobsRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(GetJobsRequest, self).__init__()
-        self.path = '/_rest_/job/'
-        self.queryparams={'bucket': bucket}
-        self.httpverb = HttpVerb.GET
-            
-class GetJobsResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_get_jobs(response.read())
-        
-class GetJobRequest(AbstractRequest):
-    def __init__(self, jobid):
-        super(GetJobRequest, self).__init__()
-        self.path = self.join_paths('/_rest_/job/', jobid)
-        self.httpverb = HttpVerb.GET
-            
-class GetJobResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_get_job(response.read())
-        
-class CancelJobRequest(AbstractRequest):
-    def __init__(self, jobid):
-        super(CancelJobRequest, self).__init__()
-        self.path = self.join_paths('/_rest_/job/', jobid)
-        self.httpverb = HttpVerb.DELETE
-            
-class CancelJobResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-     
-class ModifyJobRequest(AbstractRequest):
-    def __init__(self, jobid, priority):
-        super(ModifyJobRequest, self).__init__()
-        self.path = self.join_paths('/_rest_/job/', jobid)
-        self.queryparams={'priority': priority}
-        self.httpverb = HttpVerb.GET
-            
-class ModifyJobResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(200)
-        self.result = XmlSerializer().to_get_job(response.read())
-        
-class EjectBucketRequest(AbstractRequest):
-    def __init__(self, bucket):
-        super(EjectBucketRequest, self).__init__()
-        self.bucket = bucket
-        self.path = self.join_paths('/_rest_/bucket/', self.bucket)
-        self.queryparams={'operation': 'eject'}
-        self.httpverb = HttpVerb.PUT
-            
-class EjectBucketResponse(AbstractResponse):
-    def process_response(self, response):
-        self.__check_status_code__(204)
-        self.result = None
-   
-
-class ListAllMyBucketsResult(object):
-    def __init__(self, owner):
-        self.owner = owner
-        self.buckets = []
-        
-    def append(self, bucket):
-        if not isinstance(bucket, Bucket):
-            raise TypeError("Can only append a DS3 Bucket")
-        
-        self.buckets.append(bucket)
-        
-    def __len__(self):
-        return len(self.buckets)
-    
-    
-class ListBucketResult(object):
-    def __init__(self, name, prefix, marker, maxkeys, istruncated, creationdate, delimiter, nextmarker):
-        self.name = name
-        self.prefix = prefix
-        self.marker = marker
-        self.maxkeys = maxkeys
-        self.istruncated = istruncated
-        self.creationdate = creationdate
-        self.delimiter = delimiter
-        self.nextmarker = nextmarker
-        self.contentslist = []
-        
-    def append(self, contents):
-        if not isinstance(contents, Contents):
-            raise TypeError("Can only append a DS3 Contents Object")
-        
-        self.contentslist.append(contents)
-        
-    def __str__(self):
-        return 'Name={0} Prefix={1} Marker={2} MaxKeys={3} isTruncated={4} ' \
-                'CreationDate={5} Delimiter={6} NextMarker={7}'.format(self.name, self.prefix, self.marker, self.maxkeys, 
-                                                                       self.istruncated, self.creationdate, self.delimiter, 
-                                                                       self.nextmarker, len(self.contentslist))  
-  
-class Contents(object):
-    def __init__(self, owner, key, lastmodified, etag, size, storageclass):
-        if not isinstance(owner, Owner):
-            raise TypeError("Contents must be created with Owner object")
- 
-        self.owner = owner
-        self.key = key
-        self.lastmodified = lastmodified
-        self.etag = etag
-        self.size = size
-        self.storageclass = storageclass
-        
-    def __str__(self):
-        return '{0} Key={1} LastModified={2} Etag={3} Size={4} StorageClass={5}'.format(self.owner, self.key, self.lastmodified, 
-                                                                                        self.etag, self.size, self.storageclass)
-        
-class Bucket(object):
-    def __init__(self, name, creationdate=None):
-        self.name = name
-        self.creationdate = creationdate
-        
-    def __str__(self):
-        return 'Name={0} CreationDate={1}'.format(self.name, self.creationdate)
-   
-class Owner(object):
-    """Bucket Owner meta data"""
-    def __init__(self, displayname, ownerid):
-        self.displayname = displayname
-        self.ownerid = ownerid
-        
-    def __str__(self):
-        return 'DisplayName={0} OwnerId={1}'.format(self.displayname, self.ownerid)
-              
-class Ds3Error(object):
-    def __init__(self, code, httperrorcode, message):
-        self.code = code
-        self.httperrorcode = httperrorcode
-        self.message = message
-
-class Object(object):
-    """DS3 Object is metadata"""
-    def __init__(self, name, size):
-        self.name = name
-        self.size = size
-        
-    def __str__(self):
-        return 'Name={0} Size={1}'.format(self.name, self.size)
-            
-class MasterObjectList(object):
-    def __init__(self, jobid=None):
-        # This is a list of DS3 Objects
-        self.objectlist = []
-        self.jobid = jobid
-    def append(self, ds3obj):
-        if not isinstance(ds3obj, Object):
-            raise TypeError("Can only append a DS3 Object")
-        self.objectlist.append(ds3obj)
-                   
-class Jobs(object):
-    def __init__(self):
-        self.joblist = []
-        
-    def append(self, obj):
-        if not isinstance(obj, JobInfo):
-            raise TypeError("Can only append JobInfo Objects")
-            
-        self.joblist.append(obj)
-    
-class JobInfo(object):
-    def __init__(self, bucketname, jobid, priority, jobtype, startdate):
-        self.bucketname = bucketname
-        self.jobid = jobid
-        self.priority = priority
-        self.jobtype = jobtype
-        self.startdate = startdate
-    def __str__(self):
-        return 'BucketName={0} JobId={1} Priority={2} StartDate={3}'.format(self.bucketname, self.jobid, self.priority, self.startdate)
-   
-class JobObjectList(object):
-    """JobObjectList is a container for DS3 JobObjects.   
-        The DS3 object container has attributes for Chunk number and DS3 server hostname/address.  
-    """
-    def __init__(self, chunk, serverid):
-        self.chunknumber = chunk
-        self.serverid = serverid
-        self.jobobjects = []
-    def append(self, ds3obj):
-        if not isinstance(ds3obj, JobObject):
-            raise TypeError("Can only append a DS3 JobObject")
-        
-        self.jobobjects.append(ds3obj)
-        
-    def __str__(self):
-        return 'ChunkNumber={0} ServerId={1} JobObjects={2}'.format(self.chunknumber, self.serverid, len(self.jobobjects))
- 
-class JobObject(object):
-    """DS3 Job Object metadata"""
-    def __init__(self, name, size, state):
-        self.name = name
-        self.size = size
-        self.state = state
-        
-    def __str__(self):
-        return 'Name={0} Size={1} State={2}'.format(self.name, self.size, self.state)
-        
-class Job(object):
-    def __init__(self, jobinfo):
-        if not isinstance(jobinfo, JobInfo):
-            raise TypeError("Can only init a Job with a JobInfo object")
-        
-        self.jobinfo = jobinfo
-        self.jobobjectlists = []  # list of ObjectList
-    def append(self, jobjlist):
-        if not isinstance(jobjlist, JobObjectList):
-            raise TypeError("Can only append JobObjectList Objects")
-            
-        self.jobobjectlists.append(jobjlist)
-        
-    def __str__(self):
-        return '{0}, JobObjectLists={1}'.format(self.jobinfo, len(self.jobobjectlists))
-
-class Client(object):
-    def __init__(self, endpoint, credentials):
-        self.netclient = NetworkClient(endpoint, credentials)
-
-    def get_netclient(self):
-        return self.netclient
-    
-    def get_service(self, request):
-        return GetServiceResponse(self.netclient.get_response(request), request)
-
-    def get_bucket(self, request):
-        return GetBucketResponse(self.netclient.get_response(request), request)
-  
-    def head_bucket(self, request):
-        return HeadBucketResponse(self.netclient.get_response(request), request)
-
-    def put_bucket(self, request):
-        return PutBucketResponse(self.netclient.get_response(request), request)
-
-    def delete_bucket(self, request):
-        return DeleteBucketResponse(self.netclient.get_response(request), request)
-        
-    def get_object(self, request):
-        return GetObjectResponse(self.netclient.get_response(request), request)
-
-    def put_object(self, request):
-        return PutObjectResponse(self.netclient.get_response(request), request)
-
-    def delete_object(self, request):
-        return DeleteObjectResponse(self.netclient.get_response(request), request)
-    
-    def bulk_put(self, request):
-        return BulkPutResponse(self.netclient.get_response(request), request)
-        
-    def bulk_get(self, request):
-        return BulkGetResponse(self.netclient.get_response(request), request)
-    
-    def get_jobs(self, request):
-        return GetJobsResponse(self.netclient.get_response(request), request)
- 
-    def get_job(self, request):
-        return GetJobResponse(self.netclient.get_response(request), request)
- 
-    def cancel_job(self, request):
-        return CancelJobResponse(self.netclient.get_response(request), request)
- 
-    def modify_job(self, request):
-        return ModifyJobResponse(self.netclient.get_response(request), request)
-    
-    def eject_bucket(self, request):
-        return EjectBucketResponse(self.netclient.get_response(request), request)
-    
-class NetworkClient(object):
-    def __init__(self, endpoint, credentials):
-        self.networkconnection = NetworkConnection(endpoint)
-        self.credentials = credentials
-        self.maxredirects = 5
-        self.secure = False  # the default is HTTP. If true use HTTPS
-        self.proxy = None
-    
-    def with_secure(self, secure):
-        """If true the client will use HTTPS instead of HTTP."""
-        self.secure = secure
-        return self
-    
-    def with_proxy(self, proxy):
-        """Set HTTP proxy"""
-        index = proxy.find('://')
-        if index >= 0:
-            self.proxy = proxy[index+3:]
+            self.marker = None
+        if bucketContents.delimiter:
+            self.delimiter = bucketContents.delimiter.contents.value
         else:
-            self.proxy = proxy
-        return self
-        
-    def with_max_redirects(self, maxredirects):
-        """Set the maximum 307 redirects the SDK will automatically handle before throwing an exception.""" 
-        self.maxredirects = maxredirects
-        return self
-    
-    def get_response(self, request):
-        retrycnt = 0
-        response = self.send_request(request)
-        
-        # if needed, loop to handle 307 redirects 
-        while response.status == 307 and retrycnt < self.maxredirects:
-            retrycnt += 1
-            response = self.send_request(request)
-             
+            self.delimiter = None
+        self.maxKeys = bucketContents.max_keys
+        if bucketContents.next_marker:
+            self.nextMarker = bucketContents.next_marker.contents.value
+        else:
+            self.nextMarker = None
+        if bucketContents.prefix:
+            self.prefix = bucketContents.prefix.contents.value
+        else:
+            self.prefix = None
+        self.commonPrefixes = []
+        if bucketContents.num_common_prefixes > 0:
+            for i in xrange(0, bucketContents.num_common_prefixes):
+                self.commonPrefixes.append(bucketContents.common_prefixes[i].contents.value)
+        self.objects = []
+        if bucketContents.num_objects > 0:
+            for i in xrange(0, bucketContents.num_objects):
+                self.objects.append(Ds3Object(bucketContents.objects[i]))
+
+class Ds3BulkObject(object):
+    def __init__(self, bulkObject):
+        self.name = bulkObject.name.contents.value
+        self.length = bulkObject.length
+        self.offset = bulkObject.offset
+        self.inCache = bool(bulkObject.in_cache)
+
+class Ds3CacheList(object):
+    def __init__(self, bulkObjectList):
+        contents = bulkObjectList.contents
+        self.chunkNumber = contents.chunk_number
+        if contents.node_id:
+            self.nodeId = contents.node_id.contents.value
+        else:
+            self.nodeId = None
+        if contents.server_id:
+            self.serverId = contents.server_id.contents.value
+        else:
+            self.serverId = None
+        self.chunkId = contents.chunk_id.contents.value
+        self.objects = []
+        for i in xrange(0, contents.size):
+            self.objects.append(Ds3BulkObject(contents.list[i]))
+
+class Ds3BulkPlan(object):
+    def __init__(self, ds3BulkResponse):
+        contents = ds3BulkResponse.contents
+        self.bucketName = contents.bucket_name.contents.value
+        self.cachedSize = contents.cached_size_in_bytes
+        self.compltedSize = contents.completed_size_in_bytes
+        self.jobId = contents.job_id.contents.value
+        self.originalSize = contents.original_size_in_bytes
+        self.startDate = contents.start_date.contents.value
+        self.userId = contents.user_id.contents.value
+        self.userName = contents.user_name.contents.value
+        self.chunks = []
+        for i in xrange(0, contents.list_size):
+            self.chunks.append(Ds3CacheList(contents.list[i]))
+    def __str__(self):
+        response = "JobId: " + self.jobId
+        response += " | BucketName: " + self.bucketName
+        response += " | UserName: " + self.userName
+        response += " | Chunks: " + str(self.chunks)
         return response
-    
-    def send_request(self, request):
-        """create http or https connectiong and send the DS3 request."""
-        if self.secure:
-            connection = httplib.HTTPSConnection(self.networkconnection.endpoint)
-        else:
-            connection = httplib.HTTPConnection(self.networkconnection.endpoint)
-            
-        #use proxy if one was specified
-        if self.proxy:
-            connection.set_tunnel(self.proxy)
-            
-        date = self.get_date()
-        path = request.path
-        if request.queryparams:
-            path = self.build_path(request.path, request.queryparams)
-            
-        headers = {}
-        headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
-        headers['Date'] = date
-        # add additonal header information if specficied in the request. This might be a byte range for example
-        if request.headers:
-            headers.update(request.headers)
-            
-        if request.httpverb == HttpVerb.PUT:
-            headers['Content-Type'] = 'application/octet-stream'
-            headers['Authorization'] = self.build_authorization( verb=request.httpverb, date=date, 
-                                                                 content_type='application/octet-stream', resource=request.path)
-            connection.request(request.httpverb, path, body=request.body, headers=headers)
-        else:
-            headers['Authorization'] = self.build_authorization(verb=request.httpverb, date=date, resource=request.path)
-            connection.request(request.httpverb, path, headers=headers)
-            
-        return connection.getresponse()
-     
-    
-    def build_authorization(self, verb='', date='', content_type='', resource=''):
-        ###Build the S3 authorization###
-        signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,
-                                  date=date, canonicalized_resource=resource)
-        return 'AWS ' + self.credentials.accessId + ':' + signature
-    
-    def aws_signature(self, key, verb='GET', md5='', content_type='', date='', canonicalized_amz_header='', canonicalized_resource=''):
-        ###compute and sign S3 signature###
-        signature_string = verb + '\n'
-        signature_string += md5 + '\n'
-        signature_string += content_type+ '\n'
-        signature_string += date + '\n'
-        signature_string += canonicalized_amz_header
-        signature_string += canonicalized_resource
-        return self.sign(key, signature_string)
-    
-    def sign(self, key, contents):
-        signer = hmac.new(key.encode('utf-8'), digestmod=sha1)
-        signer.update(contents)
-        digest = signer.digest()
-        return base64.encodestring(digest).strip().decode('utf-8')
+    def __repr__(self):
+        return self.__str__()
 
-    def build_path(self, resource, query_params={}):
-        if len(query_params) == 0:
-            return resource
-        new_path = resource + '?'
+class Ds3AllocateChunkResponse(object):
+    def __init__(self, ds3AllocateChunkResponse):
+        contents = ds3AllocateChunkResponse.contents
+        self.retryAfter = contents.retry_after
+        self.chunk = Ds3CacheList(contents.objects)
 
-        new_path += '&'.join(map(lambda tupal: (tupal[0] + '=' + tupal[1]), 
-                                 query_params.iteritems()))
-        return new_path
+class Ds3AvailableChunksResponse(object):
+    def __init__(self, ds3AvailableChunksResponse):
+        contents = ds3AvailableChunksResponse.contents
+        self.retryAfter = contents.retry_after
+        self.bulkPlan = Ds3BulkPlan(contents.object_list)
 
-    def get_date(self):
-        return formatdate()
+def createClientFromEnv():
+    libDs3Client = POINTER(libds3.LibDs3Client)()
+    error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
+    if error:
+        raise Ds3Error(error)
+    clientContents = libDs3Client.contents
+    clientCreds = clientContents.creds.contents
+    creds = Credentials(clientCreds.access_id.contents.value, clientCreds.secret_key.contents.value)
+    proxyValue = None
+    if clientContents.proxy:
+        proxyValue = clientContents.proxy.contents.value
+    client = Ds3Client(clientContents.endpoint.contents.value, creds, proxyValue)
+    libds3.lib.ds3_free_creds(clientContents.creds)
+    libds3.lib.ds3_free_client(libDs3Client)
+    return client
 
-class NetworkConnection(object):
-    """
-    This class abstracts the HTTP network connection from the client to the server.
-    """
-    def __init__(self, endpoint):
-        self.url = urlparse.urlparse(self.ensure_schema(endpoint))
-        self.hostname = self.url.hostname
-        self.port = self.url.port
-        self.endpoint = endpoint
-        
-    def ensure_schema(self, endpoint):
-        if endpoint.startswith('http'):
-            return endpoint
-        else:
-            return 'http://' + endpoint
+class Ds3Client(object):
+    def __init__(self, endpoint, credentials, proxy = None):
+        self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
+        self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
+        self.credentials = credentials
+
+    def getService(self):
+        response = POINTER(libds3.LibDs3GetServiceResponse)()
+        request = libds3.lib.ds3_init_get_service()
+        error = libds3.lib.ds3_get_service(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+        contents = response.contents
+        for i in xrange(0, response.contents.num_buckets):
+            yield Ds3Bucket(contents.buckets[i])
+
+        libds3.lib.ds3_free_service_response(response)
+
+    def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
+        response = POINTER(libds3.LibDs3GetBucketResponse)()
+        request = libds3.lib.ds3_init_get_bucket(bucketName)
+        if prefix:
+            libds3.lib.ds3_request_set_prefix(request, prefix)
+        if nextMarker:
+            libds3.lib.ds3_request_set_marker(request, nextMarker)
+        if delimiter:
+            libds3.lib.ds3_request_set_delimiter(request, delimiter)
+        if maxKeys:
+            libds3.lib.ds3_request_set_max_keys(request, maxKeys)
+        error = libds3.lib.ds3_get_bucket(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        bucket = Ds3BucketDetails(response)
+
+        libds3.lib.ds3_free_bucket_response(response)
+
+        return bucket
+
+    def getObject(self, bucketName, objectName, jobId, realFileName = None):
+        '''
+        Gets an object from the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
+        Use `realFileName` when the `objectName` that you are getting to ds3 does not match what will be on the local filesystem
+        '''
+        effectiveFileName = objectName
+        if realFileName:
+            effectiveFileName = realFileName
+        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, jobId)
+        localFile = open(effectiveFileName, "w")
+        error = libds3.lib.ds3_get_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd)
+        localFile.close()
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+
+    def putBucket(self, bucketName):
+        request = libds3.lib.ds3_init_put_bucket(bucketName)
+        error = libds3.lib.ds3_put_bucket(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def putObject(self, bucketName, objectName, size, jobId, realFileName = None):
+        '''
+        Puts an object to the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
+        Use `realFileName` when the `objectName` that you are putting to ds3 does not match what is on the local filesystem.
+        '''
+        effectiveFileName = objectName
+        if realFileName:
+            effectiveFileName = realFileName
+        request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, size, jobId)
+        localFile = open(effectiveFileName, "r")
+        error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
+        localFile.close()
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def deleteObject(self, bucketName, objName):
+        request = libds3.lib.ds3_init_delete_object(bucketName, objName)
+        error = libds3.lib.ds3_delete_object(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def deleteBucket(self, bucketName):
+        request = libds3.lib.ds3_init_delete_bucket(bucketName)
+        error = libds3.lib.ds3_delete_bucket(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def putBulk(self, bucketName, fileInfoList):
+        '''
+        Initiates a start bulk put with the remote ds3 endpoint.  The fileInfoList is a list of (objectName, size) tuples.
+        `objectName` does not have to be the actual name on the local file system, but it will be the name that you must
+        initiate a single object put to later.
+        '''
+        bulkObjs = libds3.lib.ds3_init_bulk_object_list(len(fileInfoList))
+        bulkObjsList = bulkObjs.contents.list
+        for i in xrange(0, len(fileInfoList)):
+            bulkObjsList[i].name = libds3.lib.ds3_str_init(fileInfoList[i][0])
+            bulkObjsList[i].length = fileInfoList[i][1]
+        response = POINTER(libds3.LibDs3BulkResponse)()
+        request = libds3.lib.ds3_init_put_bulk(bucketName, bulkObjs)
+        error = libds3.lib.ds3_bulk(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        bulkResponse = Ds3BulkPlan(response)
+
+        libds3.lib.ds3_free_bulk_response(response)
+
+        return bulkResponse
+
+    def getBulk(self, bucketName, fileNameList, chunkOrdering = True):
+        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        response = POINTER(libds3.LibDs3BulkResponse)()
+        chunkOrderingValue = libds3.LibDs3ChunkOrdering.IN_ORDER
+        if not chunkOrdering:
+            chunkOrderingValue = libds3.LibDs3ChunkOrdering.NONE
+        request = libds3.lib.ds3_init_get_bulk(bucketName, bulkObjs, chunkOrderingValue)
+        error = libds3.lib.ds3_bulk(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        bulkResponse = Ds3BulkPlan(response)
+
+        libds3.lib.ds3_free_bulk_response(response)
+
+        return bulkResponse
+
+    def allocateChunk(self, chunkId):
+        request = libds3.lib.ds3_init_allocate_chunk(chunkId)
+        response = POINTER(libds3.LibDs3AllocateChunkResponse)()
+        error = libds3.lib.ds3_allocate_chunk(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+        result = Ds3AllocateChunkResponse(response)
+
+        libds3.lib.ds3_free_allocate_chunk_response(response)
+
+        return result
+
+    def getAvailableChunks(self, jobId):
+        request = libds3.lib.ds3_init_get_available_chunks(jobId)
+        response = POINTER(libds3.LibDs3GetAvailableChunksResponse)()
+        error = libds3.lib.ds3_get_available_chunks(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+
+        if error:
+            raise Ds3Error(error)
+
+        result = Ds3AvailableChunksResponse(response)
+
+        libds3.lib.ds3_free_available_chunks_response(response)
+
+        return result
+
+    def _sendJobRequest(self, func, request):
+        response = POINTER(libds3.LibDs3BulkResponse)()
+        error = func(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        bulkResponse = Ds3BulkPlan(response)
+
+        libds3.lib.ds3_free_bulk_response(response)
+
+        return bulkResponse
+
+    def getJob(self, jobId):
+        request = libds3.lib.ds3_init_get_job(jobId)
+        return self._sendJobRequest(libds3.lib.ds3_get_job, request)
+
+    def putJob(self, jobId):
+        request = libds3.lib.ds3_init_put_job(jobId)
+        return self._sendJobRequest(libds3.lib.ds3_put_job, request)
+
+    def deleteJob(self, jobId):
+        request = libds3.lib.ds3_init_delete_job(jobId)
+        error = libds3.lib.ds3_delete_job(jobId)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)

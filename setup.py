@@ -7,4 +7,4 @@ setup(name='DS3 SDK',
     description='Python SDK and CLI for DS3',
     author='Ryan Moore, Tim Powell',
     author_email='timp@spectralogic.com',
-    packages=['ds3'],
+    packages=['ds3'])
