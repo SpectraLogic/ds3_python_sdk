@@ -179,7 +179,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         contents = response.contents
-
+        for i in xrange(0, response.contents.num_buckets):
             yield Ds3Bucket(contents.buckets[i])
 
         libds3.lib.ds3_free_service_response(response)

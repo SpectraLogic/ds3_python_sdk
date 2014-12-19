@@ -89,3 +89,12 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             os.remove(tempFile[1])
 
         clearBucket(self.client, bucketName)
+
+    def prefix(self):
+        populateTestData(self.client, bucketName)
+
+        bucketContents = self.client.getBucket(bucketName, prefix = "beo")
+
+        self.assertEqual(len(bucketContents.objects), 1)
+
+        clearBucket(self.client, bucketName)
