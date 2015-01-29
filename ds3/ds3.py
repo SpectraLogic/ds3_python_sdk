@@ -220,8 +220,8 @@ class Ds3Client(object):
 
     def getObject(self, bucketName, objectName, jobId, realFileName = None):
         '''
-        Gets an object from the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
-        Use `realFileName` when the `objectName` that you are getting to ds3 does not match what will be on the local filesystem
+        Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
+        that you are getting to ds3 does not match what will be on the local filesystem
         '''
         effectiveFileName = objectName
         if realFileName:
@@ -244,8 +244,8 @@ class Ds3Client(object):
 
     def putObject(self, bucketName, objectName, size, jobId, realFileName = None):
         '''
-        Puts an object to the ds3 endpoint.  JobId is not explicitly required, but if omited None must be passed in.
-        Use `realFileName` when the `objectName` that you are putting to ds3 does not match what is on the local filesystem.
+        Puts an object to the ds3 endpoint.  Use `realFileName` when the `objectName`
+        that you are putting to ds3 does not match what is on the local filesystem.
         '''
         effectiveFileName = objectName
         if realFileName:
