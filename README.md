@@ -54,3 +54,57 @@ client = ds3.Ds3Client("endpoint", ds3.Credentials("access_key", "secret_key"))
 ```
 
 The proxy url can be passed in as the named parameter `proxy` to `Ds3Client()`.
+
+Putting Data
+------------
+
+To put data to a DS3 appliance you have to do it inside of the context of what is called a Bulk Job.  Bulk Jobs allow the DS3 application to plan how data should land to cache, and subsequently get written/read to/from tape.  The basic flow of every job is:
+
+* Generate the list of objects that will either be sent to DS3 or retrieved from DS3
+* Send a bulk put/get to DS3 to plan the job
+* The job will be split into multiple chunks.  An application must then get the available list of chunks that can be processed
+* For each chunk that can be processed, sent the object (this step can be done in parallel)
+* Repeat getting the list of available chunks until all chunks have been processed
+
+Here is an example of the above using the Python SDK for putting data:
+
+```python
+
+from ds3 import ds3
+
+client = ds3.createClientFromEnv()
+
+# make sure the bucket that we will be sending objects to exists
+client.putBucket("testBucket")
+
+# create your list of objects that will be sent to DS3
+# this example assumes that these files exist on the file system
+
+fileList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
+
+# this method is used to get the size of the files
+def getSize(fileName):
+    size = os.stat(pathForResource(fileName)).st_size
+    return (fileName, size)
+
+# get the sizes for each file
+fileList = map(getSize, fileList)
+
+# submit the put bulk request to DS3
+bulkResult = client.putBulk(bucketName, fileList)
+
+# the bulk request will split the files over several chunks if it needs to
+# we need have to iterate over the chunks, ask the server for spacd to send
+# the chunk, then send all the objects returned in the chunk
+for chunk in bulkResult.chunks:
+    allocateChunk = client.allocateChunk(chunk.chunkId)
+    for obj in allocateChunk.chunk.objects:
+        client.putObject(bucketName, obj.name, obj.length, bulkResult.jobId, pathForResource(obj.name))
+        
+# we now verify that all our objects have been sent to DS3
+bucketResponse = client.getBucket(bucketName)
+
+for bucket in bucketResponse:
+    print bucket.name
+
+```
