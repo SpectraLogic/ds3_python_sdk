@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from ds3.ds3 import *
+from ds3.libds3 import LibDs3JobStatus
 
 bucketName = "python_test_bucket"
 
@@ -28,7 +29,7 @@ def popluateTestData(client, bucketName):
     for chunk in bulkResult.chunks:
         allocateChunk = client.allocateChunk(chunk.chunkId)
         for obj in allocateChunk.chunk.objects:
-            client.putObject(bucketName, obj.name, obj.length, bulkResult.jobId, pathForResource(obj.name))
+            client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathForResource(obj.name))
 
 def clearBucket(client, bucketName):
     bucketContents = client.getBucket(bucketName)
@@ -81,14 +82,17 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         for obj in availableChunks.bulkPlan.chunks[0].objects:
             newFile = tempfile.mkstemp()
             tempFiles.append(newFile)
-            self.client.getObject(bucketName, obj.name, bulkGetResult.jobId, newFile[1])
 
+            self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
 
         for tempFile in tempFiles:
             os.close(tempFile[0])
             os.remove(tempFile[1])
 
         clearBucket(self.client, bucketName)
+
+        jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
+        self.assertEqual(jobStatusResponse.status == LibDs3JobStatus.COMPLETED)
 
     def testPrefix(self):
         popluateTestData(self.client, bucketName)

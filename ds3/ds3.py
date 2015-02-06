@@ -108,6 +108,10 @@ class Ds3BulkObject(object):
         self.length = bulkObject.length
         self.offset = bulkObject.offset
         self.inCache = bool(bulkObject.in_cache)
+    def __str__(self):
+        return "Name:" + self.name + " | Lenght: " + str(self.length) + " | Offset: " + str(self.offset) + " | InCache: " + str(self.inCache)
+    def __repr__(self):
+        return self.__str__()
 
 class Ds3CacheList(object):
     def __init__(self, bulkObjectList):
@@ -129,19 +133,30 @@ class Ds3CacheList(object):
 class Ds3BulkPlan(object):
     def __init__(self, ds3BulkResponse):
         contents = ds3BulkResponse.contents
-        self.bucketName = contents.bucket_name.contents.value
-        self.cachedSize = contents.cached_size_in_bytes
-        self.compltedSize = contents.completed_size_in_bytes
-        self.jobId = contents.job_id.contents.value
-        self.originalSize = contents.original_size_in_bytes
-        self.startDate = contents.start_date.contents.value
-        self.userId = contents.user_id.contents.value
-        self.userName = contents.user_name.contents.value
+        if contents.bucket_name:
+            self.bucketName = contents.bucket_name.contents.value
+        if contents.cached_size_in_bytes:
+            self.cachedSize = contents.cached_size_in_bytes
+        if contents.completed_size_in_bytes:
+            self.compltedSize = contents.completed_size_in_bytes
+        if contents.job_id:
+            self.jobId = contents.job_id.contents.value
+        if contents.original_size_in_bytes:
+            self.originalSize = contents.original_size_in_bytes
+        if contents.start_date:
+            self.startDate = contents.start_date.contents.value
+        if contents.user_id:
+            self.userId = contents.user_id.contents.value
+        if contents.user_name:
+            self.userName = contents.user_name.contents.value
+        if contents.job_status:
+            self.status = contents.job_status.contents.value
         self.chunks = []
         for i in xrange(0, contents.list_size):
             self.chunks.append(Ds3CacheList(contents.list[i]))
     def __str__(self):
         response = "JobId: " + self.jobId
+        response += " | Status: " + str(self.status)
         response += " | BucketName: " + self.bucketName
         response += " | UserName: " + self.userName
         response += " | Chunks: " + str(self.chunks)
@@ -218,7 +233,7 @@ class Ds3Client(object):
 
         return bucket
 
-    def getObject(self, bucketName, objectName, jobId, realFileName = None):
+    def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
         that you are getting to ds3 does not match what will be on the local filesystem
@@ -226,7 +241,7 @@ class Ds3Client(object):
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = realFileName
-        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, jobId)
+        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, offset, jobId)
         localFile = open(effectiveFileName, "w")
         error = libds3.lib.ds3_get_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd)
         localFile.close()
@@ -242,7 +257,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-    def putObject(self, bucketName, objectName, size, jobId, realFileName = None):
+    def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None):
         '''
         Puts an object to the ds3 endpoint.  Use `realFileName` when the `objectName`
         that you are putting to ds3 does not match what is on the local filesystem.
@@ -250,7 +265,7 @@ class Ds3Client(object):
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = realFileName
-        request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, size, jobId)
+        request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, offset, size, jobId)
         localFile = open(effectiveFileName, "r")
         error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
         localFile.close()
