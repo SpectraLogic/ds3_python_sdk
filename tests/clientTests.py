@@ -89,10 +89,10 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             os.close(tempFile[0])
             os.remove(tempFile[1])
 
-        clearBucket(self.client, bucketName)
-
         jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
-        self.assertEqual(jobStatusResponse.status == LibDs3JobStatus.COMPLETED)
+        self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
+
+        clearBucket(self.client, bucketName)
 
     def testPrefix(self):
         popluateTestData(self.client, bucketName)

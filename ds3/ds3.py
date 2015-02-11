@@ -149,14 +149,16 @@ class Ds3BulkPlan(object):
             self.userId = contents.user_id.contents.value
         if contents.user_name:
             self.userName = contents.user_name.contents.value
-        if contents.job_status:
-            self.status = contents.job_status.contents.value
+        self.requestType = contents.request_type
+        self.status = contents.status
+
         self.chunks = []
         for i in xrange(0, contents.list_size):
             self.chunks.append(Ds3CacheList(contents.list[i]))
     def __str__(self):
         response = "JobId: " + self.jobId
         response += " | Status: " + str(self.status)
+        response += " | Request Type: " + str(self.requestType)
         response += " | BucketName: " + self.bucketName
         response += " | UserName: " + self.userName
         response += " | Chunks: " + str(self.chunks)
