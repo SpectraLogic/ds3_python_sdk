@@ -71,11 +71,14 @@ Here is an example of the above using the Python SDK for putting data:
 ```python
 
 from ds3 import ds3
+import os
 
 client = ds3.createClientFromEnv()
 
+bucketName = "testBucket"
+
 # make sure the bucket that we will be sending objects to exists
-client.putBucket("testBucket")
+client.putBucket(bucketName)
 
 # create your list of objects that will be sent to DS3
 # this example assumes that these files exist on the file system
@@ -84,7 +87,7 @@ fileList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "uly
 
 # this method is used to get the size of the files
 def getSize(fileName):
-    size = os.stat(pathForResource(fileName)).st_size
+    size = os.stat(fileName).st_size
     return (fileName, size)
 
 # get the sizes for each file
@@ -99,12 +102,18 @@ bulkResult = client.putBulk(bucketName, fileList)
 for chunk in bulkResult.chunks:
     allocateChunk = client.allocateChunk(chunk.chunkId)
     for obj in allocateChunk.chunk.objects:
-        client.putObject(bucketName, obj.name, obj.length, bulkResult.jobId, pathForResource(obj.name))
-        
+        client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
+
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.getBucket(bucketName)
 
-for bucket in bucketResponse:
-    print bucket.name
+for obj in bucketResponse.objects:
+    print obj.name
+
+# delete the bucket by first deleting all the objects, and then deleting the bucket
+for obj in bucketResponse.objects:
+    client.deleteObject(bucketName, obj.name)
+
+client.deleteBucket(bucketName)
 
 ```
