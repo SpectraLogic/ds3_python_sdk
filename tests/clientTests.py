@@ -45,63 +45,71 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
 
-        bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+        try:
+            bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
-        self.assertTrue(bucketName in bucketSet)
+            self.assertTrue(bucketName in bucketSet)
+        finally:
+            clearBucket(self.client, bucketName)
 
-        clearBucket(self.client, bucketName)
 
     def testBulkPut(self):
         popluateTestData(self.client, bucketName)
 
-        bucketContents = self.client.getBucket(bucketName)
+        try:
+            bucketContents = self.client.getBucket(bucketName)
 
-        self.assertEqual(len(bucketContents.objects), 4)
+            self.assertEqual(len(bucketContents.objects), 4)
 
-        clearBucket(self.client, bucketName)
+        finally:
+            clearBucket(self.client, bucketName)
 
     def testBulkGet(self):
         popluateTestData(self.client, bucketName)
 
-        bucketContents = self.client.getBucket(bucketName)
+        try:
+            bucketContents = self.client.getBucket(bucketName)
 
-        self.assertEqual(len(bucketContents.objects), 4)
+            self.assertEqual(len(bucketContents.objects), 4)
 
-        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
+            bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
 
-        self.assertEqual(len(bulkGetResult.chunks), 1)
-        self.assertEqual(len(bulkGetResult.chunks[0].objects), 4)
+            self.assertEqual(len(bulkGetResult.chunks), 1)
+            self.assertEqual(len(bulkGetResult.chunks[0].objects), 4)
 
-        tempFiles = []
+            tempFiles = []
 
-        availableChunks = self.client.getAvailableChunks(bulkGetResult.jobId)
+            availableChunks = self.client.getAvailableChunks(bulkGetResult.jobId)
 
-        self.assertTrue(availableChunks != None)
-        self.assertEqual(len(availableChunks.bulkPlan.chunks), 1)
+            self.assertTrue(availableChunks != None)
+            self.assertEqual(len(availableChunks.bulkPlan.chunks), 1)
 
-        for obj in availableChunks.bulkPlan.chunks[0].objects:
-            newFile = tempfile.mkstemp()
-            tempFiles.append(newFile)
+            for obj in availableChunks.bulkPlan.chunks[0].objects:
+                newFile = tempfile.mkstemp()
+                tempFiles.append(newFile)
 
-            self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
+                self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
 
-        for tempFile in tempFiles:
-            os.close(tempFile[0])
-            os.remove(tempFile[1])
+            for tempFile in tempFiles:
+                os.close(tempFile[0])
+                os.remove(tempFile[1])
 
-        jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
-        self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
+            jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
+            self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
 
-        clearBucket(self.client, bucketName)
+        finally:
+            clearBucket(self.client, bucketName)
 
     def testPrefix(self):
         popluateTestData(self.client, bucketName)
 
-        bucketContents = self.client.getBucket(bucketName, prefix = "beo")
+        try:
+            bucketContents = self.client.getBucket(bucketName, prefix = "beo")
 
-        self.assertEqual(len(bucketContents.objects), 1)
+            self.assertEqual(len(bucketContents.objects), 1)
 
-        clearBucket(self.client, bucketName)
+        finally:
+            clearBucket(self.client, bucketName)
 
     def testPagination(self):
         fileList = []
@@ -109,27 +117,38 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             fileList.append(("file" + str(i), 0))
 
         self.client.putBucket(bucketName)
-        self.client.putBulk(bucketName, fileList)
+        try:
+            self.client.putBulk(bucketName, fileList)
 
-        bucketResult = self.client.getBucket(bucketName, maxKeys = 5)
+            bucketResult = self.client.getBucket(bucketName, maxKeys = 5)
 
-        self.assertEqual(len(bucketResult.objects), 5)
-        self.assertTrue(bucketResult.nextMarker != None)
-        self.assertEqual(bucketResult.objects[4].name[4:6], "12")
+            self.assertEqual(len(bucketResult.objects), 5)
+            self.assertTrue(bucketResult.nextMarker != None)
+            self.assertEqual(bucketResult.objects[4].name[4:6], "12")
 
-        bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
+            bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
 
-        self.assertEqual(len(bucketResult.objects), 5)
-        self.assertTrue(bucketResult.nextMarker != None)
-        self.assertEqual(bucketResult.objects[4].name[4], "4")
+            self.assertEqual(len(bucketResult.objects), 5)
+            self.assertTrue(bucketResult.nextMarker != None)
+            self.assertEqual(bucketResult.objects[4].name[4], "4")
 
-        bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
+            bucketResult = self.client.getBucket(bucketName, maxKeys = 5, nextMarker = bucketResult.nextMarker)
 
-        self.assertEqual(len(bucketResult.objects), 5)
-        self.assertTrue(bucketResult.nextMarker == None)
-        self.assertEqual(bucketResult.objects[4].name[4], "9")
+            self.assertEqual(len(bucketResult.objects), 5)
+            self.assertTrue(bucketResult.nextMarker == None)
+            self.assertEqual(bucketResult.objects[4].name[4], "9")
 
-        clearBucket(self.client, bucketName)
+        finally:
+            clearBucket(self.client, bucketName)
+
+    def testDeleteBadKey(self):
+        self.client.putBucket(bucketName)
+        try:
+            self.client.deleteObject(bucketName, "badFile")
+        except Ds3Error as e:
+            self.assertEqual(e.statusCode, 404)
+        finally:
+            clearBucket(self.client, bucketName)
 
     def testDelimiter(self):
         fileList = []
@@ -142,13 +161,15 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.client.putBucket(bucketName)
 
-        self.client.putBulk(bucketName, fileList)
+        try:
+            self.client.putBulk(bucketName, fileList)
 
-        bucketResult = self.client.getBucket(bucketName, delimiter = "/")
+            bucketResult = self.client.getBucket(bucketName, delimiter = "/")
 
-        self.assertEqual(len(bucketResult.objects), 10)
+            self.assertEqual(len(bucketResult.objects), 10)
 
-        self.assertEqual(len(bucketResult.commonPrefixes), 1)
-        self.assertEqual(bucketResult.commonPrefixes[0], "dir/")
+            self.assertEqual(len(bucketResult.commonPrefixes), 1)
+            self.assertEqual(bucketResult.commonPrefixes[0], "dir/")
 
-        clearBucket(self.client, bucketName)
+        finally:
+            clearBucket(self.client, bucketName)
