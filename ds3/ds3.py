@@ -109,7 +109,7 @@ class Ds3BulkObject(object):
         self.offset = bulkObject.offset
         self.inCache = bool(bulkObject.in_cache)
     def __str__(self):
-        return "Name:" + self.name + " | Lenght: " + str(self.length) + " | Offset: " + str(self.offset) + " | InCache: " + str(self.inCache)
+        return "Name:" + self.name + " | Length: " + str(self.length) + " | Offset: " + str(self.offset) + " | InCache: " + str(self.inCache)
     def __repr__(self):
         return self.__str__()
 
