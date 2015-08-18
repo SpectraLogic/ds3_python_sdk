@@ -66,6 +66,17 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             # and if it fails, we can't clean up
             pass
 
+    def testGetHeadObject(self):
+        popluateTestData(self.client, bucketName)
+
+        try:
+            # charlesh: I probably shouldn't hard code this?
+            metadata = self.client.getHeadObject(bucketName, "beowulf.txt")
+
+            # run a test to make sure the metadata is what we think it should be
+        finally:
+            clearBucket(self.client, bucketName)
+
     def testBulkPut(self):
         popluateTestData(self.client, bucketName)
 
