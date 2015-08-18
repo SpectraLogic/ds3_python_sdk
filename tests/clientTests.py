@@ -52,6 +52,19 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         finally:
             clearBucket(self.client, bucketName)
 
+    def testDeleteEmptyBucket(self):
+        self.client.putBucket(bucketName)
+
+        self.client.deleteBucket(bucketName)
+
+        try:
+            bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+
+            self.assertTrue(not (bucketName in bucketSet))
+        finally:
+            # charlesh: if this test succeeds, we don't need to do anything to clean up
+            # and if it fails, we can't clean up
+            pass
 
     def testBulkPut(self):
         popluateTestData(self.client, bucketName)
