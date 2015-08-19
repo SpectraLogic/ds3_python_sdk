@@ -41,6 +41,8 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
+        #charlesh: make sure to remove this
+#        clearBucket(self.client, bucketName)
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -123,6 +125,19 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
             self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
 
+        finally:
+            clearBucket(self.client, bucketName)
+
+    def testGetPhysicalPlacement(self):
+        populateTestData(self.client, bucketName)
+
+        try:
+            bucketContents = self.client.getBucket(bucketName)
+
+            mapped=map(lambda obj: obj.name, bucketContents.objects)
+
+            # charlesh: block here until it's confirmed that the objects are archived.
+            #print(self.client.getPhysicalPlacement(bucketName, mapped))
         finally:
             clearBucket(self.client, bucketName)
 
