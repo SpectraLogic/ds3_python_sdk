@@ -41,6 +41,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
+#        clearBucket(self.client, bucketName)
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -76,6 +77,32 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             print(metadata)
 
             # run a test to make sure the metadata is what we think it should be
+        finally:
+            clearBucket(self.client, bucketName)
+
+    def testDeleteFolder(self):
+#        populateTestData(self.client, bucketName)
+        def getSize(fileName):
+            size = os.stat(pathForResource(fileName)).st_size
+            return (fileName, size)
+        resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt", "folder/beowulf.txt"]
+
+        self.client.putBucket(bucketName)
+
+        fileList = map(getSize, resources)
+
+        bulkResult = self.client.putBulk(bucketName, fileList)
+
+        for chunk in bulkResult.chunks:
+            allocateChunk = self.client.allocateChunk(chunk.chunkId)
+            for obj in allocateChunk.chunk.objects:
+                self.client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathForResource(obj.name))
+
+        try:
+            self.client.deleteFolder(bucketName, "folder")
+
+            bucketContents = self.client.getBucket(bucketName)
+            self.assertEqual(len(bucketContents.objects), 4)
         finally:
             clearBucket(self.client, bucketName)
 
