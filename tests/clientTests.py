@@ -14,7 +14,7 @@ def pathForResource(resourceName):
     currentPath = os.path.dirname(unicode(__file__, encoding))
     return os.path.join(currentPath, "resources", resourceName)
 
-def popluateTestData(client, bucketName):
+def populateTestData(client, bucketName):
     def getSize(fileName):
         size = os.stat(pathForResource(fileName)).st_size
         return (fileName, size)
@@ -67,7 +67,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             pass
 
     def testGetHeadObject(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             # charlesh: I probably shouldn't hard code this?
@@ -80,7 +80,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testBulkPut(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName)
@@ -91,7 +91,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testBulkGet(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName)
@@ -127,7 +127,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testPrefix(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName, prefix = "beo")
