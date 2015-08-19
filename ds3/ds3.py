@@ -241,8 +241,7 @@ class Ds3Client(object):
 
         return bucket
 
-        # should the name of this be just headObject?
-    def getHeadObject(self, bucketName, objectName):
+    def headObject(self, bucketName, objectName):
         response = POINTER(libds3.LibDs3MetaData)()
         request = libds3.lib.ds3_init_head_object(bucketName, objectName)
         error = libds3.lib.ds3_head_object(self._client, request, byref(response))
@@ -299,6 +298,14 @@ class Ds3Client(object):
     def deleteObject(self, bucketName, objName):
         request = libds3.lib.ds3_init_delete_object(bucketName, objName)
         error = libds3.lib.ds3_delete_object(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+    def deleteObjects(self, bucketName, fileNameList):
+        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        request = libds3.lib.ds3_init_delete_objects(bucketName)
+        error = libds3.lib.ds3_delete_objects(self._client, request, bulkObjs)
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
