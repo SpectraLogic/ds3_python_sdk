@@ -81,28 +81,24 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testDeleteFolder(self):
-#        populateTestData(self.client, bucketName)
-        def getSize(fileName):
-            size = os.stat(pathForResource(fileName)).st_size
-            return (fileName, size)
-        resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt", "folder/beowulf.txt"]
+        fileList = []
+
+        for i in xrange(0, 10):
+            fileList.append(("folder/file" + str(i), 0))
+
+        for i in xrange(0, 10):
+            fileList.append(("file" + str(i), 0))
 
         self.client.putBucket(bucketName)
 
-        fileList = map(getSize, resources)
-
-        bulkResult = self.client.putBulk(bucketName, fileList)
-
-        for chunk in bulkResult.chunks:
-            allocateChunk = self.client.allocateChunk(chunk.chunkId)
-            for obj in allocateChunk.chunk.objects:
-                self.client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathForResource(obj.name))
-
         try:
+            self.client.putBulk(bucketName, fileList)
+
             self.client.deleteFolder(bucketName, "folder")
 
-            bucketContents = self.client.getBucket(bucketName)
-            self.assertEqual(len(bucketContents.objects), 4)
+            bucketResult = self.client.getBucket(bucketName)
+
+            self.assertEqual(len(bucketResult.objects), 10)
         finally:
             clearBucket(self.client, bucketName)
 
