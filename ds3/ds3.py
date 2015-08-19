@@ -200,6 +200,12 @@ def extractMetaDataFromResponse(metaData):
         print keys.contents.num_keys
     return {}
 
+def extractPhysicalPlacement(placement):
+    barcodes=[]
+    for index in range(0, placement.contents.num_tapes):
+        barcodes.append(placement.contents.tapes[index].barcode.contents.value)
+    return barcodes
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -406,3 +412,18 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
+
+    def getPhysicalPlacement(self, bucketName, fileNameList):
+        response = POINTER(libds3.LibDs3GetPhysicalPlacementResponse)()
+        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)
+        error = libds3.lib.ds3_get_physical_placement(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+
+        if error:
+            raise Ds3Error(error)
+        
+        placements = extractPhysicalPlacement(response)
+        libds3.lib.ds3_free_get_physical_placement_response(response)
+        
+        return placements
