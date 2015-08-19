@@ -71,7 +71,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         try:
             # charlesh: I probably shouldn't hard code this?
-            metadata = self.client.getHeadObject(bucketName, "beowulf.txt")
+            metadata = self.client.headObject(bucketName, "beowulf.txt")
+
+            print(metadata)
 
             # run a test to make sure the metadata is what we think it should be
         finally:

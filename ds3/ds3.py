@@ -66,12 +66,6 @@ class Ds3Object(object):
     def __repr__(self):
         return self.__str__()
 
-class Ds3MetaData(object):
-    def __init__(self, ds3MetaData):
-        # charlesh: need to copy out the details of ds3MetaData here, but ds3MetaData hasn't been defined (cause of GHashTable pointer)
-        pass
-
-
 class Ds3BucketDetails(object):
     def __init__(self, ds3Bucket):
         bucketContents = ds3Bucket.contents
@@ -200,6 +194,12 @@ def createClientFromEnv():
     libds3.lib.ds3_free_client(libDs3Client)
     return client
 
+def extractMetaDataFromResponse(metaData):
+    keys=libds3.lib.ds3_metadata_keys(metaData)
+    if keys:
+        print keys.contents.num_keys
+    return {}
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -241,8 +241,7 @@ class Ds3Client(object):
 
         return bucket
 
-        # should the name of this be just headObject?
-    def getHeadObject(self, bucketName, objectName):
+    def headObject(self, bucketName, objectName):
         response = POINTER(libds3.LibDs3MetaData)()
         request = libds3.lib.ds3_init_head_object(bucketName, objectName)
         error = libds3.lib.ds3_head_object(self._client, request, byref(response))
@@ -250,7 +249,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-        metadata = Ds3MetaData(response)
+        metadata = extractMetaDataFromResponse(response)
 
         libds3.lib.ds3_free_metadata(response)
 

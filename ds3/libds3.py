@@ -58,8 +58,7 @@ class LibDs3GetBucketResponse(Structure):
     _fields_ = [("objects", POINTER(LibDs3Object)), ("num_objects", c_size_t), ("creation_date", POINTER(LibDs3Str)), ("is_truncated", c_bool), ("marker", POINTER(LibDs3Str)), ("delimiter", POINTER(LibDs3Str)), ("max_keys", c_int), ("name", POINTER(LibDs3Str)), ("next_marker", POINTER(LibDs3Str)), ("prefix", POINTER(LibDs3Str)), ("common_prefixes", POINTER(POINTER(LibDs3Str))), ("num_common_prefixes", c_ulonglong)]
 
 class LibDs3MetaData(Structure):
-    # charlesh: the ds3_metadata struct has a single member, which is a pointer to GHashTable. Unsure of how to reference GHashTable here, tho.
-    _fields_ = [] #("metadata", POINTER( GHashTable??? ))]
+    pass
 
 class LibDs3BulkObject(Structure):
     _fields_ = [("name", POINTER(LibDs3Str)), ("length", c_ulonglong), ("offset", c_ulonglong), ("in_cache", c_bool)]
@@ -104,7 +103,12 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
+class LibDs3MetaDataKeysResult(Structure):
+    _fields_ = [("keys", POINTER(POINTER(LibDs3Str))), ("num_keys", c_ulonglong)]
+
 lib.ds3_str_init.restype = POINTER(LibDs3Str)
+
+lib.ds3_metadata_keys.restype = POINTER(LibDs3MetaDataKeysResult)
 
 lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
