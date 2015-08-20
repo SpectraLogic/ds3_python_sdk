@@ -200,7 +200,7 @@ def addMetadataToRequest(request, metadata):
             for value in metadata[key]:
                 libds3.lib.ds3_request_set_metadata(request, key, value);
 
-def extractMetaDataFromResponse(metaData):
+def extractMetadataFromResponse(metaData):
     result={}
     keys=libds3.lib.ds3_metadata_keys(metaData)
     if keys:
@@ -256,7 +256,7 @@ class Ds3Client(object):
         return bucket
 
     def headObject(self, bucketName, objectName):
-        response = POINTER(libds3.LibDs3MetaData)()
+        response = POINTER(libds3.LibDs3Metadata)()
         request = libds3.lib.ds3_init_head_object(bucketName, objectName)
 
         error = libds3.lib.ds3_head_object(self._client, request, byref(response))
@@ -264,7 +264,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-        metadata = extractMetaDataFromResponse(response)
+        metadata = extractMetadataFromResponse(response)
 
         libds3.lib.ds3_free_metadata(response)
 
@@ -297,7 +297,7 @@ class Ds3Client(object):
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = realFileName
-        response = POINTER(libds3.LibDs3MetaData)()
+        response = POINTER(libds3.LibDs3Metadata)()
         request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, offset, jobId)
         localFile = open(effectiveFileName, "w")
         error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
@@ -306,7 +306,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-        metadata = extractMetaDataFromResponse(response)
+        metadata = extractMetadataFromResponse(response)
         libds3.lib.ds3_free_metadata(response)
         return metadata
 

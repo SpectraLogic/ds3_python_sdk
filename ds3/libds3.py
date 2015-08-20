@@ -100,6 +100,9 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
+class LibDs3Metadata(Structure):
+    pass
+
 class LibDs3MetadataKeysResult(Structure):
     _fields_ = [("keys", POINTER(POINTER(LibDs3Str))), ("num_keys", c_ulonglong)]
 
