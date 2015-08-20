@@ -58,7 +58,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         self.client.deleteBucket(bucketName)
 
         bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
-
         self.assertFalse(bucketName in bucketSet)
 
     def testDeleteObjects(self):
@@ -96,6 +95,27 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             bucketResult = self.client.getBucket(bucketName)
 
             self.assertEqual(len(bucketResult.objects), 10)
+        finally:
+            clearBucket(self.client, bucketName)
+
+    def testHeadObject(self):
+        metadata={"name1":["value1"], "name2":["value2"], "name3":["value3"]}
+
+        self.client.putBucket(bucketName)
+
+        fileList = [("beowulf.txt", os.stat(pathForResource("beowulf.txt")).st_size)]
+
+        bulkResult = self.client.putBulk(bucketName, fileList)
+
+        for chunk in bulkResult.chunks:
+            allocateChunk = self.client.allocateChunk(chunk.chunkId)
+            for obj in allocateChunk.chunk.objects:
+                self.client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathForResource(obj.name), metadata)
+
+        try:
+            metadata_resp = self.client.headObject(bucketName, "beowulf.txt")
+
+            self.assertEqual(metadata, metadata_resp)
         finally:
             clearBucket(self.client, bucketName)
 

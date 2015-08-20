@@ -194,6 +194,26 @@ def createClientFromEnv():
     libds3.lib.ds3_free_client(libDs3Client)
     return client
 
+def addMetadataToRequest(request, metadata):
+    if metadata:
+        for key in metadata:
+            for value in metadata[key]:
+                libds3.lib.ds3_request_set_metadata(request, key, value);
+
+def extractMetaDataFromResponse(metaData):
+    result={}
+    keys=libds3.lib.ds3_metadata_keys(metaData)
+    if keys:
+        for key_index in range(0, keys.contents.num_keys):
+            key=keys.contents.keys[key_index].contents.value
+            result[key]=[]
+            metadataEntry=libds3.lib.ds3_metadata_get_entry(metaData, key)
+            for value_index in range(0, metadataEntry.contents.num_values):
+                result[key].append(metadataEntry.contents.values[value_index].contents.value)
+            libds3.lib.ds3_free_metadata_entry(metadataEntry)
+        libds3.lib.ds3_free_metadata_keys(keys)
+    return result
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -235,6 +255,21 @@ class Ds3Client(object):
 
         return bucket
 
+    def headObject(self, bucketName, objectName):
+        response = POINTER(libds3.LibDs3MetaData)()
+        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
+
+        error = libds3.lib.ds3_head_object(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        metadata = extractMetaDataFromResponse(response)
+
+        libds3.lib.ds3_free_metadata(response)
+
+        return metadata
+
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
@@ -265,7 +300,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-    def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None):
+    def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None, metadata = None):
         '''
         Puts an object to the ds3 endpoint.  Use `realFileName` when the `objectName`
         that you are putting to ds3 does not match what is on the local filesystem.
@@ -274,6 +309,9 @@ class Ds3Client(object):
         if realFileName:
             effectiveFileName = realFileName
         request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, offset, size, jobId)
+
+        addMetadataToRequest(request, metadata)
+
         localFile = open(effectiveFileName, "r")
         error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
         localFile.close()
