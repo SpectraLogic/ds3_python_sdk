@@ -60,7 +60,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         try:
             bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
-            self.assertTrue(not (bucketName in bucketSet))
+            self.assertFalse(bucketName in bucketSet)
         finally:
             pass
 
