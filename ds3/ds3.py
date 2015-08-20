@@ -282,6 +282,14 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
+    def deleteObjects(self, bucketName, fileNameList):
+        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        request = libds3.lib.ds3_init_delete_objects(bucketName)
+        error = libds3.lib.ds3_delete_objects(self._client, request, bulkObjs)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
     def deleteBucket(self, bucketName):
         request = libds3.lib.ds3_init_delete_bucket(bucketName)
         error = libds3.lib.ds3_delete_bucket(self._client, request)

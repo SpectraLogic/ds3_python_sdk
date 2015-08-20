@@ -61,6 +61,22 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.assertFalse(bucketName in bucketSet)
 
+    def testDeleteObjects(self):
+        populateTestData(self.client, bucketName)
+
+        bucketContents = self.client.getBucket(bucketName)
+
+        fileNameList = map(lambda obj: obj.name, bucketContents.objects)
+
+        try:
+            self.client.deleteObjects(bucketName, fileNameList)
+
+            bucketContents = self.client.getBucket(bucketName)
+
+            self.assertEqual(len(bucketContents.objects), 0)
+        finally:
+            clearBucket(self.client, bucketName)
+
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
 
