@@ -194,12 +194,6 @@ def createClientFromEnv():
     libds3.lib.ds3_free_client(libDs3Client)
     return client
 
-def extractMetaDataFromResponse(metaData):
-    keys=libds3.lib.ds3_metadata_keys(metaData)
-    if keys:
-        print keys.contents.num_keys
-    return {}
-
 class Ds3SearchObject(object):
     def __init__(self, ds3SearchObject):
         def checkExistence(ds3Str):
@@ -220,19 +214,6 @@ class Ds3SearchObject(object):
         self.storage_class=checkExistence(contents.storage_class)
         self.type=checkExistence(contents.type)
         self.version=checkExistence(contents.version)
-
-"""
-typedef struct {
-    ds3_str*    bucket_id;
-    ds3_str*    id;
-    ds3_str*    name;
-    uint64_t    size;
-    ds3_owner*  owner;
-    ds3_str*    last_modified;
-    ds3_str*    storage_class;
-    ds3_str*    type;
-    ds3_str*    version;
-}ds3_search_object;"""
 
 def extractSearchObjects(searchObjects):
     objects=[]
@@ -280,20 +261,6 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bucket_response(response)
 
         return bucket
-
-    def headObject(self, bucketName, objectName):
-        response = POINTER(libds3.LibDs3MetaData)()
-        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
-        error = libds3.lib.ds3_head_object(self._client, request, byref(response))
-        libds3.lib.ds3_free_request(request)
-        if error:
-            raise Ds3Error(error)
-
-        metadata = extractMetaDataFromResponse(response)
-
-        libds3.lib.ds3_free_metadata(response)
-
-        return metadata
 
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
