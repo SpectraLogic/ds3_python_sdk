@@ -59,27 +59,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.client.deleteBucket(bucketName)
 
-        try:
-            bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+        bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
-            self.assertTrue(not (bucketName in bucketSet))
-        finally:
-            # charlesh: if this test succeeds, we don't need to do anything to clean up
-            # and if it fails, we can't clean up
-            pass
-
-    def testGetHeadObject(self):
-        populateTestData(self.client, bucketName)
-
-        try:
-            # charlesh: I probably shouldn't hard code this?
-            metadata = self.client.headObject(bucketName, "beowulf.txt")
-
-            print(metadata)
-
-            # run a test to make sure the metadata is what we think it should be
-        finally:
-            clearBucket(self.client, bucketName)
+        self.assertFalse(bucketName in bucketSet)
 
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
