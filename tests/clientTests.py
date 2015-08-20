@@ -8,6 +8,7 @@ from ds3.ds3 import *
 from ds3.libds3 import LibDs3JobStatus
 
 bucketName = "python_test_bucket"
+resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
 
 def pathForResource(resourceName):
     encoding = sys.getfilesystemencoding()
@@ -18,7 +19,6 @@ def populateTestData(client, bucketName):
     def getSize(fileName):
         size = os.stat(pathForResource(fileName)).st_size
         return (fileName, size)
-    resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
 
     client.putBucket(bucketName)
 
@@ -69,7 +69,17 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         try:
             objects=self.client.getObjects(bucketName)
-            print objects
+            self.assertEqual(len(objects), 4)
+
+            def getSize(fileName):
+                size = os.stat(pathForResource(fileName)).st_size
+                return (fileName, size)
+            fileList = map(getSize, resources)
+
+            for index in range(0, len(objects)):
+                self.assertEqual(objects[index].name, fileList[index][0])
+                # charlesh: currently, size returns 0 (also in the C sdk) (this might be fixed in 1.2?)
+                #self.assertEqual(objects[index].size, fileList[index][1])
         finally:
             clearBucket(self.client, bucketName)
 

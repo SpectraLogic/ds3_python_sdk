@@ -202,7 +202,7 @@ class Ds3SearchObject(object):
             else:
                 return None
         contents=ds3SearchObject.contents
-        self.bucket_id=checkExistence(contents.bucket_id)
+        self.bucketId=checkExistence(contents.bucket_id)
         self.id=checkExistence(contents.id)
         self.name=checkExistence(contents.name)
         self.size=contents.size
@@ -210,10 +210,21 @@ class Ds3SearchObject(object):
             self.owner=Ds3Owner(contents.owner)
         else:
             self.owner=None
-        self.last_modified=checkExistence(contents.name)
-        self.storage_class=checkExistence(contents.storage_class)
+        self.lastModified=checkExistence(contents.last_modified)
+        self.storageClass=checkExistence(contents.storage_class)
         self.type=checkExistence(contents.type)
         self.version=checkExistence(contents.version)
+    def __str__(self):
+        response = "BucketId: " + str(self.bucketId)
+        response += " | Id: " + str(self.id)
+        response += " | Name: " + str(self.name)
+        response += " | Size: " + str(self.size)
+        response += " | Owner: (" + str(self.id) + ")"
+        response += " | LastModified: " + str(self.lastModified)
+        response += " | StorageClass: " + str(self.storageClass)
+        response += " | Type: " + str(self.type)
+        response += " | Version: " + str(self.version)
+        return response
 
 def extractSearchObjects(searchObjects):
     objects=[]
