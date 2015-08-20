@@ -41,7 +41,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
-#        clearBucket(self.client, bucketName)
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -66,13 +65,13 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             pass
 
     def testDeleteObjects(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
+
+        bucketContents = self.client.getBucket(bucketName)
+
+        fileNameList = map(lambda obj: obj.name, bucketContents.objects)
 
         try:
-            bucketContents = self.client.getBucket(bucketName)
-
-            fileNameList = map(lambda obj: obj.name, bucketContents.objects)
-
             self.client.deleteObjects(bucketName, fileNameList)
 
             bucketContents = self.client.getBucket(bucketName)
