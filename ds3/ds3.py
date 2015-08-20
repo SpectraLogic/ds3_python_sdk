@@ -73,7 +73,7 @@ class Ds3BucketDetails(object):
         if bucketContents.creation_date:
             self.creationDate = bucketContents.creation_date.contents.value
         else:
-            self.creation_date = None
+            self.creationDate = None
 
         self.isTruncated = bool(bucketContents.is_truncated)
         if bucketContents.marker:
@@ -194,12 +194,6 @@ def createClientFromEnv():
     libds3.lib.ds3_free_client(libDs3Client)
     return client
 
-def extractMetaDataFromResponse(metaData):
-    keys=libds3.lib.ds3_metadata_keys(metaData)
-    if keys:
-        print keys.contents.num_keys
-    return {}
-
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -240,20 +234,6 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bucket_response(response)
 
         return bucket
-
-    def headObject(self, bucketName, objectName):
-        response = POINTER(libds3.LibDs3MetaData)()
-        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
-        error = libds3.lib.ds3_head_object(self._client, request, byref(response))
-        libds3.lib.ds3_free_request(request)
-        if error:
-            raise Ds3Error(error)
-
-        metadata = extractMetaDataFromResponse(response)
-
-        libds3.lib.ds3_free_metadata(response)
-
-        return metadata
 
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
