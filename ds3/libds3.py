@@ -100,12 +100,7 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
-class LibDs3MetaDataKeysResult(Structure):
-    _fields_ = [("keys", POINTER(POINTER(LibDs3Str))), ("num_keys", c_ulonglong)]
-
 lib.ds3_str_init.restype = POINTER(LibDs3Str)
-
-lib.ds3_metadata_keys.restype = POINTER(LibDs3MetaDataKeysResult)
 
 lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
