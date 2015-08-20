@@ -79,6 +79,15 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         finally:
             clearBucket(self.client, bucketName)
 
+    def testGetObjects(self):
+        populateTestData(self.client, bucketName)
+
+        try:
+            objects=self.client.getObjects(bucketName)
+            print objects
+        finally:
+            clearBucket(self.client, bucketName)
+
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
 
