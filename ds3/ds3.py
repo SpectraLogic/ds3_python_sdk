@@ -200,6 +200,46 @@ def extractMetaDataFromResponse(metaData):
         print keys.contents.num_keys
     return {}
 
+class Ds3SearchObject(object):
+    def __init__(self, ds3SearchObject):
+        def checkExistence(ds3Str):
+            if ds3Str:
+                return ds3Str.contents.value
+            else:
+                return None
+        contents=ds3SearchObject.contents
+        self.bucket_id=checkExistence(contents.bucket_id)
+        self.id=checkExistence(contents.id)
+        self.name=checkExistence(contents.name)
+        self.size=contents.size
+        if contents.owner:
+            self.owner=Ds3Owner(contents.owner)
+        else:
+            self.owner=None
+        self.last_modified=checkExistence(contents.name)
+        self.storage_class=checkExistence(contents.storage_class)
+        self.type=checkExistence(contents.type)
+        self.version=checkExistence(contents.version)
+
+"""
+typedef struct {
+    ds3_str*    bucket_id;
+    ds3_str*    id;
+    ds3_str*    name;
+    uint64_t    size;
+    ds3_owner*  owner;
+    ds3_str*    last_modified;
+    ds3_str*    storage_class;
+    ds3_str*    type;
+    ds3_str*    version;
+}ds3_search_object;"""
+
+def extractSearchObjects(searchObjects):
+    objects=[]
+    for index in range(0, searchObjects.contents.num_objects):
+        objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
+    return objects
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -350,6 +390,20 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
+
+    def getObjects(self, bucketName):
+        request = libds3.lib.ds3_init_get_objects(bucketName)
+        response = POINTER(libds3.LibDs3GetObjectsResponse)()
+        error = libds3.lib.ds3_get_objects(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        result = extractSearchObjects(response)
+
+        libds3.lib.ds3_free_objects_response(response)
+
+        return result
 
     def allocateChunk(self, chunkId):
         request = libds3.lib.ds3_init_allocate_chunk(chunkId)
