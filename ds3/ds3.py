@@ -251,6 +251,12 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
+    def deleteFolder(self, bucketName, folderName):
+        request = libds3.lib.ds3_init_delete_folder(bucketName, folderName)
+        error = libds3.lib.ds3_delete_folder(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
 
     def putBucket(self, bucketName):
         request = libds3.lib.ds3_init_put_bucket(bucketName)

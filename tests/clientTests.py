@@ -41,6 +41,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
+#        clearBucket(self.client, bucketName)
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -74,6 +75,28 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             bucketContents = self.client.getBucket(bucketName)
 
             self.assertEqual(len(bucketContents.objects), 0)
+        finally:
+            clearBucket(self.client, bucketName)
+
+    def testDeleteFolder(self):
+        fileList = []
+
+        for i in xrange(0, 10):
+            fileList.append(("folder/file" + str(i), 0))
+
+        for i in xrange(0, 10):
+            fileList.append(("file" + str(i), 0))
+
+        self.client.putBucket(bucketName)
+
+        try:
+            self.client.putBulk(bucketName, fileList)
+
+            self.client.deleteFolder(bucketName, "folder")
+
+            bucketResult = self.client.getBucket(bucketName)
+
+            self.assertEqual(len(bucketResult.objects), 10)
         finally:
             clearBucket(self.client, bucketName)
 
