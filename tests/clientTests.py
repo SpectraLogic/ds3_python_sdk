@@ -41,7 +41,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
-#        clearBucket(self.client, bucketName)
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
