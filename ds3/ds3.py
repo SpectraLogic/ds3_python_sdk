@@ -293,6 +293,23 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
+    def getObjectWithMetadata(self, bucketName, objectName, offset, jobId, realFileName = None):
+        effectiveFileName = objectName
+        if realFileName:
+            effectiveFileName = realFileName
+        response = POINTER(libds3.LibDs3MetaData)()
+        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, offset, jobId)
+        localFile = open(effectiveFileName, "w")
+        error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
+        localFile.close()
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        metadata = extractMetaDataFromResponse(response)
+        libds3.lib.ds3_free_metadata(response)
+        return metadata
+
     def putBucket(self, bucketName):
         request = libds3.lib.ds3_init_put_bucket(bucketName)
         error = libds3.lib.ds3_put_bucket(self._client, request)
