@@ -57,12 +57,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.client.deleteBucket(bucketName)
 
-        try:
-            bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+        bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
-            self.assertFalse(bucketName in bucketSet)
-        finally:
-            pass
+        self.assertFalse(bucketName in bucketSet)
 
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
