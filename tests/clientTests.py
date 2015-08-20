@@ -14,7 +14,7 @@ def pathForResource(resourceName):
     currentPath = os.path.dirname(unicode(__file__, encoding))
     return os.path.join(currentPath, "resources", resourceName)
 
-def popluateTestData(client, bucketName):
+def populateTestData(client, bucketName):
     def getSize(fileName):
         size = os.stat(pathForResource(fileName)).st_size
         return (fileName, size)
@@ -52,9 +52,17 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         finally:
             clearBucket(self.client, bucketName)
 
+    def testDeleteEmptyBucket(self):
+        self.client.putBucket(bucketName)
+
+        self.client.deleteBucket(bucketName)
+
+        bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+
+        self.assertFalse(bucketName in bucketSet)
 
     def testBulkPut(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName)
@@ -65,7 +73,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testBulkGet(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName)
@@ -101,7 +109,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testPrefix(self):
-        popluateTestData(self.client, bucketName)
+        populateTestData(self.client, bucketName)
 
         try:
             bucketContents = self.client.getBucket(bucketName, prefix = "beo")

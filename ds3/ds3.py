@@ -73,7 +73,7 @@ class Ds3BucketDetails(object):
         if bucketContents.creation_date:
             self.creationDate = bucketContents.creation_date.contents.value
         else:
-            self.creation_date = None
+            self.creationDate = None
 
         self.isTruncated = bool(bucketContents.is_truncated)
         if bucketContents.marker:
