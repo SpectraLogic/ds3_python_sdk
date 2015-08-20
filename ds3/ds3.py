@@ -66,12 +66,6 @@ class Ds3Object(object):
     def __repr__(self):
         return self.__str__()
 
-class Ds3MetaData(object):
-    def __init__(self, ds3MetaData):
-        # charlesh: need to copy out the details of ds3MetaData here, but ds3MetaData hasn't been defined (cause of GHashTable pointer)
-        pass
-
-
 class Ds3BucketDetails(object):
     def __init__(self, ds3Bucket):
         bucketContents = ds3Bucket.contents
@@ -79,7 +73,7 @@ class Ds3BucketDetails(object):
         if bucketContents.creation_date:
             self.creationDate = bucketContents.creation_date.contents.value
         else:
-            self.creation_date = None
+            self.creationDate = None
 
         self.isTruncated = bool(bucketContents.is_truncated)
         if bucketContents.marker:
@@ -240,20 +234,6 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bucket_response(response)
 
         return bucket
-
-    def headObject(self, bucketName, objectName):
-        response = POINTER(libds3.LibDs3MetaData)()
-        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
-        error = libds3.lib.ds3_head_object(self._client, request, byref(response))
-        libds3.lib.ds3_free_request(request)
-        if error:
-            raise Ds3Error(error)
-
-        metadata = Ds3MetaData(response)
-
-        libds3.lib.ds3_free_metadata(response)
-
-        return metadata
 
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''

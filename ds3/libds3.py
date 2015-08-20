@@ -57,10 +57,6 @@ class LibDs3GetServiceResponse(Structure):
 class LibDs3GetBucketResponse(Structure):
     _fields_ = [("objects", POINTER(LibDs3Object)), ("num_objects", c_size_t), ("creation_date", POINTER(LibDs3Str)), ("is_truncated", c_bool), ("marker", POINTER(LibDs3Str)), ("delimiter", POINTER(LibDs3Str)), ("max_keys", c_int), ("name", POINTER(LibDs3Str)), ("next_marker", POINTER(LibDs3Str)), ("prefix", POINTER(LibDs3Str)), ("common_prefixes", POINTER(POINTER(LibDs3Str))), ("num_common_prefixes", c_ulonglong)]
 
-class LibDs3MetaData(Structure):
-    # charlesh: the ds3_metadata struct has a single member, which is a pointer to GHashTable. Unsure of how to reference GHashTable here, tho.
-    _fields_ = [] #("metadata", POINTER( GHashTable??? ))]
-
 class LibDs3BulkObject(Structure):
     _fields_ = [("name", POINTER(LibDs3Str)), ("length", c_ulonglong), ("offset", c_ulonglong), ("in_cache", c_bool)]
 
@@ -112,7 +108,6 @@ lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
-lib.ds3_init_head_object.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_object_for_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_object_for_job.restype = POINTER(LibDs3Request)
@@ -128,7 +123,6 @@ lib.ds3_init_put_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_job.restype = POINTER(LibDs3Request)
 lib.ds3_get_service.restype = POINTER(LibDs3Error)
 lib.ds3_get_bucket.restype = POINTER(LibDs3Error)
-lib.ds3_head_object.restype = POINTER(LibDs3Error)
 lib.ds3_get_object.restype = POINTER(LibDs3Error)
 lib.ds3_get_objects.restype = POINTER(LibDs3Error)
 lib.ds3_bulk.restype = POINTER(LibDs3Error)
