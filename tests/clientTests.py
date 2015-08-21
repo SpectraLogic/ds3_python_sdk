@@ -14,12 +14,17 @@ def pathForResource(resourceName):
     currentPath = os.path.dirname(unicode(__file__, encoding))
     return os.path.join(currentPath, "resources", resourceName)
 
-def populateTestDataFromListWithMetadata(client, bucketName, resourceList, metadata = None):
+def populateTestData(client, bucketName, resourceList = None, prefix = "", metadata = None):
+    if not resourceList:
+        resourceList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
+
     def getSize(fileName):
         size = os.stat(pathForResource(fileName)).st_size
-        return (fileName, size)
+        return (prefix + fileName, size)
 
     client.putBucket(bucketName)
+
+    pathes={prefix + fileName: pathForResource(fileName) for fileName in resourceList}
 
     fileList = map(getSize, resourceList)
 
@@ -28,11 +33,7 @@ def populateTestDataFromListWithMetadata(client, bucketName, resourceList, metad
     for chunk in bulkResult.chunks:
         allocateChunk = client.allocateChunk(chunk.chunkId)
         for obj in allocateChunk.chunk.objects:
-            client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathForResource(obj.name), metadata)
-
-def populateTestData(client, bucketName):
-    resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
-    populateTestDataFromListWithMetadata(client, bucketName, resources)
+            client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId, pathes[obj.name], metadata)
 
 def clearBucket(client, bucketName):
     bucketContents = client.getBucket(bucketName)
@@ -44,6 +45,12 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
+
+    def tearDown(self):
+        try:
+            clearBucket(self.client, bucketName)
+        except Ds3Error as e:
+            pass
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -80,43 +87,34 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
 
     def testDeleteFolder(self):
-        fileList = []
-
-        for i in xrange(0, 10):
-            fileList.append(("folder/file" + str(i), 0))
-
-        for i in xrange(0, 10):
-            fileList.append(("file" + str(i), 0))
-
-        self.client.putBucket(bucketName)
+        populateTestData(self.client, bucketName, prefix = "folder/")
 
         try:
-            self.client.putBulk(bucketName, fileList)
-
             self.client.deleteFolder(bucketName, "folder")
 
             bucketResult = self.client.getBucket(bucketName)
 
-            self.assertEqual(len(bucketResult.objects), 10)
+            self.assertEqual(len(bucketResult.objects), 0)
         finally:
             clearBucket(self.client, bucketName)
 
     def testHeadObject(self):
-        metadata={"name1":["value1"], "name2":["value2"], "name3":["value3"]}
+        metadata={"name1":["value1"], "name2":"value2", "name3":("value3")}
+        metadata_check={"name1":["value1"], "name2":["value2"], "name3":["value3"]}
 
-        populateTestDataFromListWithMetadata(self.client, bucketName, ["beowulf.txt"], metadata)
+        populateTestData(self.client, bucketName, resourceList=["beowulf.txt"], metadata=metadata)
 
         try:
             metadata_resp = self.client.headObject(bucketName, "beowulf.txt")
 
-            self.assertEqual(metadata, metadata_resp)
+            self.assertEqual(metadata_check, metadata_resp)
         finally:
             clearBucket(self.client, bucketName)
 
     def testGetObjectWithMetadata(self):
         metadata={"name1":["value1"], "name2":["value2"], "name3":["value3"]}
 
-        populateTestDataFromListWithMetadata(self.client, bucketName, ["beowulf.txt"], metadata)
+        populateTestData(self.client, bucketName, resourceList=["beowulf.txt"], metadata=metadata)
 
         try:
             #metadata_resp = self.client.getObjectWithMetadata(bucketName, "beowulf.txt")
