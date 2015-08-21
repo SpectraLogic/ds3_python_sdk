@@ -78,8 +78,8 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
             for index in range(0, len(objects)):
                 self.assertEqual(objects[index].name, fileList[index][0])
-                # charlesh: currently, size returns 0 (also in the C sdk) (this might be fixed in 1.2?)
-                #self.assertEqual(objects[index].size, fileList[index][1])
+                # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
+                # self.assertEqual(objects[index].size, fileList[index][1])
         finally:
             clearBucket(self.client, bucketName)
 
