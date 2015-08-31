@@ -8,6 +8,7 @@ from ds3.ds3 import *
 from ds3.libds3 import LibDs3JobStatus
 
 bucketName = "python_test_bucket"
+resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
 
 def pathForResource(resourceName):
     encoding = sys.getfilesystemencoding()
@@ -126,6 +127,25 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.assertEqual(metadata, metadata_resp)
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
+
+    def testGetObjects(self):
+        populateTestData(self.client, bucketName)
+
+        try:
+            objects=self.client.getObjects(bucketName)
+            self.assertEqual(len(objects), 4)
+
+            def getSize(fileName):
+                size = os.stat(pathForResource(fileName)).st_size
+                return (fileName, size)
+            fileList = map(getSize, resources)
+
+            for index in range(0, len(objects)):
+                self.assertEqual(objects[index].name, fileList[index][0])
+                # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
+                # self.assertEqual(objects[index].size, fileList[index][1])
+        finally:
+            clearBucket(self.client, bucketName)
 
     def testBulkPut(self):
         populateTestData(self.client, bucketName)

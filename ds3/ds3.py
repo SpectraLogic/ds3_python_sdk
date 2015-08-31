@@ -217,6 +217,44 @@ def extractMetadataFromResponse(metaData):
         libds3.lib.ds3_free_metadata_keys(keys)
     return result
 
+class Ds3SearchObject(object):
+    def __init__(self, ds3SearchObject):
+        def checkExistence(ds3Str):
+            if ds3Str:
+                return ds3Str.contents.value
+            else:
+                return None
+        contents=ds3SearchObject.contents
+        self.bucketId=checkExistence(contents.bucket_id)
+        self.id=checkExistence(contents.id)
+        self.name=checkExistence(contents.name)
+        self.size=contents.size
+        if contents.owner:
+            self.owner=Ds3Owner(contents.owner)
+        else:
+            self.owner=None
+        self.lastModified=checkExistence(contents.last_modified)
+        self.storageClass=checkExistence(contents.storage_class)
+        self.type=checkExistence(contents.type)
+        self.version=checkExistence(contents.version)
+    def __str__(self):
+        response = "BucketId: " + str(self.bucketId)
+        response += " | Id: " + str(self.id)
+        response += " | Name: " + str(self.name)
+        response += " | Size: " + str(self.size)
+        response += " | Owner: (" + str(self.id) + ")"
+        response += " | LastModified: " + str(self.lastModified)
+        response += " | StorageClass: " + str(self.storageClass)
+        response += " | Type: " + str(self.type)
+        response += " | Version: " + str(self.version)
+        return response
+
+def extractSearchObjects(searchObjects):
+    objects=[]
+    for index in range(0, searchObjects.contents.num_objects):
+        objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
+    return objects
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -258,6 +296,7 @@ class Ds3Client(object):
 
         return bucket
 
+<<<<<<< HEAD
     def headObject(self, bucketName, objectName):
         '''
         Returns the metadata for the retrieved object as a dictionary of lists.
@@ -283,6 +322,8 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
+=======
+>>>>>>> 4e55d9fbe32f3637ea93adca509b33c8abeb53bb
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
@@ -398,6 +439,20 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
+
+    def getObjects(self, bucketName):
+        request = libds3.lib.ds3_init_get_objects(bucketName)
+        response = POINTER(libds3.LibDs3GetObjectsResponse)()
+        error = libds3.lib.ds3_get_objects(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        result = extractSearchObjects(response)
+
+        libds3.lib.ds3_free_objects_response(response)
+
+        return result
 
     def allocateChunk(self, chunkId):
         request = libds3.lib.ds3_init_allocate_chunk(chunkId)
