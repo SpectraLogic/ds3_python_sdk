@@ -45,6 +45,8 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = createClientFromEnv()
+        #charlesh: make sure to remove this
+#        clearBucket(self.client, bucketName)
 
     def tearDown(self):
         try:
