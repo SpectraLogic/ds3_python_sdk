@@ -296,7 +296,6 @@ class Ds3Client(object):
 
         return bucket
 
-<<<<<<< HEAD
     def headObject(self, bucketName, objectName):
         '''
         Returns the metadata for the retrieved object as a dictionary of lists.
@@ -322,8 +321,6 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-=======
->>>>>>> 4e55d9fbe32f3637ea93adca509b33c8abeb53bb
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
