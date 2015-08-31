@@ -52,14 +52,14 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         except Ds3Error as e:
             pass
 
-    def testCreateBucket(self):
+    def testPutBucket(self):
         self.client.putBucket(bucketName)
 
         bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
         self.assertTrue(bucketName in bucketSet)
 
-    def testDeleteEmptyBucket(self):
+    def testDeleteBucket(self):
         self.client.putBucket(bucketName)
 
         self.client.deleteBucket(bucketName)
@@ -127,14 +127,14 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         self.assertEqual(metadata, metadata_resp)
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
 
-    def testBulkPut(self):
+    def testPutBulk(self):
         populateTestData(self.client, bucketName)
 
         bucketContents = self.client.getBucket(bucketName)
 
         self.assertEqual(len(bucketContents.objects), 4)
 
-    def testBulkGet(self):
+    def testGetBulk(self):
         populateTestData(self.client, bucketName)
 
         bucketContents = self.client.getBucket(bucketName)
