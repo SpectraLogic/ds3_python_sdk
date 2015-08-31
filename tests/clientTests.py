@@ -67,6 +67,13 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
         self.assertFalse(bucketName in bucketSet)
 
+    def testGetPhysicalPlacement(self):
+        populateTestData(self.client, bucketName)
+
+        bogus=["bogus.txt"]
+        
+        self.assertEqual(len(self.client.getPhysicalPlacement(bucketName, bogus)), 0)
+
     def testDeleteObjects(self):
         populateTestData(self.client, bucketName)
 
