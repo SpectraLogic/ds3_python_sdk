@@ -106,7 +106,6 @@ class LibDs3GetAvailableChunksResponse(Structure):
 class LibDs3Request(Structure):
     pass
 
-<<<<<<< HEAD
 class LibDs3Metadata(Structure):
     pass
 
@@ -121,20 +120,13 @@ lib.ds3_str_init.restype = POINTER(LibDs3Str)
 lib.ds3_metadata_keys.restype = POINTER(LibDs3MetadataKeysResult)
 lib.ds3_metadata_get_entry.restype = POINTER(LibDs3MetadataGetEntryResult)
 
-=======
-lib.ds3_str_init.restype = POINTER(LibDs3Str)
-
->>>>>>> 4e55d9fbe32f3637ea93adca509b33c8abeb53bb
 lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
-<<<<<<< HEAD
 lib.ds3_init_delete_folder.restype = POINTER(LibDs3Request)
-=======
->>>>>>> 4e55d9fbe32f3637ea93adca509b33c8abeb53bb
 lib.ds3_init_get_object_for_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_object_for_job.restype = POINTER(LibDs3Request)
