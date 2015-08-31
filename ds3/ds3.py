@@ -194,6 +194,29 @@ def createClientFromEnv():
     libds3.lib.ds3_free_client(libDs3Client)
     return client
 
+def addMetadataToRequest(request, metadata):
+    if metadata:
+        for key in metadata:
+            if type(metadata[key]) is list or type(metadata[key]) is tuple:
+                for value in metadata[key]:
+                    libds3.lib.ds3_request_set_metadata(request, key, value);
+            else:
+                libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
+
+def extractMetadataFromResponse(metaData):
+    result={}
+    keys=libds3.lib.ds3_metadata_keys(metaData)
+    if keys:
+        for key_index in range(0, keys.contents.num_keys):
+            key=keys.contents.keys[key_index].contents.value
+            result[key]=[]
+            metadataEntry=libds3.lib.ds3_metadata_get_entry(metaData, key)
+            for value_index in range(0, metadataEntry.contents.num_values):
+                result[key].append(metadataEntry.contents.values[value_index].contents.value)
+            libds3.lib.ds3_free_metadata_entry(metadataEntry)
+        libds3.lib.ds3_free_metadata_keys(keys)
+    return result
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -235,22 +258,53 @@ class Ds3Client(object):
 
         return bucket
 
+    def headObject(self, bucketName, objectName):
+        '''
+        Returns the metadata for the retrieved object as a dictionary of lists.
+        '''
+        response = POINTER(libds3.LibDs3Metadata)()
+        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
+
+        error = libds3.lib.ds3_head_object(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        metadata = extractMetadataFromResponse(response)
+
+        libds3.lib.ds3_free_metadata(response)
+
+        return metadata
+
+    def deleteFolder(self, bucketName, folderName):
+        request = libds3.lib.ds3_init_delete_folder(bucketName, folderName)
+        error = libds3.lib.ds3_delete_folder(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the ds3 endpoint.  Use `realFileName` when the `objectName`
-        that you are getting to ds3 does not match what will be on the local filesystem
+        that you are getting to ds3 does not match what will be on the local filesystem.
+        Returns the metadata for the retrieved object as a dictionary, where keys are
+        associated with a list of the values for that key.
         '''
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = realFileName
+        response = POINTER(libds3.LibDs3Metadata)()
         request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, offset, jobId)
         localFile = open(effectiveFileName, "w")
-        error = libds3.lib.ds3_get_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd)
+        error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
         localFile.close()
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
 
+        metadata = extractMetadataFromResponse(response)
+        libds3.lib.ds3_free_metadata(response)
+        return metadata
 
     def putBucket(self, bucketName):
         request = libds3.lib.ds3_init_put_bucket(bucketName)
@@ -259,15 +313,21 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-    def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None):
+    def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None, metadata = None):
         '''
         Puts an object to the ds3 endpoint.  Use `realFileName` when the `objectName`
         that you are putting to ds3 does not match what is on the local filesystem.
+        Use metadata to set the metadata for the object. metadata's value should be
+        a dictionary, where keys are associated with either a value or a list of the
+        values for that key.
         '''
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = realFileName
         request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, offset, size, jobId)
+
+        addMetadataToRequest(request, metadata)
+
         localFile = open(effectiveFileName, "r")
         error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
         localFile.close()
