@@ -131,21 +131,18 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def testGetObjects(self):
         populateTestData(self.client, bucketName)
 
-        try:
-            objects=self.client.getObjects(bucketName)
-            self.assertEqual(len(objects), 4)
+        objects=self.client.getObjects(bucketName)
+        self.assertEqual(len(objects), 4)
 
-            def getSize(fileName):
-                size = os.stat(pathForResource(fileName)).st_size
-                return (fileName, size)
-            fileList = map(getSize, resources)
+        def getSize(fileName):
+            size = os.stat(pathForResource(fileName)).st_size
+            return (fileName, size)
+        fileList = map(getSize, resources)
 
-            for index in range(0, len(objects)):
-                self.assertEqual(objects[index].name, fileList[index][0])
-                # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
-                # self.assertEqual(objects[index].size, fileList[index][1])
-        finally:
-            clearBucket(self.client, bucketName)
+        for index in range(0, len(objects)):
+            self.assertEqual(objects[index].name, fileList[index][0])
+            # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
+            # self.assertEqual(objects[index].size, fileList[index][1])
 
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
