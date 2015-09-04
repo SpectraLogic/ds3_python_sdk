@@ -65,7 +65,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             try:
                 self.client.putBucket(an_input)
             except TypeError as e:
-                self.assertEqual(str(e), "expected type str, got type "+type(an_input).__name__)
+                self.assertEqual(str(e), "expected instance of type basestring, got instance of type "+type(an_input).__name__)
 
     def testDeleteEmptyBucket(self):
         self.client.putBucket(bucketName)
