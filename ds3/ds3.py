@@ -14,7 +14,7 @@ class Ds3Error(Exception):
                 self.message = response.contents.error_body.contents.value
             else:
                 self.message = None
-
+                
         libds3.lib.ds3_free_error(libds3Error)
     def __str__(self):
         errorMessage = "Reason: " + self.reason
@@ -178,6 +178,14 @@ class Ds3AvailableChunksResponse(object):
         self.retryAfter = contents.retry_after
         self.bulkPlan = Ds3BulkPlan(contents.object_list)
 
+
+def sanitizeString(input_arg):
+    if type(input_arg)==str:
+        return input_arg
+    else:
+        raise TypeError("expected type str, got type "+type(input_arg).__name__)
+        return ""
+
 def createClientFromEnv():
     libDs3Client = POINTER(libds3.LibDs3Client)()
     error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
@@ -243,6 +251,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_service_response(response)
 
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
+        bucketName=sanitizeString(bucketName)
         response = POINTER(libds3.LibDs3GetBucketResponse)()
         request = libds3.lib.ds3_init_get_bucket(bucketName)
         if prefix:
@@ -313,6 +322,7 @@ class Ds3Client(object):
         return metadata
 
     def putBucket(self, bucketName):
+        bucketName=sanitizeString(bucketName)
         request = libds3.lib.ds3_init_put_bucket(bucketName)
         error = libds3.lib.ds3_put_bucket(self._client, request)
         libds3.lib.ds3_free_request(request)

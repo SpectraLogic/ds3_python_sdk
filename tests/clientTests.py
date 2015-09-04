@@ -58,6 +58,14 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
 
         self.assertTrue(bucketName in bucketSet)
+        
+    def testCreateBucketTypeChecking(self):
+        some_inputs=[1234, None]
+        for an_input in some_inputs:
+            try:
+                self.client.putBucket(an_input)
+            except TypeError as e:
+                self.assertEqual(str(e), "expected type str, got type "+type(an_input).__name__)
 
     def testDeleteEmptyBucket(self):
         self.client.putBucket(bucketName)
