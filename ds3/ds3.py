@@ -183,8 +183,7 @@ def typeCheck(input_arg, type_to_check):
     if isinstance(input_arg, type_to_check):
         return input_arg
     else:
-        raise TypeError("expected instance of type "+type_to_check.__name__+", got instance of type "+type(input_arg).__name__)
-        return ""
+        raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
 
 def typeCheckString(input_arg):
     return typeCheck(input_arg, basestring)
@@ -255,13 +254,13 @@ class Ds3Client(object):
 
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
         response = POINTER(libds3.LibDs3GetBucketResponse)()
-        request = libds3.lib.ds3_init_get_bucket( typeCheckString(bucketName) )
+        request = libds3.lib.ds3_init_get_bucket(typeCheckString(bucketName))
         if prefix:
-            libds3.lib.ds3_request_set_prefix(request, typeCheckString(prefix) )
+            libds3.lib.ds3_request_set_prefix(request, typeCheckString(prefix))
         if nextMarker:
             libds3.lib.ds3_request_set_marker(request, nextMarker)
         if delimiter:
-            libds3.lib.ds3_request_set_delimiter(request, typeCheckString(delimiter) )
+            libds3.lib.ds3_request_set_delimiter(request, typeCheckString(delimiter))
         if maxKeys:
             libds3.lib.ds3_request_set_max_keys(request, maxKeys)
         error = libds3.lib.ds3_get_bucket(self._client, request, byref(response))
@@ -307,7 +306,7 @@ class Ds3Client(object):
         Returns the metadata for the retrieved object as a dictionary, where keys are
         associated with a list of the values for that key.
         '''
-        objectName=typeCheckString(objectName)
+        objectName = typeCheckString(objectName)
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = typeCheckString(realFileName)
@@ -325,7 +324,7 @@ class Ds3Client(object):
         return metadata
 
     def putBucket(self, bucketName):
-        bucketName=typeCheckString(bucketName)
+        bucketName = typeCheckString(bucketName)
         request = libds3.lib.ds3_init_put_bucket(bucketName)
         error = libds3.lib.ds3_put_bucket(self._client, request)
         libds3.lib.ds3_free_request(request)
@@ -340,7 +339,7 @@ class Ds3Client(object):
         a dictionary, where keys are associated with either a value or a list of the
         values for that key.
         '''
-        objectName=typeCheckString(objectName)
+        objectName = typeCheckString(objectName)
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = typeCheckString(realFileName)
