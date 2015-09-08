@@ -71,6 +71,14 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             except Ds3Error as e:
                 self.assertEqual(e.statusCode, status)
         
+    def testCreateBucketTypeChecking(self):
+        some_inputs=[1234, None]
+        for an_input in some_inputs:
+            try:
+                self.client.putBucket(an_input)
+            except TypeError as e:
+                self.assertEqual(str(e), "expected instance of type basestring, got instance of type "+type(an_input).__name__)
+
     def testDeleteEmptyBucket(self):
         """tests deleteBucket: deleting an empty bucket"""
         self.client.putBucket(bucketName)
