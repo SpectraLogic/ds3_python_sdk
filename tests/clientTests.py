@@ -69,6 +69,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         try:
             objects=self.client.getObjects(bucketName)
+
+            print(objects)
+
             self.assertEqual(len(objects), 4)
 
             def getSize(fileName):

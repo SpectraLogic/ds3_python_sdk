@@ -368,10 +368,43 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
+        """
+        Query Parameters Required: [], Optional: [bucketId, id, name, page_length, page_offset, type, version]
+        </RequestRequirements>
+        <SampleUrl>
+        http[s]://datapathdnsnameofappliance/_rest_/object/[?page_length={32-bit integer}][&page_offset={32-bit integer}][&bucket_id={unique identifier or attribute}][&id={unique identifier or attribute}][&name={text}][&type={data|folder}][&version={64-bit integer}]
+        </SampleUrl>"""
+        
+        """
+        LIBRARY_API void ds3_request_set_custom_header(ds3_request* request, const char* header_name, const char* header_value);
+        LIBRARY_API void ds3_request_set_prefix(ds3_request* request, const char* prefix);
+        LIBRARY_API void ds3_request_set_delimiter(ds3_request* request, const char* delimiter);
+        LIBRARY_API void ds3_request_set_marker(ds3_request* request, const char* marker);
+        LIBRARY_API void ds3_request_set_max_keys(ds3_request* request, uint32_t max_keys);
+        LIBRARY_API void ds3_request_set_md5(ds3_request* request, const char* md5);
+        LIBRARY_API void ds3_request_set_metadata(ds3_request* request, const char* name, const char* value);
+        LIBRARY_API void ds3_request_set_name(ds3_request* request, const char* name);
+        LIBRARY_API void ds3_request_set_id(ds3_request* request, const char* id);
+        LIBRARY_API void ds3_request_set_type(ds3_request* request, object_type type);
+        LIBRARY_API void ds3_request_set_version(ds3_request* request, const char* version);"""
 
-    def getObjects(self, bucketName):
+    def getObjects(self, bucketName, id = None, name = None, page_length = None, page_offset = None, type = None, version = None):
         request = libds3.lib.ds3_init_get_objects(bucketName)
         response = POINTER(libds3.LibDs3GetObjectsResponse)()
+        
+        if id:
+            libds3.lib.ds3_request_set_id(request, id);
+        if name:
+            libds3.lib.ds3_request_set_name(request, name);
+        if page_length:
+            libds3.lib.ds3_request_set_page_length(request, page_length);
+        if page_offset:
+            libds3.lib.ds3_request_set_page_offset(request, page_offset);
+        if type:
+            libds3.lib.ds3_request_set_type(request, type);
+        if version:
+            libds3.lib.ds3_request_set_version(request, version);
+
         error = libds3.lib.ds3_get_objects(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
         if error:
