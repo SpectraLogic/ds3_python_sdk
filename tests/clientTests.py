@@ -42,6 +42,12 @@ def clearBucket(client, bucketName):
         client.deleteObject(bucketName, obj.name)
     client.deleteBucket(bucketName)
 
+def statusCodeList(status):
+    return [Ds3Error, lambda obj: obj.statusCode, status]
+
+def typeErrorList(badType):
+    return [TypeError, str, "expected instance of type basestring, got instance of type " + type(badType).__name__]
+
 class BasicClientFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -52,6 +58,26 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
         except Ds3Error as e:
             pass
+        
+    def checkBadInputs(self, testFunction, inputs, second_arg_dict = None):
+        for test_input, status in inputs.items():
+            if second_arg_dict:
+                for arg, second_status in second_arg_dict.items():
+                    if second_status:
+                        try:
+                            testFunction(test_input, arg)
+                        except second_status[0] as e:
+                            self.assertEqual(second_status[1](e), second_status[2])
+                    else:
+                        try:
+                            testFunction(test_input, arg)
+                        except status[0] as e:
+                            self.assertEqual(status[1](e), status[2])
+            else:
+                try:
+                    testFunction(test_input)
+                except status[0] as e:
+                    self.assertEqual(status[1](e), status[2])
 
     def testPutBucket(self):
         """tests putBucket"""
@@ -64,20 +90,8 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def testPutBucketBadInput(self):
         """tests putBucket: bad input to function"""
         self.client.putBucket(bucketName)
-        badBuckets={None: 400, "": 400, bucketName: 409} # should include an integer
-        for bucket, status in badBuckets.items():
-            try:
-                self.client.putBucket(bucket)
-            except Ds3Error as e:
-                self.assertEqual(e.statusCode, status)
-        
-    def testCreateBucketTypeChecking(self):
-        some_inputs=[1234, None]
-        for an_input in some_inputs:
-            try:
-                self.client.putBucket(an_input)
-            except TypeError as e:
-                self.assertEqual(str(e), "expected instance of type basestring, got instance of type "+type(an_input).__name__)
+        badBuckets = {"": statusCodeList(400), bucketName: statusCodeList(409), 1234: typeErrorList(1234), None:typeErrorList(None)}
+        self.checkBadInputs(self.client.putBucket, badBuckets)
 
     def testDeleteEmptyBucket(self):
         """tests deleteBucket: deleting an empty bucket"""
@@ -91,12 +105,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def testDeleteBucketBadInput(self):
         """tests deleteBucket: bad input to function"""
         populateTestData(self.client, bucketName)
-        badBuckets={None: 400, "": 400, bucketName: 409, "not-here":404} # should include an integer
-        for bucket, status in badBuckets.items():
-            try:
-                self.client.deleteBucket(bucket)
-            except Ds3Error as e:
-                self.assertEqual(e.statusCode, status)
+        
+        badBuckets = {"": statusCodeList(400), bucketName: statusCodeList(409), "not-here": statusCodeList(404), 1234: typeErrorList(1234), None:typeErrorList(None)}
+        self.checkBadInputs(self.client.deleteBucket, badBuckets)
             
     def testGetEmptyBucket(self):
         """tests getBucket: when bucket is empty"""
@@ -144,23 +155,11 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
         returnedFileList = map(lambda obj: (obj.name, obj.size), bucketContents.objects)
         self.assertEqual(returnedFileList, fileList)
-        
-    def testGetBadBucket(self):
-        """tests getBucket: when the bucket does not exist"""
-        try:
-            self.client.getBucket(bucketName)
-        except Ds3Error as e:
-            self.assertEqual(e.statusCode, 404)
             
     def testGetBucketBadInput(self):
         """tests getBucket: bad input to function"""
-        populateTestData(self.client, bucketName)
-        badBuckets={None: 400, "": 400, bucketName: 404} # should include an integer
-        for bucket, status in badBuckets.items():
-            try:
-                self.client.deleteBucket(bucket)
-            except Ds3Error as e:
-                self.assertEqual(e.statusCode, status)
+        badBuckets = {"": statusCodeList(400), "not-here": statusCodeList(404), 1234: typeErrorList(1234), None:typeErrorList(None)}
+        self.checkBadInputs(self.client.getBucket, badBuckets)
 
     def testPrefix(self):
         """tests getBucket: prefix parameter"""
@@ -240,17 +239,13 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
     def testDeleteObjectBadInput(self):
         """tests deleteObject: bad input to function"""
-        badBuckets={None: 400, bucketName: 404, "": 400, "badBucket":404} # an integer should be included as well
-        badObjects=["", None, "badFile"] # an integer should be in here as well
-
         self.client.putBucket(bucketName)
-        
-        for badBucket, status in badBuckets.items():
-            for badObject in badObjects:
-                try:
-                    self.client.deleteObject(badBucket, badObject)
-                except Ds3Error as e:
-                    self.assertEqual(e.statusCode, status)
+        badBuckets = {1234:typeErrorList(1234), None:typeErrorList(None)}
+        self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: None, None:None})
+        badBuckets = {bucketName: statusCodeList(404), "not-here": statusCodeList(404)}
+        self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: typeErrorList(1234), None:typeErrorList(None)})
+        badBuckets = {"": statusCodeList(400)}
+        self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"badFile":None})
 
     def testDeleteObjects(self):
         """tests deleteObjects"""
@@ -290,7 +285,10 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
     def testGetPhysicalPlacementBadInput(self):
         """tests getPhysicalPlacement: with non-existent bucket"""
-        self.assertEqual(len(self.client.getPhysicalPlacement(bucketName, ["bogus.txt"])), 0)
+        try:
+            self.client.getPhysicalPlacement(bucketName, ["bogus.txt"])
+        except Ds3Error as e:
+            self.assertEqual(e.statusCode, 404)
         
     def testDeleteFolder(self):
         """tests deleteFolder"""
@@ -304,13 +302,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
     def testDeleteFolderBadInput(self):
         """tests deleteFolder"""
-        buckets=[bucketName, "fakebucket"]
         self.client.putBucket(bucketName)
-        for bucket in buckets:
-            try:
-                self.client.deleteFolder(bucket, "folder")
-            except Ds3Error as e:
-                self.assertEqual(e.statusCode, 400)
+        badBuckets = {"": statusCodeList(400), "fakeBucket": statusCodeList(400), bucketName: statusCodeList(400)}
+        self.checkBadInputs(self.client.deleteFolder, badBuckets, second_arg_dict = {"folder":None})
 
     def testHeadObject(self):
         """tests headObject"""
@@ -328,22 +322,13 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         metadata={"name1":["value1"], "name2":"value2", "name3":("value3")}
 
         populateTestData(self.client, bucketName, resourceList=["beowulf.txt"], metadata=metadata)
-        
-        badBuckets={None: 400, "badBucket": 404, bucketName:409, "": 400} # an integer should be included as well
-        badObjects=["", None, "badFile"] # an integer should be in here as well
 
-        # TODO (charlesh): code isn't finished here
-        for badBucket, status in badBuckets.items():
-            for badObject in badObjects:
-                try:
-                    self.client.deleteObject(badBucket, badObject)
-                except Ds3Error as e:
-                    if e.statusCode==403:
-                        print 403, badBucket, badObject
-                    elif badBucket==bucketName and badObject=="badFile":
-                        self.assertEqual(e.statusCode, 404)
-                    else:
-                        self.assertEqual(e.statusCode, status)
+        badBuckets = {"fakeBucket": statusCodeList(404), bucketName: statusCodeList(404)}
+        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":None, "badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
+        badBuckets = {None:typeErrorList(None), 1234:typeErrorList(1234)}
+        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":None, "badFile":None, None:None, 1234:None})
+        badBuckets = {"": statusCodeList(400)}
+        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
                 
     def testGetBulkWithMetadata(self):
         """tests getObject: metadata parameter, putObject:metadata parameter"""
@@ -408,7 +393,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             tempFiles.append(newFile)
 
             self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
-            # TODO (charlesh): the result from getObject probably should be tested here
 
         for tempFile in tempFiles:
             os.close(tempFile[0])
