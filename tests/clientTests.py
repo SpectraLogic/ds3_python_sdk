@@ -396,7 +396,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
     def testGetObjectsObjectName(self):
         populateTestData(self.client, bucketName)
 
-        objects=self.client.getObjects(bucketName = bucketName, name = fileName)
+        objects=self.client.getObjects(bucketName = bucketName, name = "beowulf.txt")
         
         self.validateSearchObjects(objects, ["beowulf.txt"])
             

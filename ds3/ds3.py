@@ -456,36 +456,27 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
-        """NOTE: ALL of these should be optional
-        X bucket_id The UUID or name for a bucket.
-        X creation_date The date the object was created in the format YYYY-MM-DD hh:mm:ss.xxx.
-        XId The UUID for an object.
-        Xname The name of an object.
-        Xpage_length The maximum number of objects to list. The default is all items after page_offset.
-        Xpage_offset The starting point for the first object to list. The default is 0.
-        Xtype The type of object. Values: DATA, FOLDER
-        Xversion"""
 
     def getObjects(self, bucketName = None, creationDate = None, objId = None, name = None, pageLength = None, pageOffset = None, objType = None, version = None):
-        request = libds3.lib.ds3_init_get_objects(bucketName)
+        request = libds3.lib.ds3_init_get_objects(typeCheckString(bucketName))
         response = POINTER(libds3.LibDs3GetObjectsResponse)()
         
         if bucketName:
-            libds3.lib.ds3_request_set_custom_header(request, "bucket_name", bucketName);
+            libds3.lib.ds3_request_set_custom_header(request, "bucket_name", typeCheckString(bucketName))
         if creationDate:
-            libds3.lib.ds3_request_set_custom_header(request, "creation_date", creationDate);
+            libds3.lib.ds3_request_set_custom_header(request, "creation_date", typeCheckString(creationDate))
         if objId:
-            libds3.lib.ds3_request_set_id(request, objId);
+            libds3.lib.ds3_request_set_id(request, typeCheckString(objId))
         if name:
-            libds3.lib.ds3_request_set_name(request, name);
+            libds3.lib.ds3_request_set_name(request, typeCheckString(name))
         if pageLength:
-            libds3.lib.ds3_request_set_custom_header(request, "page_length", str(pageLength));
+            libds3.lib.ds3_request_set_custom_header(request, "page_length", typeCheckString(str(pageLength)))
         if pageOffset:
-            libds3.lib.ds3_request_set_custom_header(request, "page_offset", str(pageOffset));
+            libds3.lib.ds3_request_set_custom_header(request, "page_offset", typeCheckString(str(pageOffset)))
         if objType:
-            libds3.lib.ds3_request_set_type(request, objType);
+            libds3.lib.ds3_request_set_type(request, typeCheckString(objType))
         if version:
-            libds3.lib.ds3_request_set_version(request, str(version));
+            libds3.lib.ds3_request_set_version(request, typeCheckString(str(version)))
 
         error = libds3.lib.ds3_get_objects(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
