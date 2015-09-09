@@ -14,7 +14,7 @@ class Ds3Error(Exception):
                 self.message = response.contents.error_body.contents.value
             else:
                 self.message = None
-
+                
         libds3.lib.ds3_free_error(libds3Error)
     def __str__(self):
         errorMessage = "Reason: " + self.reason
@@ -178,6 +178,16 @@ class Ds3AvailableChunksResponse(object):
         self.retryAfter = contents.retry_after
         self.bulkPlan = Ds3BulkPlan(contents.object_list)
 
+
+def typeCheck(input_arg, type_to_check):
+    if isinstance(input_arg, type_to_check):
+        return input_arg
+    else:
+        raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
+
+def typeCheckString(input_arg):
+    return typeCheck(input_arg, basestring)
+
 def createClientFromEnv():
     libDs3Client = POINTER(libds3.LibDs3Client)()
     error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
@@ -255,6 +265,13 @@ def extractSearchObjects(searchObjects):
         objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
     return objects
 
+def extractPhysicalPlacement(placement):
+    barcodes=[]
+    for index in range(0, placement.contents.num_tapes):
+        barcodes.append(placement.contents.tapes[index].barcode.contents.value)
+    return barcodes
+
+
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
@@ -276,13 +293,13 @@ class Ds3Client(object):
 
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
         response = POINTER(libds3.LibDs3GetBucketResponse)()
-        request = libds3.lib.ds3_init_get_bucket(bucketName)
+        request = libds3.lib.ds3_init_get_bucket(typeCheckString(bucketName))
         if prefix:
-            libds3.lib.ds3_request_set_prefix(request, prefix)
+            libds3.lib.ds3_request_set_prefix(request, typeCheckString(prefix))
         if nextMarker:
             libds3.lib.ds3_request_set_marker(request, nextMarker)
         if delimiter:
-            libds3.lib.ds3_request_set_delimiter(request, delimiter)
+            libds3.lib.ds3_request_set_delimiter(request, typeCheckString(delimiter))
         if maxKeys:
             libds3.lib.ds3_request_set_max_keys(request, maxKeys)
         error = libds3.lib.ds3_get_bucket(self._client, request, byref(response))
@@ -301,7 +318,7 @@ class Ds3Client(object):
         Returns the metadata for the retrieved object as a dictionary of lists.
         '''
         response = POINTER(libds3.LibDs3Metadata)()
-        request = libds3.lib.ds3_init_head_object(bucketName, objectName)
+        request = libds3.lib.ds3_init_head_object(typeCheckString(bucketName), typeCheckString(objectName))
 
         error = libds3.lib.ds3_head_object(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
@@ -315,7 +332,7 @@ class Ds3Client(object):
         return metadata
 
     def deleteFolder(self, bucketName, folderName):
-        request = libds3.lib.ds3_init_delete_folder(bucketName, folderName)
+        request = libds3.lib.ds3_init_delete_folder(typeCheckString(bucketName), typeCheckString(folderName))
         error = libds3.lib.ds3_delete_folder(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
@@ -328,11 +345,12 @@ class Ds3Client(object):
         Returns the metadata for the retrieved object as a dictionary, where keys are
         associated with a list of the values for that key.
         '''
+        objectName = typeCheckString(objectName)
         effectiveFileName = objectName
         if realFileName:
-            effectiveFileName = realFileName
+            effectiveFileName = typeCheckString(realFileName)
         response = POINTER(libds3.LibDs3Metadata)()
-        request = libds3.lib.ds3_init_get_object_for_job(bucketName, objectName, offset, jobId)
+        request = libds3.lib.ds3_init_get_object_for_job(typeCheckString(bucketName), objectName, offset, jobId)
         localFile = open(effectiveFileName, "w")
         error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
         localFile.close()
@@ -345,6 +363,7 @@ class Ds3Client(object):
         return metadata
 
     def putBucket(self, bucketName):
+        bucketName = typeCheckString(bucketName)
         request = libds3.lib.ds3_init_put_bucket(bucketName)
         error = libds3.lib.ds3_put_bucket(self._client, request)
         libds3.lib.ds3_free_request(request)
@@ -359,10 +378,11 @@ class Ds3Client(object):
         a dictionary, where keys are associated with either a value or a list of the
         values for that key.
         '''
+        objectName = typeCheckString(objectName)
         effectiveFileName = objectName
         if realFileName:
-            effectiveFileName = realFileName
-        request = libds3.lib.ds3_init_put_object_for_job(bucketName, objectName, offset, size, jobId)
+            effectiveFileName = typeCheckString(realFileName)
+        request = libds3.lib.ds3_init_put_object_for_job(typeCheckString(bucketName), objectName, offset, size, jobId)
 
         addMetadataToRequest(request, metadata)
 
@@ -374,7 +394,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def deleteObject(self, bucketName, objName):
-        request = libds3.lib.ds3_init_delete_object(bucketName, objName)
+        request = libds3.lib.ds3_init_delete_object(typeCheckString(bucketName), typeCheckString(objName))
         error = libds3.lib.ds3_delete_object(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
@@ -382,14 +402,14 @@ class Ds3Client(object):
 
     def deleteObjects(self, bucketName, fileNameList):
         bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
-        request = libds3.lib.ds3_init_delete_objects(bucketName)
+        request = libds3.lib.ds3_init_delete_objects(typeCheckString(bucketName))
         error = libds3.lib.ds3_delete_objects(self._client, request, bulkObjs)
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
 
     def deleteBucket(self, bucketName):
-        request = libds3.lib.ds3_init_delete_bucket(bucketName)
+        request = libds3.lib.ds3_init_delete_bucket(typeCheckString(bucketName))
         error = libds3.lib.ds3_delete_bucket(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
@@ -407,7 +427,7 @@ class Ds3Client(object):
             bulkObjsList[i].name = libds3.lib.ds3_str_init(fileInfoList[i][0])
             bulkObjsList[i].length = fileInfoList[i][1]
         response = POINTER(libds3.LibDs3BulkResponse)()
-        request = libds3.lib.ds3_init_put_bulk(bucketName, bulkObjs)
+        request = libds3.lib.ds3_init_put_bulk(typeCheckString(bucketName), bulkObjs)
         error = libds3.lib.ds3_bulk(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
         if error:
@@ -425,7 +445,7 @@ class Ds3Client(object):
         chunkOrderingValue = libds3.LibDs3ChunkOrdering.IN_ORDER
         if not chunkOrdering:
             chunkOrderingValue = libds3.LibDs3ChunkOrdering.NONE
-        request = libds3.lib.ds3_init_get_bulk(bucketName, bulkObjs, chunkOrderingValue)
+        request = libds3.lib.ds3_init_get_bulk(typeCheckString(bucketName), bulkObjs, chunkOrderingValue)
         error = libds3.lib.ds3_bulk(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
         if error:
@@ -533,3 +553,18 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
+
+    def getPhysicalPlacement(self, bucketName, fileNameList):
+        response = POINTER(libds3.LibDs3GetPhysicalPlacementResponse)()
+        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        request = libds3.lib.ds3_init_get_physical_placement(typeCheckString(bucketName), bulkObjs)
+        error = libds3.lib.ds3_get_physical_placement(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+
+        if error:
+            raise Ds3Error(error)
+        
+        placements = extractPhysicalPlacement(response)
+        libds3.lib.ds3_free_get_physical_placement_response(response)
+        
+        return placements
