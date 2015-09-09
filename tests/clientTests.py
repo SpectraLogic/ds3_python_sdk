@@ -17,7 +17,7 @@ def pathForResource(resourceName):
 
 def populateTestData(client, bucketName, resourceList = None, prefix = "", metadata = None):
     if not resourceList:
-        resourceList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
+        resourceList = resources
 
     def getSize(fileName):
         size = os.stat(pathForResource(fileName)).st_size
@@ -52,6 +52,23 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
         except Ds3Error as e:
             pass
+
+    def validateSearchObjects(self, objects, resourceList = resources, objType = "DATA"):
+        self.assertEqual(len(objects), len(resourceList))
+
+        def getSize(fileName):
+            size = os.stat(pathForResource(fileName)).st_size
+            return (fileName, size)
+        fileList = map(getSize, resourceList)
+
+        self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
+        
+        for index in range(0, len(objects)):
+            self.assertEqual(objects[index].name, fileList[index][0])
+            # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
+            # self.assertEqual(objects[index].size, fileList[index][1])
+            self.assertEqual(objects[index].type, objType)
+            self.assertEqual(objects[index].version, "1")
 
     def testCreateBucket(self):
         self.client.putBucket(bucketName)
@@ -129,20 +146,55 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
 
     def testGetObjects(self):
+        # charlesh: the C SDK currently always expects a bucket name even though the specification says it's optional.
+        # the Python call is written so the bucket name is optional, but will still error (because of the C SDK) when it is not given
         populateTestData(self.client, bucketName)
 
-        objects=self.client.getObjects(bucketName)
-        self.assertEqual(len(objects), 4)
+        objects=self.client.getObjects()
 
-        def getSize(fileName):
-            size = os.stat(pathForResource(fileName)).st_size
-            return (fileName, size)
-        fileList = map(getSize, resources)
+        self.validateSearchObjects(objects, resources)
+            
+    def testGetObjectsBucketName(self):
+        populateTestData(self.client, bucketName)
 
-        for index in range(0, len(objects)):
-            self.assertEqual(objects[index].name, fileList[index][0])
-            # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
-            # self.assertEqual(objects[index].size, fileList[index][1])
+        objects=self.client.getObjects(bucketName = bucketName)
+
+        self.validateSearchObjects(objects, resources)
+            
+    def testGetObjectsObjectName(self):
+        populateTestData(self.client, bucketName)
+
+        objects=self.client.getObjects(bucketName = bucketName, name = fileName)
+        
+        self.validateSearchObjects(objects, ["beowulf.txt"])
+            
+    def testGetObjectsPageParameters(self):
+        populateTestData(self.client, bucketName)
+
+        first_half=self.client.getObjects(bucketName = bucketName, pageLength = 2)
+        self.assertEqual(len(first_half), 2)
+        second_half=self.client.getObjects(bucketName = bucketName, pageLength = 2, pageOffset = 2)
+        self.assertEqual(len(second_half), 2)
+        
+        self.validateSearchObjects(first_half+second_half, resources)
+            
+    def testGetObjectsType(self):
+        populateTestData(self.client, bucketName)
+
+        objects=self.client.getObjects(bucketName = bucketName, objType="DATA")
+        
+        self.validateSearchObjects(objects, resources)
+
+        objects=self.client.getObjects(bucketName = bucketName, objType="FOLDER")
+        
+        self.validateSearchObjects(objects, [], objType = "FOLDER")
+            
+    def testGetObjectsVersion(self):
+        populateTestData(self.client, bucketName)
+
+        objects=self.client.getObjects(bucketName = bucketName, version = 1)
+        
+        self.validateSearchObjects(objects, resources)
 
     def testBulkPut(self):
         populateTestData(self.client, bucketName)
