@@ -290,7 +290,7 @@ class Ds3Client(object):
             yield Ds3Bucket(contents.buckets[i])
 
         libds3.lib.ds3_free_service_response(response)
-
+      
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
         response = POINTER(libds3.LibDs3GetBucketResponse)()
         request = libds3.lib.ds3_init_get_bucket(typeCheckString(bucketName))
@@ -533,7 +533,22 @@ class Ds3Client(object):
     def getJob(self, jobId):
         request = libds3.lib.ds3_init_get_job(jobId)
         return self._sendJobRequest(libds3.lib.ds3_get_job, request)
+    
+    def getJobs(self):
+        request = libds3.lib.ds3_init_get_jobs()
+        response = POINTER(libds3.LibDs3GetJobsResponse)()
+        error = libds3.lib.ds3_get_jobs(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
 
+        result=[]
+        for index in xrange(0, response.contents.jobs_size):
+            result.append(Ds3BulkPlan(response.contents.jobs[index]))
+        libds3.lib.ds3_free_get_jobs_response(response)
+
+        return result
+        
     def putJob(self, jobId):
         request = libds3.lib.ds3_init_put_job(jobId)
         return self._sendJobRequest(libds3.lib.ds3_put_job, request)
