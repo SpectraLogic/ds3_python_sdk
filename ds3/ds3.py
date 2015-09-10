@@ -214,14 +214,14 @@ def addMetadataToRequest(request, metadata):
                 libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
 
 def extractMetadataFromResponse(metaData):
-    result={}
-    keys=libds3.lib.ds3_metadata_keys(metaData)
+    result = {}
+    keys = libds3.lib.ds3_metadata_keys(metaData)
     if keys:
-        for key_index in range(0, keys.contents.num_keys):
-            key=keys.contents.keys[key_index].contents.value
-            result[key]=[]
-            metadataEntry=libds3.lib.ds3_metadata_get_entry(metaData, key)
-            for value_index in range(0, metadataEntry.contents.num_values):
+        for key_index in xrange(0, keys.contents.num_keys):
+            key = keys.contents.keys[key_index].contents.value
+            result[key] = []
+            metadataEntry = libds3.lib.ds3_metadata_get_entry(metaData, key)
+            for value_index in xrange(0, metadataEntry.contents.num_values):
                 result[key].append(metadataEntry.contents.values[value_index].contents.value)
             libds3.lib.ds3_free_metadata_entry(metadataEntry)
         libds3.lib.ds3_free_metadata_keys(keys)
@@ -242,7 +242,7 @@ class Ds3SearchObject(object):
         if contents.owner:
             self.owner = Ds3Owner(contents.owner)
         else:
-            self.owner=None
+            self.owner = None
         self.lastModified = checkExistence(contents.last_modified)
         self.storageClass = checkExistence(contents.storage_class)
         self.type = checkExistence(contents.type)
