@@ -555,7 +555,7 @@ class Ds3Client(object):
 
     def deleteJob(self, jobId):
         request = libds3.lib.ds3_init_delete_job(jobId)
-        error = libds3.lib.ds3_delete_job(jobId)
+        error = libds3.lib.ds3_delete_job(self._client, request)
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
