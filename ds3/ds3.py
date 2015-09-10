@@ -234,19 +234,19 @@ class Ds3SearchObject(object):
                 return ds3Str.contents.value
             else:
                 return None
-        contents=ds3SearchObject.contents
-        self.bucketId=checkExistence(contents.bucket_id)
-        self.id=checkExistence(contents.id)
-        self.name=checkExistence(contents.name)
-        self.size=contents.size
+        contents = ds3SearchObject.contents
+        self.bucketId = checkExistence(contents.bucket_id)
+        self.id = checkExistence(contents.id)
+        self.name = checkExistence(contents.name)
+        self.size = contents.size
         if contents.owner:
-            self.owner=Ds3Owner(contents.owner)
+            self.owner = Ds3Owner(contents.owner)
         else:
             self.owner=None
-        self.lastModified=checkExistence(contents.last_modified)
-        self.storageClass=checkExistence(contents.storage_class)
-        self.type=checkExistence(contents.type)
-        self.version=checkExistence(contents.version)
+        self.lastModified = checkExistence(contents.last_modified)
+        self.storageClass = checkExistence(contents.storage_class)
+        self.type = checkExistence(contents.type)
+        self.version = checkExistence(contents.version)
     def __str__(self):
         response = "BucketId: " + str(self.bucketId)
         response += " | Id: " + str(self.id)
@@ -260,14 +260,14 @@ class Ds3SearchObject(object):
         return response
 
 def extractSearchObjects(searchObjects):
-    objects=[]
-    for index in range(0, searchObjects.contents.num_objects):
+    objects = []
+    for index in xrange(0, searchObjects.contents.num_objects):
         objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
     return objects
 
 def extractPhysicalPlacement(placement):
-    barcodes=[]
-    for index in range(0, placement.contents.num_tapes):
+    barcodes = []
+    for index in xrange(0, placement.contents.num_tapes):
         barcodes.append(placement.contents.tapes[index].barcode.contents.value)
     return barcodes
 
