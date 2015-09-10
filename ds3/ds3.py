@@ -277,6 +277,13 @@ class Ds3Client(object):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
         self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
         self.credentials = credentials
+        
+    def verifySystemHealth(self):
+        response = c_ulonglong()
+        request = libds3.lib.ds3_init_verify_system_health()
+        error = libds3.lib.ds3_verify_system_health(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        return response
 
     def getService(self):
         response = POINTER(libds3.LibDs3GetServiceResponse)()
