@@ -436,10 +436,10 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         result = self.client.getJobs()
         
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[2].jobId, bulkGetResult.jobId)
+        self.assertEqual(result[1].jobId, bulkGetResult.jobId)
 
         for job in result:
-            self.client.deleteJob(result.jobId)
+            self.client.deleteJob(job.jobId)
             
         result = self.client.getJobs()
         self.assertEqual(len(result), 0)
