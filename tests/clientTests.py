@@ -70,7 +70,7 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
         
-        for index in range(0, len(objects)):
+        for index in xrange(0, len(objects)):
             self.assertEqual(objects[index].name, fileList[index][0])
             # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
             # self.assertEqual(objects[index].size, fileList[index][1])
