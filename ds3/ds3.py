@@ -214,24 +214,63 @@ def addMetadataToRequest(request, metadata):
                 libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
 
 def extractMetadataFromResponse(metaData):
-    result={}
-    keys=libds3.lib.ds3_metadata_keys(metaData)
+    result = {}
+    keys = libds3.lib.ds3_metadata_keys(metaData)
     if keys:
-        for key_index in range(0, keys.contents.num_keys):
-            key=keys.contents.keys[key_index].contents.value
-            result[key]=[]
-            metadataEntry=libds3.lib.ds3_metadata_get_entry(metaData, key)
-            for value_index in range(0, metadataEntry.contents.num_values):
+        for key_index in xrange(0, keys.contents.num_keys):
+            key = keys.contents.keys[key_index].contents.value
+            result[key] = []
+            metadataEntry = libds3.lib.ds3_metadata_get_entry(metaData, key)
+            for value_index in xrange(0, metadataEntry.contents.num_values):
                 result[key].append(metadataEntry.contents.values[value_index].contents.value)
             libds3.lib.ds3_free_metadata_entry(metadataEntry)
         libds3.lib.ds3_free_metadata_keys(keys)
     return result
 
+class Ds3SearchObject(object):
+    def __init__(self, ds3SearchObject):
+        def checkExistence(ds3Str):
+            if ds3Str:
+                return ds3Str.contents.value
+            else:
+                return None
+        contents = ds3SearchObject.contents
+        self.bucketId = checkExistence(contents.bucket_id)
+        self.id = checkExistence(contents.id)
+        self.name = checkExistence(contents.name)
+        self.size = contents.size
+        if contents.owner:
+            self.owner = Ds3Owner(contents.owner)
+        else:
+            self.owner = None
+        self.lastModified = checkExistence(contents.last_modified)
+        self.storageClass = checkExistence(contents.storage_class)
+        self.type = checkExistence(contents.type)
+        self.version = checkExistence(contents.version)
+    def __str__(self):
+        response = "BucketId: " + str(self.bucketId)
+        response += " | Id: " + str(self.id)
+        response += " | Name: " + str(self.name)
+        response += " | Size: " + str(self.size)
+        response += " | Owner: (" + str(self.id) + ")"
+        response += " | LastModified: " + str(self.lastModified)
+        response += " | StorageClass: " + str(self.storageClass)
+        response += " | Type: " + str(self.type)
+        response += " | Version: " + str(self.version)
+        return response
+
+def extractSearchObjects(searchObjects):
+    objects = []
+    for index in xrange(0, searchObjects.contents.num_objects):
+        objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
+    return objects
+
 def extractPhysicalPlacement(placement):
-    barcodes=[]
-    for index in range(0, placement.contents.num_tapes):
+    barcodes = []
+    for index in xrange(0, placement.contents.num_tapes):
         barcodes.append(placement.contents.tapes[index].barcode.contents.value)
     return barcodes
+
 
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
@@ -417,6 +456,38 @@ class Ds3Client(object):
         libds3.lib.ds3_free_bulk_response(response)
 
         return bulkResponse
+
+    def getObjects(self, bucketName = None, creationDate = None, objId = None, name = None, pageLength = None, pageOffset = None, objType = None, version = None):
+        request = libds3.lib.ds3_init_get_objects(typeCheckString(bucketName))
+        response = POINTER(libds3.LibDs3GetObjectsResponse)()
+        
+        if bucketName:
+            libds3.lib.ds3_request_set_custom_header(request, "bucket_name", typeCheckString(bucketName))
+        if creationDate:
+            libds3.lib.ds3_request_set_custom_header(request, "creation_date", typeCheckString(creationDate))
+        if objId:
+            libds3.lib.ds3_request_set_id(request, typeCheckString(objId))
+        if name:
+            libds3.lib.ds3_request_set_name(request, typeCheckString(name))
+        if pageLength:
+            libds3.lib.ds3_request_set_custom_header(request, "page_length", typeCheckString(str(pageLength)))
+        if pageOffset:
+            libds3.lib.ds3_request_set_custom_header(request, "page_offset", typeCheckString(str(pageOffset)))
+        if objType:
+            libds3.lib.ds3_request_set_type(request, typeCheckString(objType))
+        if version:
+            libds3.lib.ds3_request_set_version(request, typeCheckString(str(version)))
+
+        error = libds3.lib.ds3_get_objects(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+
+        result = extractSearchObjects(response)
+
+        libds3.lib.ds3_free_objects_response(response)
+
+        return result
 
     def allocateChunk(self, chunkId):
         request = libds3.lib.ds3_init_allocate_chunk(chunkId)

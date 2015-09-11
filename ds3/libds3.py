@@ -51,11 +51,17 @@ class LibDs3Owner(Structure):
 class LibDs3Object(Structure):
     _fields_ = [("name", POINTER(LibDs3Str)), ("etag", POINTER(LibDs3Str)), ("size", c_ulonglong), ("owner", POINTER(LibDs3Owner)), ("last_modified", POINTER(LibDs3Str)), ("storage_class", POINTER(LibDs3Str))]
 
+class LibDs3SearchObject(Structure):
+    _fields_ = [("bucket_id", POINTER(LibDs3Str)), ("id", POINTER(LibDs3Str)), ("name", POINTER(LibDs3Str)), ("size", c_ulonglong), ("owner", POINTER(LibDs3Owner)), ("last_modified", POINTER(LibDs3Str)), ("storage_class", POINTER(LibDs3Str)), ("type", POINTER(LibDs3Str)), ("version", POINTER(LibDs3Str))]
+
 class LibDs3GetServiceResponse(Structure):
     _fields_ = [("buckets", POINTER(LibDs3Bucket)), ("num_buckets", c_size_t), ("owner", POINTER(LibDs3Owner))]
 
 class LibDs3GetBucketResponse(Structure):
     _fields_ = [("objects", POINTER(LibDs3Object)), ("num_objects", c_size_t), ("creation_date", POINTER(LibDs3Str)), ("is_truncated", c_bool), ("marker", POINTER(LibDs3Str)), ("delimiter", POINTER(LibDs3Str)), ("max_keys", c_int), ("name", POINTER(LibDs3Str)), ("next_marker", POINTER(LibDs3Str)), ("prefix", POINTER(LibDs3Str)), ("common_prefixes", POINTER(POINTER(LibDs3Str))), ("num_common_prefixes", c_ulonglong)]
+
+class LibDs3GetObjectsResponse(Structure):
+    _fields_ = [("objects", POINTER(POINTER(LibDs3SearchObject))), ("num_objects", c_ulonglong)]
 
 class LibDs3BulkObject(Structure):
     _fields_ = [("name", POINTER(LibDs3Str)), ("length", c_ulonglong), ("offset", c_ulonglong), ("in_cache", c_bool)]
@@ -137,6 +143,7 @@ lib.ds3_init_allocate_chunk.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_available_chunks.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_bulk.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bulk.restype = POINTER(LibDs3Request)
+lib.ds3_init_get_objects.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_physical_placement.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_job.restype = POINTER(LibDs3Request)
@@ -158,6 +165,7 @@ lib.ds3_put_object.restype = POINTER(LibDs3Error)
 lib.ds3_get_job.restype = POINTER(LibDs3Error)
 lib.ds3_put_job.restype = POINTER(LibDs3Error)
 lib.ds3_delete_job.restype = POINTER(LibDs3Error)
+lib.ds3_get_objects.restype = POINTER(LibDs3Error)
 lib.ds3_get_physical_placement.restype = POINTER(LibDs3Error)
 
 lib.ds3_write_to_file.restype = c_size_t
