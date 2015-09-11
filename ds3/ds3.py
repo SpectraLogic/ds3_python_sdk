@@ -373,7 +373,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
-        result=Ds3SystemInformation(response)
+        result = Ds3SystemInformation(response)
         libds3.lib.ds3_free_get_system_information(response)
         return result
 
