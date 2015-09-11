@@ -428,6 +428,22 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
         self.validateSearchObjects(objects, resources)
 
+    def testGetJobs(self):
+        populateTestData(self.client, bucketName)
+        bucketContents = self.client.getBucket(bucketName)
+        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
+        
+        result = self.client.getJobs()
+        
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[1].jobId, bulkGetResult.jobId)
+
+        for job in result:
+            self.client.deleteJob(job.jobId)
+            
+        result = self.client.getJobs()
+        self.assertEqual(len(result), 0)
+
     def testPutBulk(self):
         """ tests putBulk, allocateChunk, putObject"""
         fileList = populateTestData(self.client, bucketName)
@@ -466,6 +482,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         for tempFile in tempFiles:
             os.close(tempFile[0])
             os.remove(tempFile[1])
-
+        
         jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)

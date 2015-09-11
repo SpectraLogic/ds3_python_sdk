@@ -96,6 +96,9 @@ class LibDs3JobStatus(object):
 
 class LibDs3BulkResponse(Structure):
     _fields_ = [("bucket_name", POINTER(LibDs3Str)), ("cached_size_in_bytes", c_ulonglong), ("chunk_ordering", c_int), ("completed_size_in_bytes", c_ulonglong), ("job_id", POINTER(LibDs3Str)), ("original_size_in_bytes", c_ulonglong), ("ds3_job_priority", c_int), ("request_type", c_int), ("start_date", POINTER(LibDs3Str)), ("user_id", POINTER(LibDs3Str)), ("user_name", POINTER(LibDs3Str)), ("write_optimization", c_int), ("list", POINTER(POINTER(LibDs3BulkObjectList))), ("list_size", c_size_t), ("status", c_int)]
+    
+class LibDs3GetJobsResponse(Structure):
+    _fields_ = [("jobs", POINTER(POINTER(LibDs3BulkResponse))), ("jobs_size", c_size_t)]
 
 class LibDs3Tape(Structure):
     _fields_ = [("barcode", POINTER(LibDs3Str))]
@@ -108,7 +111,7 @@ class LibDs3AllocateChunkResponse(Structure):
 
 class LibDs3GetAvailableChunksResponse(Structure):
     _fields_ = [("object_list", POINTER(LibDs3BulkResponse)), ("retry_after", c_ulonglong)]
-
+    
 class LibDs3Request(Structure):
     pass
 
@@ -130,6 +133,7 @@ lib.ds3_create_creds.restype = POINTER(LibDs3Creds)
 lib.ds3_create_client.restype = POINTER(LibDs3Client)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
+lib.ds3_init_get_jobs.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_folder.restype = POINTER(LibDs3Request)
@@ -148,6 +152,7 @@ lib.ds3_init_get_physical_placement.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_put_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_job.restype = POINTER(LibDs3Request)
+lib.ds3_get_jobs.restype = POINTER(LibDs3Error)
 lib.ds3_get_service.restype = POINTER(LibDs3Error)
 lib.ds3_get_bucket.restype = POINTER(LibDs3Error)
 lib.ds3_get_object.restype = POINTER(LibDs3Error)
