@@ -542,7 +542,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-        result=[]
+        result = []
         for index in xrange(0, response.contents.jobs_size):
             result.append(Ds3BulkPlan(response.contents.jobs[index]))
         libds3.lib.ds3_free_get_jobs_response(response)

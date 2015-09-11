@@ -482,9 +482,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         for tempFile in tempFiles:
             os.close(tempFile[0])
             os.remove(tempFile[1])
-
-        result = self.client.getJobs()
-        print result
         
         jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
