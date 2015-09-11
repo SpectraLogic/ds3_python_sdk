@@ -433,16 +433,13 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         bucketContents = self.client.getBucket(bucketName)
         bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
         
-        result = self.client.getJobs()
-        
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[1].jobId, bulkGetResult.jobId)
+        result = map(lambda obj: obj.jobId, self.client.getJobs())
+        self.assertTrue(bulkGetResult.jobId in result)
 
-        for job in result:
-            self.client.deleteJob(job.jobId)
-            
-        result = self.client.getJobs()
-        self.assertEqual(len(result), 0)
+        self.client.deleteJob(bulkGetResult.jobId)
+        
+        result = map(lambda obj: obj.jobId, self.client.getJobs())
+        self.assertFalse(bulkGetResult.jobId in result)
 
     def testPutBulk(self):
         """ tests putBulk, allocateChunk, putObject"""
