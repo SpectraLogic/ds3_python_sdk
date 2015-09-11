@@ -111,15 +111,12 @@ class LibDs3AllocateChunkResponse(Structure):
 
 class LibDs3GetAvailableChunksResponse(Structure):
     _fields_ = [("object_list", POINTER(LibDs3BulkResponse)), ("retry_after", c_ulonglong)]
-<<<<<<< HEAD
-=======
 
 class LibDs3BuildInformation(Structure):
     _fields_ = [("branch", POINTER(LibDs3Str)), ("revision", POINTER(LibDs3Str)), ("version", POINTER(LibDs3Str))]
     
 class LibDs3GetSystemInformationResponse(Structure):
     _fields_ = [("api_version", POINTER(LibDs3Str)), ("serial_number", POINTER(LibDs3Str)), ("build_information", POINTER(LibDs3BuildInformation))]
->>>>>>> getSysInfo
     
 class LibDs3Request(Structure):
     pass
