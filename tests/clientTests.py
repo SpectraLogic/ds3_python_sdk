@@ -428,6 +428,11 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
         self.validateSearchObjects(objects, resources)
 
+    def testVerifySystemHealth(self):
+        milliseconds = self.client.verifySystemHealth()
+
+        self.assertTrue(milliseconds>=0)
+        
     def testPutBulk(self):
         """ tests putBulk, allocateChunk, putObject"""
         fileList=populateTestData(self.client, bucketName)
