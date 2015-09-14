@@ -428,6 +428,12 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         
         self.validateSearchObjects(objects, resources)
 
+    def testGetSystemInformation(self):
+        result = self.client.getSystemInformation()
+
+        self.assertNotEqual(result.apiVersion, None)
+        self.assertNotEqual(result.serialNumber, None)
+
     def testGetJobs(self):
         populateTestData(self.client, bucketName)
         bucketContents = self.client.getBucket(bucketName)
