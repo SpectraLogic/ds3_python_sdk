@@ -227,13 +227,14 @@ def extractMetadataFromResponse(metaData):
         libds3.lib.ds3_free_metadata_keys(keys)
     return result
 
+def checkExistence(ds3Str):
+    if ds3Str:
+        return ds3Str.contents.value
+    else:
+        return None
+
 class Ds3SearchObject(object):
     def __init__(self, ds3SearchObject):
-        def checkExistence(ds3Str):
-            if ds3Str:
-                return ds3Str.contents.value
-            else:
-                return None
         contents = ds3SearchObject.contents
         self.bucketId = checkExistence(contents.bucket_id)
         self.id = checkExistence(contents.id)
@@ -257,6 +258,33 @@ class Ds3SearchObject(object):
         response += " | StorageClass: " + str(self.storageClass)
         response += " | Type: " + str(self.type)
         response += " | Version: " + str(self.version)
+        return response
+
+class Ds3BuildInformation(object):
+    def __init__(self, ds3BuildInfo):
+        contents = ds3BuildInfo.contents
+        self.branch = checkExistence(contents.branch)
+        self.revision = checkExistence(contents.revision)
+        self.version = checkExistence(contents.version)
+    def __str__(self):
+        response = "Branch: " + str(self.branch)
+        response += " | Revision: " + str(self.revision)
+        response += " | Version: " + str(self.version)
+        return response
+
+class Ds3SystemInformation(object):
+    def __init__(self, ds3SystemInfo):
+        contents = ds3SystemInfo.contents
+        self.apiVersion = checkExistence(contents.api_version)
+        self.serialNumber = checkExistence(contents.serial_number)
+        if contents.build_information:
+            self.buildInformation = Ds3BuildInformation(contents.build_information)
+        else:
+            self.buildInformation = None
+    def __str__(self):
+        response = "API Version: " + str(self.apiVersion)
+        response += " | Serial Number: " + str(self.serialNumber)
+        response += " | Build Information: " + str(self.buildInformation)
         return response
 
 def extractSearchObjects(searchObjects):
@@ -337,6 +365,18 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
+
+    def getSystemInformation(self):
+        response = POINTER(libds3.LibDs3GetSystemInformationResponse)()
+        request = libds3.lib.ds3_init_get_system_information()
+        error = libds3.lib.ds3_get_system_information(self._client, request, byref(response))
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
+        result = Ds3SystemInformation(response)
+        libds3.lib.ds3_free_get_system_information(response)
+        return result
+
 
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
