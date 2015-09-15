@@ -448,9 +448,9 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         self.assertFalse(bulkGetResult.jobId in result)
 
     def testVerifySystemHealth(self):
-        milliseconds = self.client.verifySystemHealth()
+        result = self.client.verifySystemHealth()
 
-        self.assertTrue(milliseconds>=0)
+        self.assertTrue(result.msRequiredToVerifyDataPlannerHealth >= 0)
         
     def testPutBulk(self):
         """ tests putBulk, allocateChunk, putObject"""

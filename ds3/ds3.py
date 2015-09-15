@@ -287,6 +287,12 @@ class Ds3SystemInformation(object):
         response += " | Build Information: " + str(self.buildInformation)
         return response
 
+
+class Ds3SystemHealthInformation(object):
+    def __init__(self, ds3HealthInfo):
+        contents = ds3HealthInfo.contents
+        self.msRequiredToVerifyDataPlannerHealth = contents.ms_required_to_verify_data_planner_health
+
 def extractSearchObjects(searchObjects):
     objects = []
     for index in xrange(0, searchObjects.contents.num_objects):
@@ -313,7 +319,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
-        result=response.contents.ms_required_to_verify_data_planner_health
+        result = Ds3SystemHealthInformation(response)
         libds3.lib.ds3_free_verify_system_health(response)
         return result
 
