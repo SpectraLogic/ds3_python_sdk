@@ -22,7 +22,7 @@ Generating documentation
 ------------------------
 
 To (re)generate the documentation, navigate to the directory the documentation is in,
-<repository>/sphinx/<version you want to generate> (currently v1.0-0), and run
+"repository"/sphinx/"version you want to generate" (currently v1.0-0), and run
 
     $ make html
 
