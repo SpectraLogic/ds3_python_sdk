@@ -313,10 +313,8 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
-        result=None
-        if response:
-            result=response.contents.ms_required_to_verify_data_planner_health
-            libds3.lib.ds3_free_verify_system_health(response)
+        result=response.contents.ms_required_to_verify_data_planner_health
+        libds3.lib.ds3_free_verify_system_health(response)
         return result
 
     def getService(self):
