@@ -108,7 +108,10 @@ class LibDs3AllocateChunkResponse(Structure):
 
 class LibDs3GetAvailableChunksResponse(Structure):
     _fields_ = [("object_list", POINTER(LibDs3BulkResponse)), ("retry_after", c_ulonglong)]
-
+    
+class LibDs3VerifySystemHealthResponse(Structure):
+    _fields_ = [("ms_required_to_verify_data_planner_health", c_ulonglong)]
+    
 class LibDs3Request(Structure):
     pass
 
