@@ -447,6 +447,11 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         result = map(lambda obj: obj.jobId, self.client.getJobs())
         self.assertFalse(bulkGetResult.jobId in result)
 
+    def testVerifySystemHealth(self):
+        result = self.client.verifySystemHealth()
+
+        self.assertTrue(result.msRequiredToVerifyDataPlannerHealth >= 0)
+        
     def testPutBulk(self):
         """ tests putBulk, allocateChunk, putObject"""
         fileList = populateTestData(self.client, bucketName)

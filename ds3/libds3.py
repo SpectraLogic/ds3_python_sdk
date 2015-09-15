@@ -118,6 +118,9 @@ class LibDs3BuildInformation(Structure):
 class LibDs3GetSystemInformationResponse(Structure):
     _fields_ = [("api_version", POINTER(LibDs3Str)), ("serial_number", POINTER(LibDs3Str)), ("build_information", POINTER(LibDs3BuildInformation))]
     
+class LibDs3VerifySystemHealthResponse(Structure):
+    _fields_ = [("ms_required_to_verify_data_planner_health", c_ulonglong)]
+    
 class LibDs3Request(Structure):
     pass
 
@@ -141,6 +144,7 @@ lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_create_client_from_env.restype = POINTER(LibDs3Error)
 lib.ds3_init_get_jobs.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_system_information.restype = POINTER(LibDs3Request)
+lib.ds3_init_verify_system_health.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_service.restype = POINTER(LibDs3Request)
 lib.ds3_init_get_bucket.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_folder.restype = POINTER(LibDs3Request)
@@ -161,6 +165,7 @@ lib.ds3_init_put_job.restype = POINTER(LibDs3Request)
 lib.ds3_init_delete_job.restype = POINTER(LibDs3Request)
 lib.ds3_get_jobs.restype = POINTER(LibDs3Error)
 lib.ds3_get_system_information.restype = POINTER(LibDs3Error)
+lib.ds3_verify_system_health.restype = POINTER(LibDs3Error)
 lib.ds3_get_service.restype = POINTER(LibDs3Error)
 lib.ds3_get_bucket.restype = POINTER(LibDs3Error)
 lib.ds3_get_object.restype = POINTER(LibDs3Error)
