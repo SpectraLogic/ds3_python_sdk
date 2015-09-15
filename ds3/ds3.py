@@ -307,11 +307,17 @@ class Ds3Client(object):
         self.credentials = credentials
         
     def verifySystemHealth(self):
-        response = c_ulonglong()
+        response = POINTER(libds3.LibDs3VerifySystemHealthResponse)()
         request = libds3.lib.ds3_init_verify_system_health()
         error = libds3.lib.ds3_verify_system_health(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
-        return response
+        if error:
+            raise Ds3Error(error)
+        result=None
+        if response:
+            result=response.contents.ms_required_to_verify_data_planner_health
+            libds3.lib.ds3_free_verify_system_health(response)
+        return result
 
     def getService(self):
         response = POINTER(libds3.LibDs3GetServiceResponse)()

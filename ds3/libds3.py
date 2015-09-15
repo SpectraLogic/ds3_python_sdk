@@ -118,6 +118,9 @@ class LibDs3BuildInformation(Structure):
 class LibDs3GetSystemInformationResponse(Structure):
     _fields_ = [("api_version", POINTER(LibDs3Str)), ("serial_number", POINTER(LibDs3Str)), ("build_information", POINTER(LibDs3BuildInformation))]
     
+class LibDs3VerifySystemHealthResponse(Structure):
+    _fields_ = [("ms_required_to_verify_data_planner_health", c_ulonglong)]
+    
 class LibDs3Request(Structure):
     pass
 
