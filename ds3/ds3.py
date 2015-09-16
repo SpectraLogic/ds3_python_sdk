@@ -317,7 +317,7 @@ class Ds3Client(object):
         
     def verifySystemHealth(self):
         '''
-        Returns how long it took to verify the health of the system.  In the event that the system is in a bad state, and error will
+        Returns how long it took to verify the health of the system.  In the event that the system is in a bad state, an error will
         be thrown.
         '''
         response = POINTER(libds3.LibDs3VerifySystemHealthResponse)()
