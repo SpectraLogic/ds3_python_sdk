@@ -617,10 +617,14 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
 
-    def getPhysicalPlacement(self, bucketName, fileNameList):
+    def getPhysicalPlacement(self, bucketName, fileNameList, fullDetails = False):
         response = POINTER(libds3.LibDs3GetPhysicalPlacementResponse)()
         bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
-        request = libds3.lib.ds3_init_get_physical_placement(typeCheckString(bucketName), bulkObjs)
+        bucketName=typeCheckString(bucketName)
+        if fullDetails:
+            request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)
+        else:
+            request = libds3.lib.ds3_init_get_physical_placement_full(bucketName, bulkObjs)
         error = libds3.lib.ds3_get_physical_placement(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
 
