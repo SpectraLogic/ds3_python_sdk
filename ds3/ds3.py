@@ -1,6 +1,20 @@
 from ctypes import *
 import libds3
 
+def checkExistence(obj, wrapper = lambda ds3Str: ds3Str.contents.value):
+    if obj:
+        return wrapper(obj)
+    else:
+        return None
+
+def arrayToList(array, length, wrapper = lambda ds3Str: ds3Str.contents.value):
+    result = []
+    for i in xrange(0, length):
+        result.append(wrapper(array[i]))
+    return result
+    
+# generate list from C array
+    
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
         self.reason = libds3Error.contents.message.contents.value
@@ -10,11 +24,7 @@ class Ds3Error(Exception):
             self._hasResponse = True
             self.statusCode = response.contents.status_code
             self.statusMessage = response.contents.status_message.contents.value
-            if response.contents.error_body:
-                self.message = response.contents.error_body.contents.value
-            else:
-                self.message = None
-                
+            self.message = checkExistence(response.contents.error_body)
         libds3.lib.ds3_free_error(libds3Error)
     def __str__(self):
         errorMessage = "Reason: " + self.reason
@@ -55,10 +65,7 @@ class Ds3Owner(object):
 class Ds3Object(object):
     def __init__(self, ds3Object):
         self.name = ds3Object.name.contents.value
-        if ds3Object.etag:
-            self.etag = ds3Object.etag.contents.value
-        else:
-            self.etag = None
+        self.etag = checkExistence(ds3Object.etag)
         self.size = ds3Object.size
         self.owner = Ds3Owner(ds3Object.owner)
     def __str__(self):
@@ -70,37 +77,16 @@ class Ds3BucketDetails(object):
     def __init__(self, ds3Bucket):
         bucketContents = ds3Bucket.contents
         self.name = bucketContents.name.contents.value
-        if bucketContents.creation_date:
-            self.creationDate = bucketContents.creation_date.contents.value
-        else:
-            self.creationDate = None
+        self.creationDate = checkExistence(bucketContents.creation_date)
 
         self.isTruncated = bool(bucketContents.is_truncated)
-        if bucketContents.marker:
-            self.marker = bucketContents.marker.contents.value
-        else:
-            self.marker = None
-        if bucketContents.delimiter:
-            self.delimiter = bucketContents.delimiter.contents.value
-        else:
-            self.delimiter = None
+        self.marker = checkExistence(bucketContents.marker)
+        self.delimiter = checkExistence(bucketContents.delimiter)
         self.maxKeys = bucketContents.max_keys
-        if bucketContents.next_marker:
-            self.nextMarker = bucketContents.next_marker.contents.value
-        else:
-            self.nextMarker = None
-        if bucketContents.prefix:
-            self.prefix = bucketContents.prefix.contents.value
-        else:
-            self.prefix = None
-        self.commonPrefixes = []
-        if bucketContents.num_common_prefixes > 0:
-            for i in xrange(0, bucketContents.num_common_prefixes):
-                self.commonPrefixes.append(bucketContents.common_prefixes[i].contents.value)
-        self.objects = []
-        if bucketContents.num_objects > 0:
-            for i in xrange(0, bucketContents.num_objects):
-                self.objects.append(Ds3Object(bucketContents.objects[i]))
+        self.nextMarker = checkExistence(bucketContents.next_marker)
+        self.prefix = checkExistence(bucketContents.prefix)
+        self.commonPrefixes = arrayToList(bucketContents.common_prefixes, bucketContents.num_common_prefixes)
+        self.objects = arrayToList(bucketContents.objects, bucketContents.num_objects, wrapper = Ds3Object)
 
 class Ds3BulkObject(object):
     def __init__(self, bulkObject):
@@ -117,44 +103,28 @@ class Ds3CacheList(object):
     def __init__(self, bulkObjectList):
         contents = bulkObjectList.contents
         self.chunkNumber = contents.chunk_number
-        if contents.node_id:
-            self.nodeId = contents.node_id.contents.value
-        else:
-            self.nodeId = None
-        if contents.server_id:
-            self.serverId = contents.server_id.contents.value
-        else:
-            self.serverId = None
+        self.nodeId = checkExistence(contents.node_id)
+        self.serverId = checkExistence(contents.server_id)
         self.chunkId = contents.chunk_id.contents.value
-        self.objects = []
-        for i in xrange(0, contents.size):
-            self.objects.append(Ds3BulkObject(contents.list[i]))
+        self.objects = arrayToList(contents.list, contents.size, wrapper = Ds3BulkObject)
 
 class Ds3BulkPlan(object):
     def __init__(self, ds3BulkResponse):
         contents = ds3BulkResponse.contents
-        if contents.bucket_name:
-            self.bucketName = contents.bucket_name.contents.value
+        self.bucketName = checkExistence(contents.bucket_name)
         if contents.cached_size_in_bytes:
             self.cachedSize = contents.cached_size_in_bytes
         if contents.completed_size_in_bytes:
             self.compltedSize = contents.completed_size_in_bytes
-        if contents.job_id:
-            self.jobId = contents.job_id.contents.value
+        self.jobId = checkExistence(contents.job_id)
         if contents.original_size_in_bytes:
             self.originalSize = contents.original_size_in_bytes
-        if contents.start_date:
-            self.startDate = contents.start_date.contents.value
-        if contents.user_id:
-            self.userId = contents.user_id.contents.value
-        if contents.user_name:
-            self.userName = contents.user_name.contents.value
+        self.startDate = checkExistence(contents.start_date)
+        self.userId = checkExistence(contents.user_id)
+        self.userName = checkExistence(contents.user_name)
         self.requestType = contents.request_type
         self.status = contents.status
-
-        self.chunks = []
-        for i in xrange(0, contents.list_size):
-            self.chunks.append(Ds3CacheList(contents.list[i]))
+        self.chunks = arrayToList(contents.list, contents.list_size, wrapper = Ds3CacheList)
     def __str__(self):
         response = "JobId: " + self.jobId
         response += " | Status: " + str(self.status)
@@ -178,61 +148,6 @@ class Ds3AvailableChunksResponse(object):
         self.retryAfter = contents.retry_after
         self.bulkPlan = Ds3BulkPlan(contents.object_list)
 
-
-def typeCheck(input_arg, type_to_check):
-    if isinstance(input_arg, type_to_check):
-        return input_arg
-    else:
-        raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
-
-def typeCheckString(input_arg):
-    return typeCheck(input_arg, basestring)
-
-def createClientFromEnv():
-    libDs3Client = POINTER(libds3.LibDs3Client)()
-    error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
-    if error:
-        raise Ds3Error(error)
-    clientContents = libDs3Client.contents
-    clientCreds = clientContents.creds.contents
-    creds = Credentials(clientCreds.access_id.contents.value, clientCreds.secret_key.contents.value)
-    proxyValue = None
-    if clientContents.proxy:
-        proxyValue = clientContents.proxy.contents.value
-    client = Ds3Client(clientContents.endpoint.contents.value, creds, proxyValue)
-    libds3.lib.ds3_free_creds(clientContents.creds)
-    libds3.lib.ds3_free_client(libDs3Client)
-    return client
-
-def addMetadataToRequest(request, metadata):
-    if metadata:
-        for key in metadata:
-            if type(metadata[key]) is list or type(metadata[key]) is tuple:
-                for value in metadata[key]:
-                    libds3.lib.ds3_request_set_metadata(request, key, value);
-            else:
-                libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
-
-def extractMetadataFromResponse(metaData):
-    result = {}
-    keys = libds3.lib.ds3_metadata_keys(metaData)
-    if keys:
-        for key_index in xrange(0, keys.contents.num_keys):
-            key = keys.contents.keys[key_index].contents.value
-            result[key] = []
-            metadataEntry = libds3.lib.ds3_metadata_get_entry(metaData, key)
-            for value_index in xrange(0, metadataEntry.contents.num_values):
-                result[key].append(metadataEntry.contents.values[value_index].contents.value)
-            libds3.lib.ds3_free_metadata_entry(metadataEntry)
-        libds3.lib.ds3_free_metadata_keys(keys)
-    return result
-
-def checkExistence(ds3Str):
-    if ds3Str:
-        return ds3Str.contents.value
-    else:
-        return None
-
 class Ds3SearchObject(object):
     def __init__(self, ds3SearchObject):
         contents = ds3SearchObject.contents
@@ -240,10 +155,7 @@ class Ds3SearchObject(object):
         self.id = checkExistence(contents.id)
         self.name = checkExistence(contents.name)
         self.size = contents.size
-        if contents.owner:
-            self.owner = Ds3Owner(contents.owner)
-        else:
-            self.owner = None
+        self.owner = checkExistence(contents.owner, wrapper = Ds3Owner)
         self.lastModified = checkExistence(contents.last_modified)
         self.storageClass = checkExistence(contents.storage_class)
         self.type = checkExistence(contents.type)
@@ -277,34 +189,61 @@ class Ds3SystemInformation(object):
         contents = ds3SystemInfo.contents
         self.apiVersion = checkExistence(contents.api_version)
         self.serialNumber = checkExistence(contents.serial_number)
-        if contents.build_information:
-            self.buildInformation = Ds3BuildInformation(contents.build_information)
-        else:
-            self.buildInformation = None
+        self.buildInformation = checkExistence(contents.build_information, wrapper = Ds3BuildInformation)
     def __str__(self):
         response = "API Version: " + str(self.apiVersion)
         response += " | Serial Number: " + str(self.serialNumber)
         response += " | Build Information: " + str(self.buildInformation)
         return response
 
-
 class Ds3SystemHealthInformation(object):
     def __init__(self, ds3HealthInfo):
         contents = ds3HealthInfo.contents
         self.msRequiredToVerifyDataPlannerHealth = contents.ms_required_to_verify_data_planner_health
 
-def extractSearchObjects(searchObjects):
-    objects = []
-    for index in xrange(0, searchObjects.contents.num_objects):
-        objects.append(Ds3SearchObject(searchObjects.contents.objects[index]))
-    return objects
+def typeCheck(input_arg, type_to_check):
+    if isinstance(input_arg, type_to_check):
+        return input_arg
+    else:
+        raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
 
-def extractPhysicalPlacement(placement):
-    barcodes = []
-    for index in xrange(0, placement.contents.num_tapes):
-        barcodes.append(placement.contents.tapes[index].barcode.contents.value)
-    return barcodes
+def typeCheckString(input_arg):
+    return typeCheck(input_arg, basestring)
 
+def addMetadataToRequest(request, metadata):
+    if metadata:
+        for key in metadata:
+            if type(metadata[key]) is list or type(metadata[key]) is tuple:
+                for value in metadata[key]:
+                    libds3.lib.ds3_request_set_metadata(request, key, value);
+            else:
+                libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
+
+def extractMetadataFromResponse(metaData):
+    result = {}
+    keys = libds3.lib.ds3_metadata_keys(metaData)
+    if keys:
+        for key_index in xrange(0, keys.contents.num_keys):
+            key = keys.contents.keys[key_index].contents.value
+            metadataEntry = libds3.lib.ds3_metadata_get_entry(metaData, key)
+            result[key] = arrayToList(metadataEntry.contents.values, metadataEntry.contents.num_values)
+            libds3.lib.ds3_free_metadata_entry(metadataEntry)
+        libds3.lib.ds3_free_metadata_keys(keys)
+    return result
+
+def createClientFromEnv():
+    libDs3Client = POINTER(libds3.LibDs3Client)()
+    error = libds3.lib.ds3_create_client_from_env(byref(libDs3Client))
+    if error:
+        raise Ds3Error(error)
+    clientContents = libDs3Client.contents
+    clientCreds = clientContents.creds.contents
+    creds = Credentials(clientCreds.access_id.contents.value, clientCreds.secret_key.contents.value)
+    proxyValue = checkExistence(clientContents.proxy)
+    client = Ds3Client(clientContents.endpoint.contents.value, creds, proxyValue)
+    libds3.lib.ds3_free_creds(clientContents.creds)
+    libds3.lib.ds3_free_client(libDs3Client)
+    return client
 
 class Ds3Client(object):
     def __init__(self, endpoint, credentials, proxy = None):
@@ -539,8 +478,8 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
-
-        result = extractSearchObjects(response)
+        
+        result = arrayToList(searchObjects.contents.objects, searchObjects.contents.num_objects, wrapper = Ds3SearchObject)
 
         libds3.lib.ds3_free_objects_response(response)
 
@@ -627,7 +566,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         
-        placements = extractPhysicalPlacement(response)
+        placements = arrayToList(placement.contents.tapes, placement.contents.num_tapes, lambda obj: obj.barcode.contents.value)
         libds3.lib.ds3_free_get_physical_placement_response(response)
         
         return placements
