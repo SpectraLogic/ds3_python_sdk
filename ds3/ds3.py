@@ -479,7 +479,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         
-        result = arrayToList(searchObjects.contents.objects, searchObjects.contents.num_objects, wrapper = Ds3SearchObject)
+        result = arrayToList(response.contents.objects, response.contents.num_objects, wrapper = Ds3SearchObject)
 
         libds3.lib.ds3_free_objects_response(response)
 
@@ -566,7 +566,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         
-        placements = arrayToList(placement.contents.tapes, placement.contents.num_tapes, lambda obj: obj.barcode.contents.value)
+        placements = arrayToList(response.contents.tapes, response.contents.num_tapes, lambda obj: obj.barcode.contents.value)
         libds3.lib.ds3_free_get_physical_placement_response(response)
         
         return placements
