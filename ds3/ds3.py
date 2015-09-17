@@ -624,7 +624,7 @@ class Ds3Client(object):
         if fullDetails:
             request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)
         else:
-            request = libds3.lib.ds3_init_get_physical_placement_full(bucketName, bulkObjs)
+            request = libds3.lib.ds3_init_get_physical_placement_full_details(bucketName, bulkObjs)
         error = libds3.lib.ds3_get_physical_placement(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
 
