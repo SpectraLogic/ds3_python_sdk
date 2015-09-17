@@ -13,8 +13,6 @@ def arrayToList(array, length, wrapper = lambda ds3Str: ds3Str.contents.value):
         result.append(wrapper(array[i]))
     return result
     
-# generate list from C array
-    
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
         self.reason = libds3Error.contents.message.contents.value
