@@ -375,6 +375,16 @@ class Ds3Client(object):
         libds3.lib.ds3_free_metadata(response)
 
         return metadata
+    
+    def headBucket(self, bucketName):
+        '''
+        Checks whether a bucket exists.
+        '''
+        request = libds3.lib.ds3_init_head_bucket(typeCheckString(bucketName))
+        error = libds3.lib.ds3_head_bucket(self._client, request)
+        libds3.lib.ds3_free_request(request)
+        if error:
+            raise Ds3Error(error)
 
     def deleteFolder(self, bucketName, folderName):
         request = libds3.lib.ds3_init_delete_folder(typeCheckString(bucketName), typeCheckString(folderName))
