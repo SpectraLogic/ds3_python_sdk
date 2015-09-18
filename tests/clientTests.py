@@ -330,6 +330,18 @@ class ObjectTestCase(Ds3TestCase):
             self.client.getPhysicalPlacement(bucketName, ["bogus.txt"])
         except Ds3Error as e:
             self.assertEqual(e.statusCode, 404)
+            
+    def testGetPhysicalPlacementFull(self):
+        """tests getPhysicalPlacement: with an empty file"""
+        populateTestData(self.client, bucketName)
+        self.assertEqual(len(self.client.getPhysicalPlacement(bucketName, ["bogus.txt"], fullDetails = True)), 0)
+
+    def testGetPhysicalPlacementFullBadInput(self):
+        """tests getPhysicalPlacement: with non-existent bucket"""
+        try:
+            self.client.getPhysicalPlacement(bucketName, ["bogus.txt"], fullDetails = True)
+        except Ds3Error as e:
+            self.assertEqual(e.statusCode, 404)
         
     def testDeleteFolder(self):
         """tests deleteFolder"""
