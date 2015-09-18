@@ -49,8 +49,7 @@ def statusCodeList(status):
 def typeErrorList(badType):
     return [TypeError, str, "expected instance of type basestring, got instance of type " + type(badType).__name__]
 
-class BasicClientFunctionTestCase(unittest.TestCase):
-
+class Ds3TestCase(unittest.TestCase):
     def setUp(self):
         self.client = createClientFromEnv()
 
@@ -59,23 +58,6 @@ class BasicClientFunctionTestCase(unittest.TestCase):
             clearBucket(self.client, bucketName)
         except Ds3Error as e:
             pass
-
-    def validateSearchObjects(self, objects, resourceList = resources, objType = "DATA"):
-        self.assertEqual(len(objects), len(resourceList))
-
-        def getSize(fileName):
-            size = os.stat(pathForResource(fileName)).st_size
-            return (fileName, size)
-        fileList = map(getSize, resourceList)
-
-        self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
-        
-        for index in xrange(0, len(objects)):
-            self.assertEqual(objects[index].name, fileList[index][0])
-            # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
-            # self.assertEqual(objects[index].size, fileList[index][1])
-            self.assertEqual(objects[index].type, objType)
-            self.assertEqual(objects[index].version, "1")
         
     def checkBadInputs(self, testFunction, inputs, second_arg_dict = None):
         for test_input, status in inputs.items():
@@ -96,7 +78,8 @@ class BasicClientFunctionTestCase(unittest.TestCase):
                     testFunction(test_input)
                 except status[0] as e:
                     self.assertEqual(status[1](e), status[2])
-
+                    
+class BucketTestCase(Ds3TestCase):
     def testPutBucket(self):
         """tests putBucket"""
         self.client.putBucket(bucketName)
@@ -245,6 +228,38 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         servicesAfter = map(lambda service: service.name, frozenset(self.client.getService()))
         self.assertTrue(bucketName in servicesAfter)
 
+class JobTestCase(Ds3TestCase):
+    def testGetJobs(self):
+        populateTestData(self.client, bucketName)
+        bucketContents = self.client.getBucket(bucketName)
+        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
+        
+        result = map(lambda obj: obj.jobId, self.client.getJobs())
+        self.assertTrue(bulkGetResult.jobId in result)
+
+        self.client.deleteJob(bulkGetResult.jobId)
+        
+        result = map(lambda obj: obj.jobId, self.client.getJobs())
+        self.assertFalse(bulkGetResult.jobId in result)
+
+class ObjectTestCase(Ds3TestCase):
+    def validateSearchObjects(self, objects, resourceList = resources, objType = "DATA"):
+        self.assertEqual(len(objects), len(resourceList))
+
+        def getSize(fileName):
+            size = os.stat(pathForResource(fileName)).st_size
+            return (fileName, size)
+        fileList = map(getSize, resourceList)
+
+        self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
+        
+        for index in xrange(0, len(objects)):
+            self.assertEqual(objects[index].name, fileList[index][0])
+            # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
+            # self.assertEqual(objects[index].size, fileList[index][1])
+            self.assertEqual(objects[index].type, objType)
+            self.assertEqual(objects[index].version, "1")
+
     def testDeleteObject(self):
         """tests deleteObject: when object exists"""
         populateTestData(self.client, bucketName, resourceList = ["beowulf.txt"])
@@ -324,6 +339,59 @@ class BasicClientFunctionTestCase(unittest.TestCase):
         badBuckets = {"": statusCodeList(400), "fakeBucket": statusCodeList(400), bucketName: statusCodeList(400)}
         self.checkBadInputs(self.client.deleteFolder, badBuckets, second_arg_dict = {"folder":None})
 
+    def testGetObjects(self):
+        # charlesh: the C SDK currently always expects a bucket name even though the specification says it's optional.
+        # the Python call is written so the bucket name is optional, but will still error (because of the C SDK) when it is not given
+        populateTestData(self.client, bucketName)
+
+        objects = self.client.getObjects()
+
+        self.validateSearchObjects(objects, resources)
+            
+    def testGetObjectsBucketName(self):
+        populateTestData(self.client, bucketName)
+
+        objects = self.client.getObjects(bucketName = bucketName)
+
+        self.validateSearchObjects(objects, resources)
+            
+    def testGetObjectsObjectName(self):
+        populateTestData(self.client, bucketName)
+
+        objects = self.client.getObjects(bucketName = bucketName, name = "beowulf.txt")
+        
+        self.validateSearchObjects(objects, ["beowulf.txt"])
+            
+    def testGetObjectsPageParameters(self):
+        populateTestData(self.client, bucketName)
+
+        first_half = self.client.getObjects(bucketName = bucketName, pageLength = 2)
+        self.assertEqual(len(first_half), 2)
+        second_half = self.client.getObjects(bucketName = bucketName, pageLength = 2, pageOffset = 2)
+        self.assertEqual(len(second_half), 2)
+        
+        self.validateSearchObjects(first_half+second_half, resources)
+            
+    def testGetObjectsType(self):
+        populateTestData(self.client, bucketName)
+
+        objects = self.client.getObjects(bucketName = bucketName, objType = "DATA")
+        
+        self.validateSearchObjects(objects, resources)
+
+        objects = self.client.getObjects(bucketName = bucketName, objType = "FOLDER")
+        
+        self.validateSearchObjects(objects, [], objType = "FOLDER")
+            
+    def testGetObjectsVersion(self):
+        populateTestData(self.client, bucketName)
+
+        objects = self.client.getObjects(bucketName = bucketName, version = 1)
+        
+        self.validateSearchObjects(objects, resources)
+
+    
+class ObjectMetadataTestCase(Ds3TestCase):
     def testHeadObject(self):
         """tests headObject"""
         metadata = {"name1":["value1"], "name2":"value2", "name3":("value3")}
@@ -376,120 +444,15 @@ class BasicClientFunctionTestCase(unittest.TestCase):
 
         self.assertEqual(metadata, metadata_resp)
         self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
-
-    def testGetObjects(self):
-        # charlesh: the C SDK currently always expects a bucket name even though the specification says it's optional.
-        # the Python call is written so the bucket name is optional, but will still error (because of the C SDK) when it is not given
-        populateTestData(self.client, bucketName)
-
-        objects = self.client.getObjects()
-
-        self.validateSearchObjects(objects, resources)
-            
-    def testGetObjectsBucketName(self):
-        populateTestData(self.client, bucketName)
-
-        objects = self.client.getObjects(bucketName = bucketName)
-
-        self.validateSearchObjects(objects, resources)
-            
-    def testGetObjectsObjectName(self):
-        populateTestData(self.client, bucketName)
-
-        objects = self.client.getObjects(bucketName = bucketName, name = "beowulf.txt")
         
-        self.validateSearchObjects(objects, ["beowulf.txt"])
-            
-    def testGetObjectsPageParameters(self):
-        populateTestData(self.client, bucketName)
-
-        first_half = self.client.getObjects(bucketName = bucketName, pageLength = 2)
-        self.assertEqual(len(first_half), 2)
-        second_half = self.client.getObjects(bucketName = bucketName, pageLength = 2, pageOffset = 2)
-        self.assertEqual(len(second_half), 2)
-        
-        self.validateSearchObjects(first_half+second_half, resources)
-            
-    def testGetObjectsType(self):
-        populateTestData(self.client, bucketName)
-
-        objects = self.client.getObjects(bucketName = bucketName, objType = "DATA")
-        
-        self.validateSearchObjects(objects, resources)
-
-        objects = self.client.getObjects(bucketName = bucketName, objType = "FOLDER")
-        
-        self.validateSearchObjects(objects, [], objType = "FOLDER")
-            
-    def testGetObjectsVersion(self):
-        populateTestData(self.client, bucketName)
-
-        objects = self.client.getObjects(bucketName = bucketName, version = 1)
-        
-        self.validateSearchObjects(objects, resources)
-
+class BasicClientTestCase(Ds3TestCase):
     def testGetSystemInformation(self):
         result = self.client.getSystemInformation()
 
         self.assertNotEqual(result.apiVersion, None)
         self.assertNotEqual(result.serialNumber, None)
 
-    def testGetJobs(self):
-        populateTestData(self.client, bucketName)
-        bucketContents = self.client.getBucket(bucketName)
-        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
-        
-        result = map(lambda obj: obj.jobId, self.client.getJobs())
-        self.assertTrue(bulkGetResult.jobId in result)
-
-        self.client.deleteJob(bulkGetResult.jobId)
-        
-        result = map(lambda obj: obj.jobId, self.client.getJobs())
-        self.assertFalse(bulkGetResult.jobId in result)
-
     def testVerifySystemHealth(self):
         result = self.client.verifySystemHealth()
 
         self.assertTrue(result.msRequiredToVerifyDataPlannerHealth >= 0)
-        
-    def testPutBulk(self):
-        """ tests putBulk, allocateChunk, putObject"""
-        fileList = populateTestData(self.client, bucketName)
-
-        bucketContents = self.client.getBucket(bucketName)
-
-        returnedFileList = map(lambda obj: (obj.name, obj.size), bucketContents.objects)
-        self.assertEqual(returnedFileList, fileList)
-
-    def testGetBulk(self):
-        """tests getBulk, getAvailableChunks, getObject, getJob"""
-        populateTestData(self.client, bucketName)
-
-        bucketContents = self.client.getBucket(bucketName)
-
-        self.assertEqual(len(bucketContents.objects), 4)
-
-        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: obj.name, bucketContents.objects))
-
-        self.assertEqual(len(bulkGetResult.chunks), 1)
-        self.assertEqual(len(bulkGetResult.chunks[0].objects), 4)
-
-        tempFiles = []
-
-        availableChunks = self.client.getAvailableChunks(bulkGetResult.jobId)
-
-        self.assertTrue(availableChunks != None)
-        self.assertEqual(len(availableChunks.bulkPlan.chunks), 1)
-
-        for obj in availableChunks.bulkPlan.chunks[0].objects:
-            newFile = tempfile.mkstemp()
-            tempFiles.append(newFile)
-
-            self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
-
-        for tempFile in tempFiles:
-            os.close(tempFile[0])
-            os.remove(tempFile[1])
-        
-        jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
-        self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
