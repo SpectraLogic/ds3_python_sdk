@@ -227,6 +227,14 @@ class BucketTestCase(Ds3TestCase):
         
         servicesAfter = map(lambda service: service.name, frozenset(self.client.getService()))
         self.assertTrue(bucketName in servicesAfter)
+        
+    def testHeadBucket(self):
+        self.client.putBucket(bucketName)
+        self.client.headBucket(bucketName)
+        
+    def testHeadBucketBadInput(self):
+        badBuckets = {"": statusCodeList(400), "not-here": statusCodeList(404), 1234: typeErrorList(1234), None:typeErrorList(None)}
+        self.checkBadInputs(self.client.headBucket, badBuckets)
 
 class JobTestCase(Ds3TestCase):
     def testGetJobs(self):
