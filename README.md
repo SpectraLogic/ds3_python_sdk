@@ -1,7 +1,7 @@
-DS3 Python SDK
+Spectra S3 Python SDK
 --------------
 
-An SDK conforming to the DS3 specification.
+An SDK conforming to the Spectra S3 specification.
 
 Contact Us
 ----------
@@ -11,7 +11,7 @@ Join us at our [Google Groups](https://groups.google.com/d/forum/spectralogicds3
 Installing
 ----------
 
-Follow the instructions for installing the [ds3_c_sdk](https://github.com/SpectraLogic/ds3_c_sdk) first.  The ds3_python_sdk uses the ds3_c_sdk to communicate with a DS3 endpoint, and will not function without it.
+Follow the instructions for installing the [ds3_c_sdk](https://github.com/SpectraLogic/ds3_c_sdk) first.  The ds3_python_sdk uses the ds3_c_sdk to communicate with a Spectra S3 endpoint, and will not function without it.
 
 To install the ds3_python_sdk, either clone the latest code, or download a release bundle from [Releases](http://github.com/SpectraLogic/ds3_python_sdk/releases).  Once the code has been download, cd into the bundle, and install it with `sudo python setup.py install`
 
@@ -20,7 +20,7 @@ Once `setup.py` completes the ds3_python_sdk should be installed and available t
 SDK
 ---
 
-The SDK provides an interface for a user to add DS3 functionality to their existing or new python code.  In order to take advantage of the SDK you need to import the `ds3` python package and module.  The following is an example that creates a ds3 client from environment variables, creates a bucket, and lists all the buckets that are visible to the user.
+The SDK provides an interface for a user to add Spectra S3 functionality to their existing or new python code.  In order to take advantage of the SDK you need to import the `ds3` python package and module.  The following is an example that creates a Spectra S3 client from environment variables, creates a bucket, and lists all the buckets that are visible to the user.
 
 ```python
 
@@ -60,8 +60,8 @@ Putting Data
 
 To put data to a DS3 appliance you have to do it inside of the context of what is called a Bulk Job.  Bulk Jobs allow the DS3 application to plan how data should land to cache, and subsequently get written/read to/from tape.  The basic flow of every job is:
 
-* Generate the list of objects that will either be sent to DS3 or retrieved from DS3
-* Send a bulk put/get to DS3 to plan the job
+* Generate the list of objects that will either be sent to or retrieved from Spectra S3
+* Send a bulk put/get to Spectra S3 to plan the job
 * The job will be split into multiple chunks.  An application must then get the available list of chunks that can be processed
 * For each chunk that can be processed, sent the object (this step can be done in parallel)
 * Repeat getting the list of available chunks until all chunks have been processed
