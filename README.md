@@ -1,7 +1,7 @@
 DS3 Python SDK
 --------------
 
-A SDK conforming to the DS3 specification.
+An SDK conforming to the DS3 specification.
 
 Contact Us
 ----------
@@ -38,10 +38,10 @@ Ds3Client
 ---------
 In the ds3_python_sdk there are two ways that you can create a `Ds3Client` instance: environment variables, or manually.  `ds3.createClientFromEnv` will create a `Ds3Client` using the following environment variables:
 
-* `DS3_ENDPOINT` - The url to the DS3 Endpoint
+* `DS3_ENDPOINT` - The URL to the DS3 Endpoint
 * `DS3_ACCESS_KEY` - The DS3 access key
 * `DS3_SECRET_KEY` - The DS3 secret key
-* `http_proxy` - If set, the `Ds3Client` instance will proxy through this url
+* `http_proxy` - If set, the `Ds3Client` instance will proxy through this URL
 
 The `Ds3Client` instance can also be created manually in code with:
 
@@ -53,7 +53,7 @@ client = ds3.Ds3Client("endpoint", ds3.Credentials("access_key", "secret_key"))
 
 ```
 
-The proxy url can be passed in as the named parameter `proxy` to `Ds3Client()`.
+The proxy URL can be passed in as the named parameter `proxy` to `Ds3Client()`.
 
 Putting Data
 ------------
