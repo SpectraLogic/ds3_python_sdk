@@ -1,3 +1,14 @@
+#   Copyright 2014-2015 Spectra Logic Corporation. All Rights Reserved.
+#   Licensed under the Apache License, Version 2.0 (the "License"). You may not use
+#   this file except in compliance with the License. A copy of the License is located at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   or in the "license" file accompanying this file.
+#   This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+#   CONDITIONS OF ANY KIND, either express or implied. See the License for the
+#   specific language governing permissions and limitations under the License.
+
 from ds3 import ds3
 import os
 
@@ -25,8 +36,8 @@ fileList = map(createDs3Obj, fileList)
 bulkResult = client.putBulk(bucketName, fileList)
 
 # the bulk request will split the files over several chunks if it needs to
-# we need have to iterate over the chunks, ask the server for spacd to send
-# the chunk, then send all the objects returned in the chunk
+# we need to iterate over the chunks, ask the server for space to send
+# the chunks, then send all the objects returned in the chunk
 for chunk in bulkResult.chunks:
     allocateChunk = client.allocateChunk(chunk.chunkId)
     for obj in allocateChunk.chunk.objects:
