@@ -376,7 +376,7 @@ class Ds3Client(object):
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
         '''
         Gets an object from the Spectra S3 endpoint.  Use `realFileName` when the `objectName`
-        that you are getting from Spectra sS3 does not match what will be on the local filesystem.
+        that you are getting from Spectra S3 does not match what will be on the local filesystem.
         Returns the metadata for the retrieved object as a dictionary, where keys are
         associated with a list of the values for that key.
         
@@ -568,9 +568,9 @@ class Ds3Client(object):
 
     def getAvailableChunks(self, jobId):
         '''
-        Returns a list of all chunks in a job that can be currently be processed.  It will return a subset of all chunks and
-        will return the same set of chunks until all the data in one of the chunks returned has been either completly gotten,
-        or been completly put.
+        Returns a list of all chunks in a job that can currently be processed.  It will return a subset of all chunks, and it
+        will return that same set of chunks until all the data in one of the chunks returned has been either completely gotten,
+        or been completely put.
         '''
         request = libds3.lib.ds3_init_get_available_chunks(jobId)
         response = POINTER(libds3.LibDs3GetAvailableChunksResponse)()
