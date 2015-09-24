@@ -36,8 +36,8 @@ fileList = map(createDs3Obj, fileList)
 bulkResult = client.putBulk(bucketName, fileList)
 
 # the bulk request will split the files over several chunks if it needs to
-# we need have to iterate over the chunks, ask the server for spacd to send
-# the chunk, then send all the objects returned in the chunk
+# we need to iterate over the chunks, ask the server for space to send
+# the chunks, then send all the objects returned in the chunk
 for chunk in bulkResult.chunks:
     allocateChunk = client.allocateChunk(chunk.chunkId)
     for obj in allocateChunk.chunk.objects:
