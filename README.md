@@ -101,27 +101,39 @@ fileList = map(getSize, fileList)
 # submit the put bulk request to DS3
 bulkResult = client.putBulk(bucketName, fileList)
 
-# the bulk request will split the files over several chunks if it needs to
-# we need to iterate over the chunks, ask the server for space to send
-# the chunks, then send all the objects returned in the chunk
+# the bulk request will split the files over several chunks if it needs to.
+# we then need to ask what chunks we can send, and then send them making
+# sure we don't resend the same chunks
 
+# create a set of the chunk ids which will be used to track
+# what chunks have not been sent
 chunkIds = set(map(lambda x: x.chunkId, bulkResult.chunks))
 
+# while we still have chunks to send
 while len(chunkIds) > 0:
+    # get a list of the available chunks that we can send
     availableChunks = client.getAvailableChunks(bulkResult.jobId)
 
-    chunks = availableChunks.bulkPlan.chunks
-
+    # check to make sure we got some chunks, if we did not
+    # sleep and retry.  This could mean that the cache is full
     if len(chunks) == 0:
         time.sleep(availableChunks.retryAfter)
         continue
 
+    chunks = availableChunks.bulkPlan.chunks
+
+    # for each chunk that is available, check to make sure
+    # we have not sent it, and if not, send that object
     for chunk in chunks:
         if not chunk.chunkId in chunkIds:
             continue
         chunkIds.remove(chunk.chunkId)
         for obj in chunk.objects:
-            client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
+            # it is possible that if we start resending a chunk, due to the program crashing, that 
+            # some objects will already be in cache.  Check to make sure that they are not, and then
+            # send the object to Sepctra S3
+            if not obj.inCache:
+                client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
 
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.getBucket(bucketName)
