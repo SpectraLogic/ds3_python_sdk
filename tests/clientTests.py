@@ -371,8 +371,6 @@ class ObjectTestCase(Ds3TestCase):
         self.checkBadInputs(self.client.deleteFolder, badBuckets, second_arg_dict = {"folder":None})
 
     def testGetObjects(self):
-        # charlesh: the C SDK currently always expects a bucket name even though the specification says it's optional.
-        # the Python call is written so the bucket name is optional, but will still error (because of the C SDK) when it is not given
         populateTestData(self.client, bucketName)
 
         objects = self.client.getObjects()
