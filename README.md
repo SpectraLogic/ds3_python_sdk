@@ -76,10 +76,11 @@ Here is an example of the above using the Python SDK for putting data:
 
 from ds3 import ds3
 import os
+import time
 
 client = ds3.createClientFromEnv()
 
-bucketName = "testBucket"
+bucketName = "books"
 
 # make sure the bucket that we will be sending objects to exists
 client.putBucket(bucketName)
@@ -103,10 +104,24 @@ bulkResult = client.putBulk(bucketName, fileList)
 # the bulk request will split the files over several chunks if it needs to
 # we need to iterate over the chunks, ask the server for space to send
 # the chunks, then send all the objects returned in the chunk
-for chunk in bulkResult.chunks:
-    allocateChunk = client.allocateChunk(chunk.chunkId)
-    for obj in allocateChunk.chunk.objects:
-        client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
+
+chunkIds = set(map(lambda x: x.chunkId, bulkResult.chunks))
+
+while len(chunkIds) > 0:
+    availableChunks = client.getAvailableChunks(bulkResult.jobId)
+
+    chunks = availableChunks.bulkPlan.chunks
+
+    if len(chunks) == 0:
+        time.sleep(availableChunks.retryAfter)
+        continue
+
+    for chunk in chunks:
+        if not chunk.chunkId in chunkIds:
+            continue
+        chunkIds.remove(chunk.chunkId)
+        for obj in chunk.objects:
+            client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
 
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.getBucket(bucketName)
