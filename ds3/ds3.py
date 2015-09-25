@@ -529,21 +529,21 @@ class Ds3Client(object):
         Returns a list of objects.
         '''
         # TODO: need to add an example here of what different query strings are supported 
-        request = libds3.lib.ds3_init_get_objects(typeCheckString(bucketName))
+        request = libds3.lib.ds3_init_get_objects()
         response = POINTER(libds3.LibDs3GetObjectsResponse)()
         
         if bucketName:
-            libds3.lib.ds3_request_set_custom_header(request, "bucket_name", typeCheckString(bucketName))
+            libds3.lib.ds3_request_set_bucket_name(request, typeCheckString(bucketName))
         if creationDate:
-            libds3.lib.ds3_request_set_custom_header(request, "creation_date", typeCheckString(creationDate))
+            libds3.lib.ds3_request_set_creation_date(request, typeCheckString(creationDate))
         if objId:
             libds3.lib.ds3_request_set_id(request, typeCheckString(objId))
         if name:
             libds3.lib.ds3_request_set_name(request, typeCheckString(name))
         if pageLength:
-            libds3.lib.ds3_request_set_custom_header(request, "page_length", typeCheckString(str(pageLength)))
+             libds3.lib.ds3_request_set_page_length(request, typeCheckString(str(pageLength)))
         if pageOffset:
-            libds3.lib.ds3_request_set_custom_header(request, "page_offset", typeCheckString(str(pageOffset)))
+             libds3.lib.ds3_request_set_page_offset(request, typeCheckString(str(pageOffset)))
         if objType:
             libds3.lib.ds3_request_set_type(request, typeCheckString(objType))
         if version:
