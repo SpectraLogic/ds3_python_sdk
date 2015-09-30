@@ -60,6 +60,9 @@ def statusCodeList(status):
 def typeErrorList(badType):
     return [TypeError, str, "expected instance of type basestring, got instance of type " + type(badType).__name__]
 
+def reasonErrorList(reason):
+    return [Ds3Error, str, reason]
+
 class Ds3TestCase(unittest.TestCase):
     def setUp(self):
         self.client = createClientFromEnv()
@@ -170,7 +173,7 @@ class BucketTestCase(Ds3TestCase):
             
     def testGetBucketBadInput(self):
         """tests getBucket: bad input to function"""
-        badBuckets = {"": statusCodeList(400), "not-here": statusCodeList(404), 1234: typeErrorList(1234), None:typeErrorList(None)}
+        badBuckets = {"": reasonErrorList("Reason: The bucket name parameter is required."), "not-here": statusCodeList(404), 1234: typeErrorList(1234), None:typeErrorList(None)}
         self.checkBadInputs(self.client.getBucket, badBuckets)
 
     def testPrefix(self):
@@ -270,7 +273,8 @@ class ObjectTestCase(Ds3TestCase):
             return (fileName, size)
         fileList = map(getSize, resourceList)
 
-        self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
+        if len(objects)>0:
+            self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
         
         for index in xrange(0, len(objects)):
             self.assertEqual(objects[index].name, fileList[index][0])
@@ -439,11 +443,11 @@ class ObjectMetadataTestCase(Ds3TestCase):
         populateTestData(self.client, bucketName, resourceList = ["beowulf.txt"], metadata = metadata)
 
         badBuckets = {"fakeBucket": statusCodeList(404), bucketName: statusCodeList(404)}
-        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":None, "badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
+        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":reasonErrorList("Reason: The object name parameter is required."), "badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
         badBuckets = {None:typeErrorList(None), 1234:typeErrorList(1234)}
         self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":None, "badFile":None, None:None, 1234:None})
-        badBuckets = {"": statusCodeList(400)}
-        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
+        badBuckets = {"": statusCodeList(404)}
+        self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)}) #kjhkjh
                 
     def testGetBulkWithMetadata(self):
         """tests getObject: metadata parameter, putObject:metadata parameter"""
