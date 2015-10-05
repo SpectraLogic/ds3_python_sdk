@@ -41,8 +41,8 @@ puts "DS3_ENDPOINT #{ENV["DS3_ENDPOINT"]}"
 puts "DS3_SECRET_KEY #{ENV["DS3_SECRET_KEY"]}"
 puts "DS3_ACCESS_KEY #{ENV["DS3_ACCESS_KEY"]}"
 
-puts "docker run -e DS3_ENDPOINT -e DS3_SECRET_KEY -e DS3_ACCESS_KEY -it --dns=10.1.0.9 spectralogic/ds3_c_docker_test"
-output = `docker run -e DS3_ENDPOINT -e DS3_SECRET_KEY -e DS3_ACCESS_KEY -it --dns=10.1.0.9 spectralogic/ds3_c_docker_test`
+puts "docker run -e DS3_ENDPOINT -e DS3_SECRET_KEY -e DS3_ACCESS_KEY -it --dns=10.1.0.9 a8f4f0ebb54c"
+output = `docker run -e DS3_ENDPOINT -e DS3_SECRET_KEY -e DS3_ACCESS_KEY -it --dns=10.1.0.9 a8f4f0ebb54c`
 docker_status = $?
 
 puts output
