@@ -29,6 +29,9 @@ class Ds3Error(Exception):
         self.reason = libds3Error.contents.message.contents.value
         response = libds3Error.contents.error
         self._hasResponse = False
+        self.statusCode = None
+        self.statusMessage = None
+        self.message = None
         if response:
             self._hasResponse = True
             self.statusCode = response.contents.status_code
@@ -218,6 +221,15 @@ def typeCheck(input_arg, type_to_check):
 
 def typeCheckString(input_arg):
     return typeCheck(input_arg, basestring)
+
+def enumCheck(input_arg, enum_dict):
+    if input_arg in enum_dict.keys():
+        return enum_dict[input_arg]
+    else:
+        raise TypeError("expected value to be one of " + str(enum_dict.keys()) + ", got " + str(input_arg))
+
+def enumCheckDs3ObjectType(input_arg):
+    return enumCheck(input_arg, {"DATA":0, "FOLDER":1})
 
 def addMetadataToRequest(request, metadata):
     if metadata:
@@ -545,7 +557,7 @@ class Ds3Client(object):
         if pageOffset:
              libds3.lib.ds3_request_set_page_offset(request, typeCheckString(str(pageOffset)))
         if objType:
-            libds3.lib.ds3_request_set_type(request, typeCheckString(objType))
+            libds3.lib.ds3_request_set_type(request, enumCheckDs3ObjectType(objType))
         if version:
             libds3.lib.ds3_request_set_version(request, typeCheckString(str(version)))
 
@@ -669,7 +681,9 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         
-        placements = arrayToList(response.contents.tapes, response.contents.num_tapes, lambda obj: obj.barcode.contents.value)
-        libds3.lib.ds3_free_get_physical_placement_response(response)
+        placements = []
+        if response:
+            placements = arrayToList(response.contents.tapes, response.contents.num_tapes, lambda obj: obj.barcode.contents.value)
+            libds3.lib.ds3_free_get_physical_placement_response(response)
         
         return placements
