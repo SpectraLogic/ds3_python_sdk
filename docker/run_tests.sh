@@ -7,7 +7,7 @@ autoreconf --install
 make install
 ldconfig
 
-cd ..
+cd /opt
 git clone https://github.com/SpectraLogic/ds3_python_sdk.git
 cd ds3_python_sdk
 python setup.py install
