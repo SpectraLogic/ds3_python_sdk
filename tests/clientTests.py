@@ -371,7 +371,7 @@ class ObjectTestCase(Ds3TestCase):
     def testDeleteFolderBadInput(self):
         """tests deleteFolder"""
         self.client.putBucket(bucketName)
-        badBuckets = {"": statusCodeList(400), "fakeBucket": statusCodeList(400), bucketName: statusCodeList(400)}
+        badBuckets = {"": statusCodeList(404), "fakeBucket": statusCodeList(404), bucketName: statusCodeList(404)}
         self.checkBadInputs(self.client.deleteFolder, badBuckets, second_arg_dict = {"folder":None})
 
     def testGetObjects(self):
@@ -476,7 +476,6 @@ class ObjectMetadataTestCase(Ds3TestCase):
         jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
 
         self.assertEqual(metadata, metadata_resp)
-        self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
         
 class BasicClientTestCase(Ds3TestCase):
     def testGetSystemInformation(self):
