@@ -476,6 +476,7 @@ class ObjectMetadataTestCase(Ds3TestCase):
         jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
 
         self.assertEqual(metadata, metadata_resp)
+        self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
         
 class BasicClientTestCase(Ds3TestCase):
     def testGetSystemInformation(self):
