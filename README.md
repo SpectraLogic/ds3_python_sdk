@@ -241,9 +241,36 @@ for bucketName in bucketNames:
     	object_dict[bucketName].append(name)
 
 print(object_dict)
+
+
+Suppose we didn't want to get the contents of a bucket all at once, but in sections; to do that, we can use the maxKeys and nextMarker parameters
+For instance, if we wanted to look at objects in the 'books' bucket, two at a time:
+
+```python
+import os
+import tempfile
+
+from ds3 import ds3
+
+client = ds3.createClientFromEnv()
+
+bucketName = 'books'
+
+# use the maxKeys parameter to specify we only want 2 objects to come back
+bucketResult = client.getBucket(bucketName, maxKeys = 2)
+
+# the first two objects
+print(map(lambda bucket: bucket.name, bucketResult.objects))
+
+# nextMarker indicates where to start the next section of objects
+# it will be None when there are no more objects left
+while(bucketResult.nextMarker != None):
+	# we use maxKeys parameter to say we still want 2 objects, and the nextMarker parameter to say we want the section after the one we just got
+	bucketResult = client.getBucket(bucketName, maxKeys = 2, nextMarker = bucketResult.nextMarker)
+	print(map(lambda bucket: bucket.name, bucketResult.objects))
 ```
 
-Here's an example of how give objects on the server a different name than what is on the filesystem, and how to delete the renamed objects as though they were organized by folder
+Here's an example of how to give objects on the server a different name than what is on the filesystem, and how to delete the renamed objects as though they were organized by folder
 
 ```python
 import os
