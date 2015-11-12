@@ -44,12 +44,8 @@ while len(chunkIds) > 0:
             # if we haven't create a temporary file for this object yet, create one
             if obj.name not in tempFiles.keys():
                 tempFiles[obj.name]=tempfile.mkstemp()
-            # it is possible that if we start resending a chunk, due to the program crashing, that 
-            # some objects will already be in cache.  Check to make sure that they are not, and then
-            # send the object to Spectra S3
-            if not obj.inCache:
-                client.putObject(bucketName, obj.name, obj.offset, obj.length, bulkResult.jobId)
-                client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, tempFiles[obj.name][1])
+	    # get the object
+	    client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, realFileName=tempFiles[obj.name][1])
 
 # iterate over the temporary files, printing out their names, then closing and and removing them
 for objName in tempFiles.keys():

@@ -300,7 +300,7 @@ class ObjectTestCase(Ds3TestCase):
         self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: None, None:None})
         badBuckets = {bucketName: statusCodeList(404), "not-here": statusCodeList(404)}
         self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: typeErrorList(1234), None:typeErrorList(None)})
-        badBuckets = {"": statusCodeList(400)}
+        badBuckets = {"":reasonErrorList("Reason: The bucket name parameter is required.")}
         self.checkBadInputs(self.client.deleteObject, badBuckets, second_arg_dict = {"badFile":None})
 
     def testDeleteObjects(self):
@@ -446,7 +446,7 @@ class ObjectMetadataTestCase(Ds3TestCase):
         self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":reasonErrorList("Reason: The object name parameter is required."), "badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
         badBuckets = {None:typeErrorList(None), 1234:typeErrorList(1234)}
         self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"":None, "badFile":None, None:None, 1234:None})
-        badBuckets = {"": statusCodeList(400)}
+        badBuckets = {"": reasonErrorList("Reason: The bucket name parameter is required.")}
         self.checkBadInputs(self.client.headObject, badBuckets, second_arg_dict = {"badFile":None, None:typeErrorList(None), 1234:typeErrorList(1234)})
                 
     def testGetBulkWithMetadata(self):
