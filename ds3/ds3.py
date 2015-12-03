@@ -274,7 +274,9 @@ class Ds3Client(object):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
         self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
         self.credentials = credentials
-        
+        if proxy:
+            libds3.lib.ds3_client_proxy(self._client, proxy)
+
     def verifySystemHealth(self):
         '''
         Returns how long it took to verify the health of the system.  In the event that the system is in a bad state, an error will
