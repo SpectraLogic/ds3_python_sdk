@@ -23,7 +23,7 @@ def arrayToList(array, length, wrapper = lambda ds3Str: ds3Str.contents.value):
     for i in xrange(0, length):
         result.append(wrapper(array[i]))
     return result
-    
+
 class Ds3Error(Exception):
     def __init__(self, libds3Error):
         self.reason = libds3Error.contents.message.contents.value
@@ -274,7 +274,9 @@ class Ds3Client(object):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
         self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
         self.credentials = credentials
-        
+        if proxy:
+            libds3.lib.ds3_client_proxy(self._client, proxy)
+
     def verifySystemHealth(self):
         '''
         Returns how long it took to verify the health of the system.  In the event that the system is in a bad state, an error will
@@ -306,19 +308,19 @@ class Ds3Client(object):
 
         libds3.lib.ds3_free_service_response(response)
 
-      
+
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
         '''
         Returns a list of all the objects in a specific bucket as specified by `bucketName`.  This will return at most 1000 objects.
         In order to retrieve more, pagination must be used.  The `nextMarker` is used to specify where the next 1000 objects will
         start listing from.
-        
+
         `delimiter` can be used to list objects like directories.  So for example, if delimiter is set to '/' then it will return
         a list of 'directories' in the commons prefixes field in the response.  In order to list all the files in that directory use the prefix parameter.
         For example:
-        
+
             client.getBucket("my_bucket", prefix = 'dir', delimiter = '/')
-            
+
         The above will list any files and directories that are in the 'dir' directory. 
         '''
         response = POINTER(libds3.LibDs3GetBucketResponse)()
@@ -360,7 +362,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_metadata(response)
 
         return metadata
-    
+
     def headBucket(self, bucketName):
         '''
         Checks whether a bucket exists.
@@ -402,7 +404,7 @@ class Ds3Client(object):
         that you are getting from Spectra S3 does not match what will be on the local filesystem.
         Returns the metadata for the retrieved object as a dictionary, where keys are
         associated with a list of the values for that key.
-        
+
         This can only be used within the context of a Bulk Get Job.
         '''
         objectName = typeCheckString(objectName)
@@ -411,7 +413,8 @@ class Ds3Client(object):
             effectiveFileName = typeCheckString(realFileName)
         response = POINTER(libds3.LibDs3Metadata)()
         request = libds3.lib.ds3_init_get_object_for_job(typeCheckString(bucketName), objectName, offset, jobId)
-        localFile = open(effectiveFileName, "w")
+        localFile = open(effectiveFileName, "wb")
+        localFile.seek(offset, 0)
         error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
         localFile.close()
         libds3.lib.ds3_free_request(request)
@@ -440,18 +443,19 @@ class Ds3Client(object):
         Use metadata to set the metadata for the object. metadata's value should be
         a dictionary, where keys are associated with either a value or a list of the
         values for that key.
-        
+
         This can only be used within the context of a Spectra S3 Bulk Put job.
         '''
         objectName = typeCheckString(objectName)
         effectiveFileName = objectName
         if realFileName:
             effectiveFileName = typeCheckString(realFileName)
-        request = libds3.lib.ds3_init_put_object_for_job(typeCheckString(bucketName), objectName, offset, size, jobId)
+        request = libds3.lib.ds3_init_put_object_for_job(typeCheckString(bucketName), objectName, c_ulonglong(offset), c_ulonglong(size), jobId)
 
         addMetadataToRequest(request, metadata)
 
-        localFile = open(effectiveFileName, "r")
+        localFile = open(effectiveFileName, "rb")
+        localFile.seek(offset, 0)
         error = libds3.lib.ds3_put_object(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_read_from_fd)
         localFile.close()
         libds3.lib.ds3_free_request(request)
@@ -543,7 +547,7 @@ class Ds3Client(object):
         # TODO: need to add an example here of what different query strings are supported 
         request = libds3.lib.ds3_init_get_objects()
         response = POINTER(libds3.LibDs3GetObjectsResponse)()
-        
+
         if bucketName:
             libds3.lib.ds3_request_set_bucket_name(request, typeCheckString(bucketName))
         if creationDate:
@@ -565,7 +569,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_request(request)
         if error:
             raise Ds3Error(error)
-        
+
         result = arrayToList(response.contents.objects, response.contents.num_objects, wrapper = Ds3SearchObject)
 
         libds3.lib.ds3_free_objects_response(response)
@@ -628,7 +632,7 @@ class Ds3Client(object):
         '''
         request = libds3.lib.ds3_init_get_job(jobId)
         return self._sendJobRequest(libds3.lib.ds3_get_job, request)
-    
+
     def getJobs(self):
         '''
         Returns a list of all jobs.
@@ -646,7 +650,7 @@ class Ds3Client(object):
         libds3.lib.ds3_free_get_jobs_response(response)
 
         return result
-        
+
     def putJob(self, jobId):
         '''
         Modifies a job to reset the timeout timer for the job.
@@ -680,10 +684,10 @@ class Ds3Client(object):
 
         if error:
             raise Ds3Error(error)
-        
+
         placements = []
         if response:
             placements = arrayToList(response.contents.tapes, response.contents.num_tapes, lambda obj: obj.barcode.contents.value)
             libds3.lib.ds3_free_get_physical_placement_response(response)
-        
+
         return placements
