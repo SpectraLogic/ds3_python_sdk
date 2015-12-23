@@ -26,9 +26,13 @@ def asCList(orig):
 
 def toDs3BulkObjectList(fileList):
     bulkList = lib.ds3_init_bulk_object_list(len(fileList))
-    bulkContents = bulkList.contents
+    bulkContents = bulkList.contents.list
     for i in xrange(len(fileList)):
-        bulkContents.list[i].name = lib.ds3_str_init(fileList[i])
+        if isinstance(fileList[i], tuple):
+            bulkContents[i].name = lib.ds3_str_init(fileList[i][0])
+            bulkContents[i].length = fileList[i][1]
+        else:
+            bulkContents[i].name = lib.ds3_str_init(fileList[i])
     return bulkList
 
 class LibDs3Str(Structure):

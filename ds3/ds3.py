@@ -219,8 +219,22 @@ def typeCheck(input_arg, type_to_check):
     else:
         raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
 
+def ensureUTF8(input_arg):
+    if isinstance(input_arg, unicode):
+        return input_arg.encode('utf-8')
+    return input_arg
+
 def typeCheckString(input_arg):
-    return typeCheck(input_arg, basestring)
+    return ensureUTF8(typeCheck(input_arg, basestring))
+
+def typeCheckObjectList(fileList):
+    result = []
+    for item in fileList:
+        if isinstance(item, tuple):
+            result.append((typeCheckString(item[0]), item[1]))
+        else:
+            result.append(typeCheckString(item))
+    return result
 
 def enumCheck(input_arg, enum_dict):
     if input_arg in enum_dict.keys():
@@ -236,9 +250,9 @@ def addMetadataToRequest(request, metadata):
         for key in metadata:
             if type(metadata[key]) is list or type(metadata[key]) is tuple:
                 for value in metadata[key]:
-                    libds3.lib.ds3_request_set_metadata(request, key, value);
+                    libds3.lib.ds3_request_set_metadata(request, typeCheckString(key), typeCheckString(value));
             else:
-                libds3.lib.ds3_request_set_metadata(request, key, metadata[key]);
+                libds3.lib.ds3_request_set_metadata(request, typeCheckString(key), typeCheckString(metadata[key]));
 
 def extractMetadataFromResponse(metaData):
     result = {}
@@ -476,7 +490,7 @@ class Ds3Client(object):
         '''
         Deletes multiple objects from the bucket using a single API call.
         '''
-        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
         request = libds3.lib.ds3_init_delete_objects(typeCheckString(bucketName))
         error = libds3.lib.ds3_delete_objects(self._client, request, bulkObjs)
         libds3.lib.ds3_free_request(request)
@@ -500,11 +514,7 @@ class Ds3Client(object):
         `objectName` does not have to be the actual name on the local file system, but it will be the name that you must
         initiate a single object put to later.  `size` must reflect the actual size of the file that is being put.
         '''
-        bulkObjs = libds3.lib.ds3_init_bulk_object_list(len(fileInfoList))
-        bulkObjsList = bulkObjs.contents.list
-        for i in xrange(0, len(fileInfoList)):
-            bulkObjsList[i].name = libds3.lib.ds3_str_init(fileInfoList[i][0])
-            bulkObjsList[i].length = fileInfoList[i][1]
+        bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileInfoList))
         response = POINTER(libds3.LibDs3BulkResponse)()
         request = libds3.lib.ds3_init_put_bulk(typeCheckString(bucketName), bulkObjs)
         error = libds3.lib.ds3_bulk(self._client, request, byref(response))
@@ -523,7 +533,7 @@ class Ds3Client(object):
         Initiates a start bulk get with the remote Spectra S3 endpoint.  All the files that will be retrieved must be specified in
         `fileNameList`.
         '''
-        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
         response = POINTER(libds3.LibDs3BulkResponse)()
         chunkOrderingValue = libds3.LibDs3ChunkOrdering.IN_ORDER
         if not chunkOrdering:
@@ -673,7 +683,7 @@ class Ds3Client(object):
         Returns where in the Spectra S3 system each file in `fileNameList` is located.
         '''
         response = POINTER(libds3.LibDs3GetPhysicalPlacementResponse)()
-        bulkObjs = libds3.toDs3BulkObjectList(fileNameList)
+        bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
         bucketName=typeCheckString(bucketName)
         if fullDetails:
             request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)

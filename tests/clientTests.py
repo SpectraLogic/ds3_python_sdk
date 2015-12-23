@@ -20,6 +20,7 @@ from ds3.libds3 import LibDs3JobStatus
 
 bucketName = "python_test_bucket"
 resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
+unicodeResources = [unicode(filename) for filename in resources]
 
 def pathForResource(resourceName):
     encoding = sys.getfilesystemencoding()
@@ -102,6 +103,14 @@ class BucketTestCase(Ds3TestCase):
 
         self.assertTrue(bucketName in bucketSet)
         
+    def testPutBucketUnicode(self):
+        """tests putBucket"""
+        self.client.putBucket(unicode(bucketName))
+
+        bucketSet = frozenset(map(lambda service: service.name, self.client.getService()))
+
+        self.assertTrue(bucketName in bucketSet)
+        
     def testPutBucketBadInput(self):
         """tests putBucket: bad input to function"""
         self.client.putBucket(bucketName)
@@ -146,6 +155,10 @@ class BucketTestCase(Ds3TestCase):
                          
         self.assertEqual(len(bucketContents.objects), 0)
         
+    def testPutBulkUnicode(self):
+        """tests getBucket: when bucket has contents"""
+        fileList = populateTestData(self.client, bucketName, resourceList = unicodeResources)
+
     def testGetFilledBucket(self):
         """tests getBucket: when bucket has contents"""
         fileList = populateTestData(self.client, bucketName)
@@ -292,6 +305,16 @@ class ObjectTestCase(Ds3TestCase):
         bucketContents = self.client.getBucket(bucketName)
 
         self.assertEqual(len(bucketContents.objects), 0)
+
+    def testDeleteObjectUnicode(self):
+        """tests deleteObject: unicode parameter"""
+        populateTestData(self.client, bucketName, resourceList = ["beowulf.txt"])
+
+        self.client.deleteObject(bucketName, unicode("beowulf.txt"))
+        
+        bucketContents = self.client.getBucket(bucketName)
+
+        self.assertEqual(len(bucketContents.objects), 0)
         
     def testDeleteObjectBadInput(self):
         """tests deleteObject: bad input to function"""
@@ -308,6 +331,16 @@ class ObjectTestCase(Ds3TestCase):
         fileList = populateTestData(self.client, bucketName)
 
         deletedResponse = self.client.deleteObjects(bucketName, map(lambda obj: obj[0], fileList))
+
+        bucketContents = self.client.getBucket(bucketName)
+
+        self.assertEqual(len(bucketContents.objects), 0)
+
+    def testDeleteObjectsUnicode(self):
+        """tests deleteObjects: unicode parameter"""
+        fileList = populateTestData(self.client, bucketName)
+
+        deletedResponse = self.client.deleteObjects(bucketName, map(lambda obj: unicode(obj[0]), fileList))
 
         bucketContents = self.client.getBucket(bucketName)
 
@@ -422,7 +455,31 @@ class ObjectTestCase(Ds3TestCase):
         objects = self.client.getObjects(bucketName = bucketName, version = 1)
         
         self.validateSearchObjects(objects, resources)
+                
+    def testGetBulkUnicode(self):
+        """tests getObject: unicode parameter"""
+        populateTestData(self.client, bucketName, resourceList = unicodeResources)
 
+        bucketContents = self.client.getBucket(bucketName)
+        
+        bulkGetResult = self.client.getBulk(bucketName, map(lambda obj: unicode(obj.name), bucketContents.objects))
+        
+        tempFiles = []
+        
+        availableChunks = self.client.getAvailableChunks(bulkGetResult.jobId)
+        
+        for obj in availableChunks.bulkPlan.chunks[0].objects:
+            newFile = tempfile.mkstemp()
+            tempFiles.append(newFile)
+
+            metadata_resp = self.client.getObject(bucketName, obj.name, obj.offset, bulkGetResult.jobId, newFile[1])
+        
+        for tempFile in tempFiles:
+            os.close(tempFile[0])
+            os.remove(tempFile[1])
+
+        #jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
+        #self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
     
 class ObjectMetadataTestCase(Ds3TestCase):
     def testHeadObject(self):
