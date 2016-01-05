@@ -49,47 +49,118 @@
 <dl class="class">
 <dt id="ds3.ds3.Credentials">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Credentials</tt><big>(</big><em>accessKey</em>, <em>secretKey</em><big>)</big><a class="headerlink" href="#ds3.ds3.Credentials" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Credential object to build client</p>
+<p>Construct with (accessKey, secretKey) for target device or build client from environment variables</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3AllocateChunkResponse">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3AllocateChunkResponse</tt><big>(</big><em>ds3AllocateChunkResponse</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3AllocateChunkResponse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This class has been deprecated</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3AvailableChunksResponse">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3AvailableChunksResponse</tt><big>(</big><em>ds3AvailableChunksResponse</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3AvailableChunksResponse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A list of all chunks in a job that can currently be processed.</p>
+<p>Members:</p>
+<blockquote>
+<div><p>retryAfter (int) : retry interval in seconds.</p>
+<p>bulkPlan(Ds3BulkPlan) : collection of chunks.</p>
+</div></blockquote>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3Bucket">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Bucket</tt><big>(</big><em>ds3Bucket</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Bucket" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Descibes a Bucket (name and creationDate)</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">name (string) : The name of the bucket.</p>
+<p class="last">creationDate (date) : The date and time the bucket was created in the format YYYY-MM-DDThh:mm:ss.xxxZ.</p>
+</dd>
+</dl>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3BucketDetails">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3BucketDetails</tt><big>(</big><em>ds3Bucket</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3BucketDetails" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Response for ListObjects (Get Bucket)</p>
+<p>Members:</p>
+<blockquote>
+<div><p>commonPrefixes (List&lt;string&gt;) : If a delimiter is specified, contains the portion of an object&#8217;s name between the prefix and the next occurrence of the delimiter.</p>
+<p>creationDate (string) : The date and time the bucket was created in the format YYYY-MM-DDThh:mm:ss.xxxZ.</p>
+<p>delimiter (string) : The character used to group object names.</p>
+<p>isTruncated (bool) : Specifies whether the results were truncated (true) or not (false) due to the number of results exceeding MaxKeys.</p>
+<p>marker (string) : The object name where the bucket listing begins. Included in the response if it was specified in the request.</p>
+<p>maxKeys (int) : The maximum number of keys (object names) returned in the response.</p>
+<p>name (string) : The name of the bucket.</p>
+<p>nextMarker (string) : If the delimiter parameter was specified, and isTruncated is true, indicates the object name to use in the marker field in the next request to get the next set of objects.</p>
+<p>objects (List&lt;Ds3Objects&gt;) : Bucket contents matching search criteria</p>
+<p>prefix (string) : The string used to limit the response keys. Only object names that begin with the specified prefix are listed.</p>
+<p>size (long) : The size of the object in bytes.</p>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3BuildInformation">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3BuildInformation</tt><big>(</big><em>ds3BuildInfo</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3BuildInformation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Describes the Black Pearl Software</p>
+<p>Members:</p>
+<blockquote>
+<div><p>branch (string) : The branch used to build the API.</p>
+<p>revision (string) : The revision of the software build.</p>
+<p>version (string) : The version of the software build.</p>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3BulkObject">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3BulkObject</tt><big>(</big><em>bulkObject</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3BulkObject" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Object description from bulk response</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">name (string) : The object name</p>
+<p>length (long) : The length in bytes of the object or part of the object.</p>
+<p>offset (long) : The offset in bytes from the start of the object.</p>
+<p class="last">inCache (bool) : Indicates if the object is currently in cache on the BlackPearl Deep Storage Gateway.</p>
+</dd>
+</dl>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3BulkPlan">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3BulkPlan</tt><big>(</big><em>ds3BulkResponse</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3BulkPlan" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Collection of job chunks and associated parameters.</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">startDate (string) : The date and time the job was started in the format YYYY-MM-DDThh:mm:ss.xxxZ.</p>
+<p>userID (string) : The UUID for the user who initiated the job.</p>
+<p>userName (string) : The username of the user who initiated the job.</p>
+<p>requestType (string) : Specifies whether job chunks are written as quickly as possible (PERFORMANCE) or across as few tapes as possible (CAPACITY). Values: CAPACITY, PERFORMANCE,</p>
+<p>status (string) : Values COMPLETED, CANCELLED, IN_PROGRESS</p>
+<p class="last">chunks (Ds3CacheList) : list of chunks to process.</p>
+</dd>
+</dl>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3CacheList">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3CacheList</tt><big>(</big><em>bulkObjectList</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3CacheList" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Collection of chunks to process.</p>
+<p>Members:</p>
+<blockquote>
+<div><p>chunkId (string) : The UUID for the job chunk.</p>
+<p>chunkNumber (string) : The position of the chunk within the job.</p>
+<p>nodeId (string) : The UUID for the BlackPearl node.</p>
+<p>objects (List&lt;Ds3BulkObject&gt;) : Container for information about the objects.</p>
+</div></blockquote>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3Client">
@@ -188,6 +259,17 @@ associated with a list of the values for that key.</p>
 <dt id="ds3.ds3.Ds3Client.getObjects">
 <tt class="descname">getObjects</tt><big>(</big><em>bucketName=None</em>, <em>creationDate=None</em>, <em>objId=None</em>, <em>name=None</em>, <em>pageLength=None</em>, <em>pageOffset=None</em>, <em>objType=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of objects.</p>
+<p>Optional Search parameters:</p>
+<blockquote>
+<div><p>bucketName (string) : The UUID or name for a bucket.</p>
+<p>creationDate (string) : The date the object was created in the format YYYY-MM-DD hh:mm:ss.xxx.</p>
+<p>name (string) : The name of an object.</p>
+<p>objId (string) : The UUID for an object.</p>
+<p>objType (string) : The type of object. Values: DATA, FOLDER</p>
+<p>pageLength (int) : The maximum number of objects to list. The default is all items after pageOffset.</p>
+<p>pageOffset (int) : The starting point for the first object to list. The default is 0.</p>
+<p>version (string) : The version of an object.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -255,8 +337,8 @@ values for that key.</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.verifySystemHealth">
 <tt class="descname">verifySystemHealth</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.verifySystemHealth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns how long it took to verify the health of the system.  In the event that the system is in a bad state, an error will
-be thrown.</p>
+<dd><p>Returns how long it took to verify the health of the system. 
+In the event that the system is in a bad state, an error will be thrown.</p>
 </dd></dl>
 
 </dd></dl>
@@ -264,32 +346,86 @@ be thrown.</p>
 <dl class="exception">
 <dt id="ds3.ds3.Ds3Error">
 <em class="property">exception </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Error</tt><big>(</big><em>libds3Error</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns an exception to the client. Attributes:</p>
+<p>reason (string):  error contents message  
+response (string): error contents error  
+if(has_response == true)</p>
+<blockquote>
+<div><p>statusCode (int): http return value</p>
+<p>statusMessage (string): http return status_message</p>
+<p>message (string): error body</p>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3Object">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Object</tt><big>(</big><em>ds3Object</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Object" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Describes a Object</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">name (string) : The object name</p>
+<p>etag (string) : The http entity tag.</p>
+<p>size (long) : The size of the object in bytes.</p>
+<p class="last">owner (Ds3Owner) : The owner of the object.</p>
+</dd>
+</dl>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3Owner">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Owner</tt><big>(</big><em>ds3Owner</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Owner" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Describes an object owner (name and id)</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">name (string) : The name of the owner.</p>
+<p class="last">id (string) : The UUID of the object owner.</p>
+</dd>
+</dl>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3SearchObject">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3SearchObject</tt><big>(</big><em>ds3SearchObject</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3SearchObject" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Search parameters for Get Objects</p>
+<p>Members:</p>
+<blockquote>
+<div><p>bucketId (string) : The UUID or name for a bucket.</p>
+<p>id (string) : The UUID for an object.</p>
+<p>lastModified (string) : The date the object was created in the format YYYY-MM-DD hh:mm:ss.xxx.</p>
+<p>name (string) : The name of an object.</p>
+<p>owner (Ds3Owner) : The owner of an object.</p>
+<p>size (long) : The size of the object in bytes.</p>
+<p>storageClass (string) : unused.</p>
+<p>type (string) : The type of object. Values: DATA, FOLDER</p>
+<p>version (string) : The version of an object.</p>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3SystemHealthInformation">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3SystemHealthInformation</tt><big>(</big><em>ds3HealthInfo</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3SystemHealthInformation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Verifies that the system appears to be online and functioning normally. If critical components in the data path between the client and the BlackPearl gateway are unresponsive, an error is generated.</p>
+<p>Members:</p>
+<blockquote>
+<div>msRequiredToVerifyDataPlannerHealth (long) : The amount of time, in milliseconds, that it took the gateway to respond.</div></blockquote>
+</dd></dl>
 
 <dl class="class">
 <dt id="ds3.ds3.Ds3SystemInformation">
 <em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3SystemInformation</tt><big>(</big><em>ds3SystemInfo</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3SystemInformation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Describes the Black Pearl Hardware and Software</p>
+<p>Members:</p>
+<blockquote>
+<div><p>apiVersion (string) : The version of the DS3 API. The version is in the form X.Y, where X is the MD5 checksum across all request handler major revisions and Y is the MD5 checksum across all request handler full versions (including the minor revision).</p>
+<p>buildInformation (ds3BuildInfo) : A container for the information about the build.</p>
+<p>serialNumber (string) : The serial number of the BlackPearl Deep Storage Gateway</p>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ds3.ds3.addMetadataToRequest">
@@ -298,17 +434,35 @@ be thrown.</p>
 
 <dl class="function">
 <dt id="ds3.ds3.arrayToList">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x7fc7199d9b90&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b0a49acdcf8&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ds3.ds3.checkExistence">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x7fc7199d9aa0&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b0a49acdc08&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ds3.ds3.createClientFromEnv">
 <tt class="descclassname">ds3.ds3.</tt><tt class="descname">createClientFromEnv</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.createClientFromEnv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a Ds3Client from environment varialbles.</p>
+<p>Required: DS3_ACCESS_KEY, DS3_SECRET_KEY, DS3_ENDPOINT</p>
+<p>Optional: http_proxy</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ds3.ds3.ensureUTF8">
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">ensureUTF8</tt><big>(</big><em>input_arg</em><big>)</big><a class="headerlink" href="#ds3.ds3.ensureUTF8" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ds3.ds3.enumCheck">
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">enumCheck</tt><big>(</big><em>input_arg</em>, <em>enum_dict</em><big>)</big><a class="headerlink" href="#ds3.ds3.enumCheck" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ds3.ds3.enumCheckDs3ObjectType">
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">enumCheckDs3ObjectType</tt><big>(</big><em>input_arg</em><big>)</big><a class="headerlink" href="#ds3.ds3.enumCheckDs3ObjectType" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -319,6 +473,11 @@ be thrown.</p>
 <dl class="function">
 <dt id="ds3.ds3.typeCheck">
 <tt class="descclassname">ds3.ds3.</tt><tt class="descname">typeCheck</tt><big>(</big><em>input_arg</em>, <em>type_to_check</em><big>)</big><a class="headerlink" href="#ds3.ds3.typeCheck" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ds3.ds3.typeCheckObjectList">
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">typeCheckObjectList</tt><big>(</big><em>fileList</em><big>)</big><a class="headerlink" href="#ds3.ds3.typeCheckObjectList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
