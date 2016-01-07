@@ -17,7 +17,7 @@ bucketNames = map(lambda bucket: bucket.name, bucketObjects)
 for bucketName in bucketNames:
     object_dict[bucketName]=[]
     bucketContents = client.getBucket(bucketName)
-    
+
     # like getService, getBucket returns more information about the bucket than the contents, so we'll extract those
     objectNames = map(lambda bucket: bucket.name, bucketContents.objects)
     for name in objectNames:

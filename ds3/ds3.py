@@ -26,15 +26,15 @@ def arrayToList(array, length, wrapper = lambda ds3Str: ds3Str.contents.value):
 
 class Ds3Error(Exception):
     """Returns an exception to the client. Attributes:
-    
-    reason (string):  error contents message  
-    response (string): error contents error  
+
+    reason (string):  error contents message
+    response (string): error contents error
     if(has_response == true)
         statusCode (int): http return value
 
         statusMessage (string): http return status_message
 
-        message (string): error body  
+        message (string): error body
 
     Cast to string for description.
     """
@@ -211,10 +211,10 @@ class Ds3CacheList(object):
 
         chunkId (string) : The UUID for the job chunk.
 
-        chunkNumber (string) : The position of the chunk within the job. 
+        chunkNumber (string) : The position of the chunk within the job.
 
         nodeId (string) : The UUID for the BlackPearl node.
- 
+
         objects (List<Ds3BulkObject>) : Container for information about the objects.
     """
     def __init__(self, bulkObjectList):
@@ -238,12 +238,12 @@ class Ds3BulkPlan(object):
         requestType (string) : Specifies whether job chunks are written as quickly as possible (PERFORMANCE) or across as few tapes as possible (CAPACITY). Values: CAPACITY, PERFORMANCE,
 
         status (string) : Values COMPLETED, CANCELLED, IN_PROGRESS
-       
+
         cachedSize (long) : The amount of data successfully transferred to the BlackPearl Deep Storage Gateway from the client. 
 
-        completedSize (long) : The amount of data written to tape media. 
+        completedSize (long) : The amount of data written to tape media.
 
-        originalSize (long) : The amount of data for the job to transfer. 
+        originalSize (long) : The amount of data for the job to transfer.
 
         jobId (string) : The UUID for the job.
 
@@ -256,11 +256,17 @@ class Ds3BulkPlan(object):
         self.bucketName = checkExistence(contents.bucket_name)
         if contents.cached_size_in_bytes:
             self.cachedSize = contents.cached_size_in_bytes
+        else:
+            self.cachedSize = 0
         if contents.completed_size_in_bytes:
             self.completedSize = contents.completed_size_in_bytes
+        else:
+            self.completedSize = 0
         self.jobId = checkExistence(contents.job_id)
         if contents.original_size_in_bytes:
             self.originalSize = contents.original_size_in_bytes
+        else:
+            self.originalSize = 0
         self.startDate = checkExistence(contents.start_date)
         self.userId = checkExistence(contents.user_id)
         self.userName = checkExistence(contents.user_name)
@@ -319,7 +325,7 @@ class Ds3SearchObject(object):
         size (long) : The size of the object in bytes.
 
         storageClass (string) : unused.
- 
+
         type (string) : The type of object. Values: DATA, FOLDER
 
         version (string) : The version of an object.
@@ -489,11 +495,13 @@ class Ds3Client(object):
         self._ds3Creds = libds3.lib.ds3_create_creds(c_char_p(credentials.accessKey), c_char_p(credentials.secretKey))
         self._client = libds3.lib.ds3_create_client(c_char_p(endpoint), self._ds3Creds)
         self.credentials = credentials
+        self.endpoint = endpoint
+        self.proxy = proxy
         if proxy:
             libds3.lib.ds3_client_proxy(self._client, proxy)
 
     def verifySystemHealth(self):
-        """Returns how long it took to verify the health of the system. 
+        """Returns how long it took to verify the health of the system.
         In the event that the system is in a bad state, an error will be thrown.
         """
         response = POINTER(libds3.LibDs3VerifySystemHealthResponse)()
@@ -516,7 +524,7 @@ class Ds3Client(object):
         if error:
             raise Ds3Error(error)
         contents = response.contents
-        for i in xrange(0, response.contents.num_buckets):
+        for i in xrange(0, contents.num_buckets):
             yield Ds3Bucket(contents.buckets[i])
 
         libds3.lib.ds3_free_service_response(response)
