@@ -249,7 +249,7 @@ class Ds3BulkPlan(object):
         if contents.cached_size_in_bytes:
             self.cachedSize = contents.cached_size_in_bytes
         if contents.completed_size_in_bytes:
-            self.compltedSize = contents.completed_size_in_bytes
+            self.completedSize = contents.completed_size_in_bytes
         self.jobId = checkExistence(contents.job_id)
         if contents.original_size_in_bytes:
             self.originalSize = contents.original_size_in_bytes
