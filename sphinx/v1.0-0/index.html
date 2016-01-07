@@ -139,10 +139,14 @@
 <dl class="docutils">
 <dt>Members:</dt>
 <dd><p class="first">startDate (string) : The date and time the job was started in the format YYYY-MM-DDThh:mm:ss.xxxZ.</p>
-<p>userID (string) : The UUID for the user who initiated the job.</p>
+<p>userId (string) : The UUID for the user who initiated the job.</p>
 <p>userName (string) : The username of the user who initiated the job.</p>
 <p>requestType (string) : Specifies whether job chunks are written as quickly as possible (PERFORMANCE) or across as few tapes as possible (CAPACITY). Values: CAPACITY, PERFORMANCE,</p>
 <p>status (string) : Values COMPLETED, CANCELLED, IN_PROGRESS</p>
+<p>cachedSize (long) : The amount of data successfully transferred to the BlackPearl Deep Storage Gateway from the client.</p>
+<p>completedSize (long) : The amount of data written to tape media.</p>
+<p>originalSize (long) : The amount of data for the job to transfer.</p>
+<p>jobId (string) : The UUID for the job.</p>
 <p class="last">chunks (Ds3CacheList) : list of chunks to process.</p>
 </dd>
 </dl>
@@ -434,12 +438,12 @@ if(has_response == true)</p>
 
 <dl class="function">
 <dt id="ds3.ds3.arrayToList">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b0a49acdcf8&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2abb28f90cf8&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ds3.ds3.checkExistence">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b0a49acdc08&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2abb28f90c08&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
