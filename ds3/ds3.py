@@ -231,13 +231,21 @@ class Ds3BulkPlan(object):
     Members:
         startDate (string) : The date and time the job was started in the format YYYY-MM-DDThh:mm:ss.xxxZ.
 
-        userID (string) : The UUID for the user who initiated the job.
+        userId (string) : The UUID for the user who initiated the job.
 
         userName (string) : The username of the user who initiated the job.
 
         requestType (string) : Specifies whether job chunks are written as quickly as possible (PERFORMANCE) or across as few tapes as possible (CAPACITY). Values: CAPACITY, PERFORMANCE,
 
         status (string) : Values COMPLETED, CANCELLED, IN_PROGRESS
+       
+        cachedSize (long) : The amount of data successfully transferred to the BlackPearl Deep Storage Gateway from the client. 
+
+        completedSize (long) : The amount of data written to tape media. 
+
+        originalSize (long) : The amount of data for the job to transfer. 
+
+        jobId (string) : The UUID for the job.
 
         chunks (Ds3CacheList) : list of chunks to process.
 
