@@ -12,11 +12,11 @@
 from ctypes import *
 import libds3
 
-def checkExistence(obj, wrapper = lambda ds3Str: ds3Str.contents.value):
+def checkExistence(obj, wrapper = lambda ds3Str: ds3Str.contents.value, defaultReturnValue = None):
     if obj:
         return wrapper(obj)
     else:
-        return None
+        return defaultReturnValue
 
 def arrayToList(array, length, wrapper = lambda ds3Str: ds3Str.contents.value):
     result = []
@@ -254,19 +254,10 @@ class Ds3BulkPlan(object):
     def __init__(self, ds3BulkResponse):
         contents = ds3BulkResponse.contents
         self.bucketName = checkExistence(contents.bucket_name)
-        if contents.cached_size_in_bytes:
-            self.cachedSize = contents.cached_size_in_bytes
-        else:
-            self.cachedSize = 0
-        if contents.completed_size_in_bytes:
-            self.completedSize = contents.completed_size_in_bytes
-        else:
-            self.completedSize = 0
+        self.cachedSize = checkExistence(contents.cached_size_in_bytes, 0)
+        self.completedSize = checkExistence(contents.completed_size_in_bytes, 0)
         self.jobId = checkExistence(contents.job_id)
-        if contents.original_size_in_bytes:
-            self.originalSize = contents.original_size_in_bytes
-        else:
-            self.originalSize = 0
+        self.originalSize = checkExistence(contents.original_size_in_bytes, 0)
         self.startDate = checkExistence(contents.start_date)
         self.userId = checkExistence(contents.user_id)
         self.userName = checkExistence(contents.user_name)
