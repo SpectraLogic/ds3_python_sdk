@@ -14,6 +14,8 @@ import libds3
 
 def checkExistence(obj, wrapper = lambda ds3Str: ds3Str.contents.value, defaultReturnValue = None):
     if obj:
+        if wrapper == None:
+            return obj
         return wrapper(obj)
     else:
         return defaultReturnValue
@@ -254,10 +256,10 @@ class Ds3BulkPlan(object):
     def __init__(self, ds3BulkResponse):
         contents = ds3BulkResponse.contents
         self.bucketName = checkExistence(contents.bucket_name)
-        self.cachedSize = checkExistence(contents.cached_size_in_bytes, 0)
-        self.completedSize = checkExistence(contents.completed_size_in_bytes, 0)
+        self.cachedSize = checkExistence(contents.cached_size_in_bytes, None, 0)
+        self.completedSize = checkExistence(contents.completed_size_in_bytes, None, 0)
         self.jobId = checkExistence(contents.job_id)
-        self.originalSize = checkExistence(contents.original_size_in_bytes, 0)
+        self.originalSize = checkExistence(contents.original_size_in_bytes, None, 0)
         self.startDate = checkExistence(contents.start_date)
         self.userId = checkExistence(contents.user_id)
         self.userName = checkExistence(contents.user_name)
@@ -271,6 +273,9 @@ class Ds3BulkPlan(object):
         response += " | BucketName: " + self.bucketName
         response += " | UserName: " + self.userName
         response += " | Chunks: " + str(self.chunks)
+        response += " | Completed Size: " + str(self.completedSize)
+        response += " | Original Size: " + str(self.originalSize)
+        response += " | Cached Size: " + str(self.cachedSize)
         return response
     def __repr__(self):
         return self.__str__()
