@@ -497,7 +497,7 @@ class Ds3Client(object):
             libds3.lib.ds3_client_proxy(self._client, proxy)
 
     def verifySystemHealth(self):
-        """Returns how long it took to verify the health of the system.
+        """Returns (Ds3SystemHealthInformation) how long it took to verify the health of the system.
         In the event that the system is in a bad state, an error will be thrown.
         """
         response = POINTER(libds3.LibDs3VerifySystemHealthResponse)()
@@ -511,7 +511,7 @@ class Ds3Client(object):
         return result
 
     def getService(self):
-        """Returns a list of all the buckets the current access id has access to.
+        """Returns (List<Ds3Bucket>) a list of all the buckets the current access id has access to.
         """
         response = POINTER(libds3.LibDs3GetServiceResponse)()
         request = libds3.lib.ds3_init_get_service()
@@ -527,7 +527,7 @@ class Ds3Client(object):
 
 
     def getBucket(self, bucketName, prefix = None, nextMarker = None, delimiter = None, maxKeys = None):
-        """Returns a list of all the objects in a specific bucket as specified by `bucketName`.  This will return at most 1000 objects.
+        """Returns  (Ds3BucketDetails) a list of all the objects in a specific bucket as specified by `bucketName`.  This will return at most 1000 objects.
         In order to retrieve more, pagination must be used.  The `nextMarker` is used to specify where the next 1000 objects will
         start listing from.
 
@@ -561,7 +561,7 @@ class Ds3Client(object):
         return bucket
 
     def headObject(self, bucketName, objectName):
-        """Returns the metadata for the retrieved object as a dictionary of lists.  If the object does not exist  
+        """Returns (dictionary of lists) the metadata for the retrieved object.  If the object does not exist  
         an error is thrown with a status code of 404.
         """
         response = POINTER(libds3.LibDs3Metadata)()
@@ -579,7 +579,7 @@ class Ds3Client(object):
         return metadata
 
     def headBucket(self, bucketName):
-        """Checks whether a bucket exists.
+        """(Void) Raises Ds3Error if bucket does not exist.
         """
         request = libds3.lib.ds3_init_head_bucket(typeCheckString(bucketName))
         error = libds3.lib.ds3_head_bucket(self._client, request)
@@ -588,7 +588,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def deleteFolder(self, bucketName, folderName):
-        """Deletes a folder and all the objects contained within it.
+        """  (Void) Deletes a folder and all the objects contained within it.
         """
         request = libds3.lib.ds3_init_delete_folder(typeCheckString(bucketName), typeCheckString(folderName))
         error = libds3.lib.ds3_delete_folder(self._client, request)
@@ -597,7 +597,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def getSystemInformation(self):
-        """Returns the version and other information about the Spectra S3 endpoint.
+        """Returns (Ds3SystemInformation) version, build and serial number for the Spectra S3 endpoint.
         """
         response = POINTER(libds3.LibDs3GetSystemInformationResponse)()
         request = libds3.lib.ds3_init_get_system_information()
@@ -611,11 +611,11 @@ class Ds3Client(object):
 
 
     def getObject(self, bucketName, objectName, offset, jobId, realFileName = None):
-        """Gets an object from the Spectra S3 endpoint.  Use `realFileName` when the `objectName`
-        that you are getting from Spectra S3 does not match what will be on the local filesystem.
-        Returns the metadata for the retrieved object as a dictionary, where keys are
-        associated with a list of the values for that key.
+        """Returns (dictionary of lists) metadata for retrieved object. 
 
+        Gets an object from the Spectra S3 endpoint.  Use `realFileName` when the `objectName`
+        that you are getting from Spectra S3 does not match what will be on the local filesystem.
+        
         This can only be used within the context of a Bulk Get Job.
         """
         objectName = typeCheckString(objectName)
@@ -637,7 +637,7 @@ class Ds3Client(object):
         return metadata
 
     def putBucket(self, bucketName):
-        """Creates a new bucket where objects can be stored.
+        """(Void) Creates a new bucket where objects can be stored.
         """
         bucketName = typeCheckString(bucketName)
         request = libds3.lib.ds3_init_put_bucket(bucketName)
@@ -647,7 +647,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def putObject(self, bucketName, objectName, offset, size, jobId, realFileName = None, metadata = None):
-        """Puts an object to the Spectra S3 endpoint.  Use `realFileName` when the `objectName`
+        """(Void) Puts an object to the Spectra S3 endpoint.  Use `realFileName` when the `objectName`
         that you are putting to Spectra S3 does not match what is on the local filesystem.
         Use metadata to set the metadata for the object. metadata's value should be
         a dictionary, where keys are associated with either a value or a list of the
@@ -672,7 +672,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def deleteObject(self, bucketName, objName):
-        """Deletes an object from the specified bucket.  If deleting several files at once, use `deleteObjects` instead.
+        """(Void) Deletes an object from the specified bucket.  If deleting several files at once, use `deleteObjects` instead.
         """
         request = libds3.lib.ds3_init_delete_object(typeCheckString(bucketName), typeCheckString(objName))
         error = libds3.lib.ds3_delete_object(self._client, request)
@@ -681,7 +681,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def deleteObjects(self, bucketName, fileNameList):
-        """Deletes multiple objects from the bucket using a single API call.
+        """(Void) Deletes multiple objects from the bucket using a single API call.
         """
         bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
         request = libds3.lib.ds3_init_delete_objects(typeCheckString(bucketName))
@@ -691,7 +691,7 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def deleteBucket(self, bucketName):
-        """Deletes a bucket.  If the bucket is not empty, then this request will fail.  All objects must be deleted first
+        """(Void) Deletes a bucket.  If the bucket is not empty, then this request will fail.  All objects must be deleted first
         before the bucket can be deleted.
         """
         request = libds3.lib.ds3_init_delete_bucket(typeCheckString(bucketName))
@@ -701,7 +701,9 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def putBulk(self, bucketName, fileInfoList):
-        """Initiates a start bulk put with the remote Spectra S3 endpoint.  The `fileInfoList` is a list of (objectName, size) tuples.
+        """Returns (Ds3BulkPlan).
+
+        Initiates a start bulk put with the remote Spectra S3 endpoint.  The `fileInfoList` is a list of (objectName, size) tuples.
         `objectName` does not have to be the actual name on the local file system, but it will be the name that you must
         initiate a single object put to later.  `size` must reflect the actual size of the file that is being put.
         """
@@ -720,7 +722,9 @@ class Ds3Client(object):
         return bulkResponse
 
     def getBulk(self, bucketName, fileNameList, chunkOrdering = True):
-        """Initiates a start bulk get with the remote Spectra S3 endpoint.  All the files that will be retrieved must be specified in
+        """Returns (Ds3BulkPlan).
+
+        Initiates a start bulk get with the remote Spectra S3 endpoint.  All the files that will be retrieved must be specified in
         `fileNameList`.
         """
         bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
@@ -741,7 +745,7 @@ class Ds3Client(object):
         return bulkResponse
 
     def getObjects(self, bucketName = None, creationDate = None, objId = None, name = None, pageLength = None, pageOffset = None, objType = None, version = None):
-        """Returns a list of objects. 
+        """Returns (List<Ds3Objects>) a list of objects. 
 
         Optional Search parameters:
 
@@ -809,7 +813,7 @@ class Ds3Client(object):
         return result
 
     def getAvailableChunks(self, jobId):
-        """Returns a list of all chunks in a job that can currently be processed.  It will return a subset of all chunks, and it
+        """Returns (Ds3AvailableChunksResponse) a list of all chunks in a job that can currently be processed.  It will return a subset of all chunks, and it
         will return that same set of chunks until all the data in one of the chunks returned has been either completely gotten,
         or been completely put.
         """
@@ -841,13 +845,13 @@ class Ds3Client(object):
         return bulkResponse
 
     def getJob(self, jobId):
-        """Returns information about a job, including all the chunks in the job, as well as the status of the job.
+        """Returns (Ds3BulkPlan) information about a job, including all the chunks in the job, as well as the status of the job.
         """
         request = libds3.lib.ds3_init_get_job(jobId)
         return self._sendJobRequest(libds3.lib.ds3_get_job, request)
 
     def getJobs(self):
-        """Returns a list of all jobs.
+        """Returns (Ds3BulkPlan[]) a list of all jobs.
         """
         request = libds3.lib.ds3_init_get_jobs()
         response = POINTER(libds3.LibDs3GetJobsResponse)()
@@ -864,13 +868,15 @@ class Ds3Client(object):
         return result
 
     def putJob(self, jobId):
-        """Modifies a job to reset the timeout timer for the job.
+        """Returns (Ds3BulkPlan).
+
+        Modifies a job to reset the timeout timer for the job.
         """
         request = libds3.lib.ds3_init_put_job(jobId)
         return self._sendJobRequest(libds3.lib.ds3_put_job, request)
 
     def deleteJob(self, jobId):
-        """Cancels a currently in progress job.
+        """(Void) Cancels a currently in progress job.
         """
         request = libds3.lib.ds3_init_delete_job(jobId)
         error = libds3.lib.ds3_delete_job(self._client, request)
