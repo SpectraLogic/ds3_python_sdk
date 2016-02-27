@@ -96,6 +96,7 @@ class LibDs3Priority(object):
     LOW = 4
     BACKGROUND = 5
     MINIMIZED_DUE_TO_TOO_MANY_REQUESTS = 6
+
 class LibDs3RequestType(object):
     PUT = 0
     GET = 1
@@ -109,6 +110,44 @@ class LibDs3JobStatus(object):
     COMPLETED = 1
     CANCELED = 2
 
+class LibDs3TapeType(object):
+    LTO5 = 0
+    LTO6 = 1
+    LTO7 = 2
+    LTO_CLEANING_TAPE = 3
+    TS_JC = 4
+    TS_JY = 5
+    TS_JK = 6
+    TS_JD = 7
+    TS_JZ = 8
+    TS_JL = 9
+    TS_CLEANING_TAPE = 10
+    UNKNOWN = 11
+    FORBIDDEN = 12
+
+class LibDs3TapeState(object):
+    NORMAL = 0
+    OFFLINE = 1
+    ONLINE_PENDING = 2
+    ONLINE_IN_PROGRESS = 3
+    STATE_PENDING_INSPECTION = 4
+    STATE_UNKNOWN = 5
+    DATA_CHECKPOINT_FAILURE = 6
+    DATA_CHECKPOINT_MISSING = 7
+    LTFS_WITH_FOREIGN_DATA = 8
+    FOREIGN = 9
+    IMPORT_PENDING = 10
+    IMPORT_IN_PROGRESS = 11
+    LOST = 12
+    TAPE_STATE_BAD = 13
+    TAPE_STATE_SERIAL_NUMBER_MISMATCH = 14
+    TAPE_STATE_BAD_CODE_MISSING = 15
+    TAPE_STATE_FORMAT_PENDING = 16
+    TAPE_STATE_FORMAT_IN_PROGRESS = 17
+    TAPE_STATE_EJECT_TO_EE_IN_PROGRESS = 18
+    TAPE_STATE_EJECT_FROM_EE_PENDING = 19
+    TAPE_STATE_EJECTED = 20
+
 class LibDs3BulkResponse(Structure):
     _fields_ = [("bucket_name", POINTER(LibDs3Str)), ("cached_size_in_bytes", c_ulonglong), ("chunk_ordering", c_int), ("completed_size_in_bytes", c_ulonglong), ("job_id", POINTER(LibDs3Str)), ("original_size_in_bytes", c_ulonglong), ("ds3_job_priority", c_int), ("request_type", c_int), ("start_date", POINTER(LibDs3Str)), ("user_id", POINTER(LibDs3Str)), ("user_name", POINTER(LibDs3Str)), ("write_optimization", c_int), ("list", POINTER(POINTER(LibDs3BulkObjectList))), ("list_size", c_size_t), ("status", c_int)]
 
@@ -116,7 +155,7 @@ class LibDs3GetJobsResponse(Structure):
     _fields_ = [("jobs", POINTER(POINTER(LibDs3BulkResponse))), ("jobs_size", c_size_t)]
 
 class LibDs3Tape(Structure):
-    _fields_ = [("barcode", POINTER(LibDs3Str))]
+    _fields_ = [("assigned_to_bucket", c_bool), ("available_raw_capacity", c_ulonglong), ("barcode", POINTER(LibDs3Str)), ("bucket_id", POINTER(LibDs3Str)), ("description", POINTER(LibDs3Str)), ("eject_date", POINTER(LibDs3Str)), ("eject_label", POINTER(LibDs3Str)), ("eject_location", POINTER(LibDs3Str)), ("eject_pending", POINTER(LibDs3Str)), ("full_of_data", c_bool), ("id", POINTER(LibDs3Str)), ("last_accessed", POINTER(LibDs3Str)), ("last_checkpoint", POINTER(LibDs3Str)), ("last_modified", POINTER(LibDs3Str)), ("last_verified", POINTER(LibDs3Str)), ("partition_id", POINTER(LibDs3Str)), ("state", c_uint), ("previous_state", c_uint), ("serial_number", POINTER(LibDs3Str)), ("total_raw_capacity", c_ulonglong), ("type", c_uint), ("write_protected", c_bool)]
 
 class LibDs3GetPhysicalPlacementResponse(Structure):
     _fields_ = [("tapes", POINTER(LibDs3Tape)), ("num_tapes", c_ulonglong)]

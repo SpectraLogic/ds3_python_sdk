@@ -885,15 +885,14 @@ class Ds3Client(object):
             raise Ds3Error(error)
 
     def getPhysicalPlacement(self, bucketName, fileNameList, fullDetails = False):
-        """Returns where in the Spectra S3 system each file in `fileNameList` is located.
+        """Returns (Ds3TapeList) where in the Spectra S3 system each file in `fileNameList` is located.
+        Note: fullDetails is not supported in this release; will be forced to False
+
         """
         response = POINTER(libds3.LibDs3GetPhysicalPlacementResponse)()
         bulkObjs = libds3.toDs3BulkObjectList(typeCheckObjectList(fileNameList))
         bucketName=typeCheckString(bucketName)
-        if fullDetails:
-            request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)
-        else:
-            request = libds3.lib.ds3_init_get_physical_placement_full_details(bucketName, bulkObjs)
+        request = libds3.lib.ds3_init_get_physical_placement(bucketName, bulkObjs)
         error = libds3.lib.ds3_get_physical_placement(self._client, request, byref(response))
         libds3.lib.ds3_free_request(request)
 
@@ -902,7 +901,123 @@ class Ds3Client(object):
 
         placements = []
         if response:
-            placements = arrayToList(response.contents.tapes, response.contents.num_tapes, lambda obj: obj.barcode.contents.value)
+            placements = Ds3TapeList(response)
             libds3.lib.ds3_free_get_physical_placement_response(response)
 
         return placements
+
+
+class Ds3TapeList(object):
+    """List of Ds3Tapes returned by getPhysicalPlacement()
+
+    Members:
+        tapes (List<Ds3Tape>) 
+    """
+    def __init__(self, ds3Tapes):
+        array = ds3Tapes.contents.tapes
+        length = ds3Tapes.contents.num_tapes
+        self.tapes = arrayToList(array, length, Ds3Tape)
+        
+class Ds3Tape(object):
+    """Descibes a Tape 
+
+    Members:
+        length (long) : The length in bytes of the object. Only included with full_details.
+
+        name (string) : The name of the object. Only included with full_details.
+
+        offset (long) : The offset in bytes from the start of the object. Only included with full_details.
+
+        assignedToBucket (bool) : Whether the tape is currently assigned to a bucket. Values: TRUE, FALSE
+
+        availableRawCapacity (long) : The amount of unused raw capacity on the tape in bytes.
+
+        barCode (string) : The barcode on the label of the tape cartridge.
+
+        bucketId (string) : The UUID for the bucket to which the tape is assigned.
+
+        descriptionForIdentification {string) : The LTFS Volume ID and name, if applicable. This is only provided if the BlackPearl gateway cannot identify the tape.
+
+        ejectDate (string) : The date and time that the BlackPearl gateway discovered that the tape was ejected, in the format YYYY-MM-DD hh:mm:ss.xxx. If the parameter is empty, the tape has not been ejected.
+
+        ejectLabel (string) : The user entered information to assist in the handling of the tape.
+
+        ejectLocation (string) : The user entered information to describe where the ejected tape can be located.
+
+        ejectPending (string) : The date and time that the tape was put in the queue to be ejected in the format YYYY-MM-DD hh:mm:ss.xxx. If the parameter is empty, the tape has not been queued to be ejected or the eject has started and is no longer cancelable.
+
+        fullOfData (bool) : Whether the tape is completely full of data. 
+Values: TRUE, FALSE
+
+        id (string) : The UUID for the tape.
+
+        lastAccessed (string) : The last date and time the tape was loaded into a tape drive in the format YYYY-MM-DD hh:mm:ss.xxx.
+
+        lastCheckpoint : An identifier, internal to the Black Pearl gateway, for verifying the application integrity of the tape.
+
+        lastModified (string) : The last date and time the content of the tape was modified in the format YYYY-MM-DD hh:mm:ss.xxx.
+
+        lastVerified (string) : The last date and time the checksum of the data was verified in the format YYYY-MM-DD hh:mm:ss.xxx.
+
+        partitionId (string) : The UUID for the partition to which the tape belongs.
+
+        previousState (string) : The previous status of the tape. See State.
+
+        serialNumber (string) : The manufacturer assigned serial number for the tape.
+
+        state (string) : The status of the tape. 
+        Values: NORMAL|BAD|BAR_CODE_MISSING|DATA_CHECKPOINT_MISSING|EJECT_FROM_EE_PENDING|
+                EJECT_TO_EE_IN_PROGRESS|EJECTED|FOREIGN|FORMAT_IN_PROGRESS|FORMAT_PENDING|
+                IMPORT_IN_PROGRESS|LOST|LTFS_WITH_FOREIGN_DATA|OFFLINE|ONLINE_IN_PROGRESS|ONLINE_PENDING|
+                PENDING_INSPECTION|SERIAL_NUMBER_MISMATCH|UNKNOWN
+
+        totalRawCapacity (long) : The total raw capacity of the tape in bytes.
+
+        type (string) : The tape format and generation of the tape cartridge. 
+        Values: LTO5|LTO6|LTO7|LTO_CLEANING_TAPE|TS_JC|TS_JY|TS_JK|TS_JD|TS_JZ|TS_JL}
+                TS_CLEANING_TAPE|UNKNOWN|FORBIDDEN 
+
+    Cast to string for description.
+
+    """        
+    def __init__(self, ds3Tape):
+        contents = ds3Tape 	
+        self.barcode = checkExistence(contents.barcode)
+        self.bucketId = checkExistence(contents.bucket_id)
+        self.description = checkExistence(contents.description)
+        self.ejectDate = checkExistence(contents.eject_date)
+        self.assignedToBucket = bool(contents.assigned_to_bucket)
+        self.availableRawCapacity = contents.available_raw_capacity
+        self.ejectLabel = checkExistence(contents.eject_label)
+        self.ejectLocation = checkExistence(contents.eject_location)
+        self.ejectPending = checkExistence(contents.eject_pending)
+        self.fullOfData = bool(contents.full_of_data)
+        self.id = checkExistence(contents.id)
+        self.lastAccessed = checkExistence(contents.last_accessed)
+        self.lastCheckpoint = checkExistence(contents.last_checkpoint)
+        self.lastModified = checkExistence(contents.last_modified)
+        self.lastVerified = checkExistence(contents.last_verified)
+        self.partitionId = checkExistence(contents.partition_id)
+        self.serialNumber = checkExistence(contents.serial_number)
+        self.previousState = contents.previous_state
+        self.state = contents.state
+        self.totalRawCapacity = contents.total_raw_capacity
+        self.type = contents.type
+        self.writeProtected = bool(contents.write_protected)
+
+    def __str__(self):
+        response = "Barcode: " + str(self.barcode)
+        response += " | BucketId: " + str(self.bucketId)
+        response += " | Id: " + str(self.id)
+        response += " | Serial Number: " + str(self.serialNumber)
+        response += " | Available: " + str(self.availableRawCapacity)
+        response += " | Full of data: (" + str(self.fullOfData) + ")"
+        response += " | Last Modified: " + str(self.lastModified)
+        response += " | Last Accessed: " + str(self.lastAccessed)
+        response += " | Write Protected: (" + str(self.writeProtected) + ")"
+        return response
+
+    def __repr__(self):
+        return self.__str__()
+
+
