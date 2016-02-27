@@ -180,38 +180,38 @@ to handle 307 redirects.</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.deleteBucket">
 <tt class="descname">deleteBucket</tt><big>(</big><em>bucketName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.deleteBucket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a bucket.  If the bucket is not empty, then this request will fail.  All objects must be deleted first
+<dd><p>(Void) Deletes a bucket.  If the bucket is not empty, then this request will fail.  All objects must be deleted first
 before the bucket can be deleted.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.deleteFolder">
 <tt class="descname">deleteFolder</tt><big>(</big><em>bucketName</em>, <em>folderName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.deleteFolder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a folder and all the objects contained within it.</p>
+<dd><p>(Void) Deletes a folder and all the objects contained within it.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.deleteJob">
 <tt class="descname">deleteJob</tt><big>(</big><em>jobId</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.deleteJob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels a currently in progress job.</p>
+<dd><p>(Void) Cancels a currently in progress job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.deleteObject">
 <tt class="descname">deleteObject</tt><big>(</big><em>bucketName</em>, <em>objName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.deleteObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes an object from the specified bucket.  If deleting several files at once, use <cite>deleteObjects</cite> instead.</p>
+<dd><p>(Void) Deletes an object from the specified bucket.  If deleting several files at once, use <cite>deleteObjects</cite> instead.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.deleteObjects">
 <tt class="descname">deleteObjects</tt><big>(</big><em>bucketName</em>, <em>fileNameList</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.deleteObjects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes multiple objects from the bucket using a single API call.</p>
+<dd><p>(Void) Deletes multiple objects from the bucket using a single API call.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getAvailableChunks">
 <tt class="descname">getAvailableChunks</tt><big>(</big><em>jobId</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getAvailableChunks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of all chunks in a job that can currently be processed.  It will return a subset of all chunks, and it
+<dd><p>Returns (Ds3AvailableChunksResponse) a list of all chunks in a job that can currently be processed.  It will return a subset of all chunks, and it
 will return that same set of chunks until all the data in one of the chunks returned has been either completely gotten,
 or been completely put.</p>
 </dd></dl>
@@ -219,7 +219,7 @@ or been completely put.</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getBucket">
 <tt class="descname">getBucket</tt><big>(</big><em>bucketName</em>, <em>prefix=None</em>, <em>nextMarker=None</em>, <em>delimiter=None</em>, <em>maxKeys=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getBucket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of all the objects in a specific bucket as specified by <cite>bucketName</cite>.  This will return at most 1000 objects.
+<dd><p>Returns  (Ds3BucketDetails) a list of all the objects in a specific bucket as specified by <cite>bucketName</cite>.  This will return at most 1000 objects.
 In order to retrieve more, pagination must be used.  The <cite>nextMarker</cite> is used to specify where the next 1000 objects will
 start listing from.</p>
 <p><cite>delimiter</cite> can be used to list objects like directories.  So for example, if delimiter is set to &#8216;/&#8217; then it will return
@@ -233,36 +233,36 @@ For example:</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getBulk">
 <tt class="descname">getBulk</tt><big>(</big><em>bucketName</em>, <em>fileNameList</em>, <em>chunkOrdering=True</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getBulk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initiates a start bulk get with the remote Spectra S3 endpoint.  All the files that will be retrieved must be specified in
+<dd><p>Returns (Ds3BulkPlan).</p>
+<p>Initiates a start bulk get with the remote Spectra S3 endpoint.  All the files that will be retrieved must be specified in
 <cite>fileNameList</cite>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getJob">
 <tt class="descname">getJob</tt><big>(</big><em>jobId</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getJob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns information about a job, including all the chunks in the job, as well as the status of the job.</p>
+<dd><p>Returns (Ds3BulkPlan) information about a job, including all the chunks in the job, as well as the status of the job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getJobs">
 <tt class="descname">getJobs</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getJobs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of all jobs.</p>
+<dd><p>Returns (Ds3BulkPlan[]) a list of all jobs.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getObject">
 <tt class="descname">getObject</tt><big>(</big><em>bucketName</em>, <em>objectName</em>, <em>offset</em>, <em>jobId</em>, <em>realFileName=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets an object from the Spectra S3 endpoint.  Use <cite>realFileName</cite> when the <cite>objectName</cite>
-that you are getting from Spectra S3 does not match what will be on the local filesystem.
-Returns the metadata for the retrieved object as a dictionary, where keys are
-associated with a list of the values for that key.</p>
+<dd><p>Returns (dictionary of lists) metadata for retrieved object.</p>
+<p>Gets an object from the Spectra S3 endpoint.  Use <cite>realFileName</cite> when the <cite>objectName</cite>
+that you are getting from Spectra S3 does not match what will be on the local filesystem.</p>
 <p>This can only be used within the context of a Bulk Get Job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getObjects">
 <tt class="descname">getObjects</tt><big>(</big><em>bucketName=None</em>, <em>creationDate=None</em>, <em>objId=None</em>, <em>name=None</em>, <em>pageLength=None</em>, <em>pageOffset=None</em>, <em>objType=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getObjects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of objects.</p>
+<dd><p>Returns (List&lt;Ds3Objects&gt;) a list of objects.</p>
 <p>Optional Search parameters:</p>
 <blockquote>
 <div><p>bucketName (string) : The UUID or name for a bucket.</p>
@@ -279,44 +279,46 @@ associated with a list of the values for that key.</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getPhysicalPlacement">
 <tt class="descname">getPhysicalPlacement</tt><big>(</big><em>bucketName</em>, <em>fileNameList</em>, <em>fullDetails=False</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getPhysicalPlacement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns where in the Spectra S3 system each file in <cite>fileNameList</cite> is located.</p>
+<dd><p>Returns (Ds3TapeList) where in the Spectra S3 system each file in <cite>fileNameList</cite> is located.
+Note: fullDetails is not supported in this release; will be forced to False</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getService">
 <tt class="descname">getService</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getService" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of all the buckets the current access id has access to.</p>
+<dd><p>Returns (List&lt;Ds3Bucket&gt;) a list of all the buckets the current access id has access to.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.getSystemInformation">
 <tt class="descname">getSystemInformation</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.getSystemInformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the version and other information about the Spectra S3 endpoint.</p>
+<dd><p>Returns (Ds3SystemInformation) version, build and serial number for the Spectra S3 endpoint.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.headBucket">
 <tt class="descname">headBucket</tt><big>(</big><em>bucketName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.headBucket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether a bucket exists.</p>
+<dd><p>(Void) Raises Ds3Error if bucket does not exist.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.headObject">
 <tt class="descname">headObject</tt><big>(</big><em>bucketName</em>, <em>objectName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.headObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the metadata for the retrieved object as a dictionary of lists.  If the object does not exist  
+<dd><p>Returns (dictionary of lists) the metadata for the retrieved object.  If the object does not exist  
 an error is thrown with a status code of 404.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.putBucket">
 <tt class="descname">putBucket</tt><big>(</big><em>bucketName</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.putBucket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a new bucket where objects can be stored.</p>
+<dd><p>(Void) Creates a new bucket where objects can be stored.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.putBulk">
 <tt class="descname">putBulk</tt><big>(</big><em>bucketName</em>, <em>fileInfoList</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.putBulk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initiates a start bulk put with the remote Spectra S3 endpoint.  The <cite>fileInfoList</cite> is a list of (objectName, size) tuples.
+<dd><p>Returns (Ds3BulkPlan).</p>
+<p>Initiates a start bulk put with the remote Spectra S3 endpoint.  The <cite>fileInfoList</cite> is a list of (objectName, size) tuples.
 <cite>objectName</cite> does not have to be the actual name on the local file system, but it will be the name that you must
 initiate a single object put to later.  <cite>size</cite> must reflect the actual size of the file that is being put.</p>
 </dd></dl>
@@ -324,13 +326,14 @@ initiate a single object put to later.  <cite>size</cite> must reflect the actua
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.putJob">
 <tt class="descname">putJob</tt><big>(</big><em>jobId</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.putJob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Modifies a job to reset the timeout timer for the job.</p>
+<dd><p>Returns (Ds3BulkPlan).</p>
+<p>Modifies a job to reset the timeout timer for the job.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.putObject">
 <tt class="descname">putObject</tt><big>(</big><em>bucketName</em>, <em>objectName</em>, <em>offset</em>, <em>size</em>, <em>jobId</em>, <em>realFileName=None</em>, <em>metadata=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.putObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Puts an object to the Spectra S3 endpoint.  Use <cite>realFileName</cite> when the <cite>objectName</cite>
+<dd><p>(Void) Puts an object to the Spectra S3 endpoint.  Use <cite>realFileName</cite> when the <cite>objectName</cite>
 that you are putting to Spectra S3 does not match what is on the local filesystem.
 Use metadata to set the metadata for the object. metadata&#8217;s value should be
 a dictionary, where keys are associated with either a value or a list of the
@@ -341,7 +344,7 @@ values for that key.</p>
 <dl class="method">
 <dt id="ds3.ds3.Ds3Client.verifySystemHealth">
 <tt class="descname">verifySystemHealth</tt><big>(</big><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Client.verifySystemHealth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns how long it took to verify the health of the system. 
+<dd><p>Returns (Ds3SystemHealthInformation) how long it took to verify the health of the system.
 In the event that the system is in a bad state, an error will be thrown.</p>
 </dd></dl>
 
@@ -351,8 +354,8 @@ In the event that the system is in a bad state, an error will be thrown.</p>
 <dt id="ds3.ds3.Ds3Error">
 <em class="property">exception </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Error</tt><big>(</big><em>libds3Error</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an exception to the client. Attributes:</p>
-<p>reason (string):  error contents message  
-response (string): error contents error  
+<p>reason (string):  error contents message
+response (string): error contents error
 if(has_response == true)</p>
 <blockquote>
 <div><p>statusCode (int): http return value</p>
@@ -431,6 +434,66 @@ if(has_response == true)</p>
 <p>Cast to string for description.</p>
 </dd></dl>
 
+<dl class="class">
+<dt id="ds3.ds3.Ds3Tape">
+<em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3Tape</tt><big>(</big><em>ds3Tape</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3Tape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descibes a Tape</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Members:</dt>
+<dd><p class="first">length (long) : The length in bytes of the object. Only included with full_details.</p>
+<p>name (string) : The name of the object. Only included with full_details.</p>
+<p>offset (long) : The offset in bytes from the start of the object. Only included with full_details.</p>
+<p>assignedToBucket (bool) : Whether the tape is currently assigned to a bucket. Values: TRUE, FALSE</p>
+<p>availableRawCapacity (long) : The amount of unused raw capacity on the tape in bytes.</p>
+<p>barCode (string) : The barcode on the label of the tape cartridge.</p>
+<p>bucketId (string) : The UUID for the bucket to which the tape is assigned.</p>
+<p>descriptionForIdentification {string) : The LTFS Volume ID and name, if applicable. This is only provided if the BlackPearl gateway cannot identify the tape.</p>
+<p>ejectDate (string) : The date and time that the BlackPearl gateway discovered that the tape was ejected, in the format YYYY-MM-DD hh:mm:ss.xxx. If the parameter is empty, the tape has not been ejected.</p>
+<p>ejectLabel (string) : The user entered information to assist in the handling of the tape.</p>
+<p>ejectLocation (string) : The user entered information to describe where the ejected tape can be located.</p>
+<p>ejectPending (string) : The date and time that the tape was put in the queue to be ejected in the format YYYY-MM-DD hh:mm:ss.xxx. If the parameter is empty, the tape has not been queued to be ejected or the eject has started and is no longer cancelable.</p>
+<p class="last">fullOfData (bool) : Whether the tape is completely full of data.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Values: TRUE, FALSE</p>
+<blockquote>
+<div><blockquote>
+<div><p>id (string) : The UUID for the tape.</p>
+<p>lastAccessed (string) : The last date and time the tape was loaded into a tape drive in the format YYYY-MM-DD hh:mm:ss.xxx.</p>
+<p>lastCheckpoint : An identifier, internal to the Black Pearl gateway, for verifying the application integrity of the tape.</p>
+<p>lastModified (string) : The last date and time the content of the tape was modified in the format YYYY-MM-DD hh:mm:ss.xxx.</p>
+<p>lastVerified (string) : The last date and time the checksum of the data was verified in the format YYYY-MM-DD hh:mm:ss.xxx.</p>
+<p>partitionId (string) : The UUID for the partition to which the tape belongs.</p>
+<p>previousState (string) : The previous status of the tape. See State.</p>
+<p>serialNumber (string) : The manufacturer assigned serial number for the tape.</p>
+<p>state (string) : The status of the tape. 
+Values: NORMAL|BAD|BAR_CODE_MISSING|DATA_CHECKPOINT_MISSING|EJECT_FROM_EE_PENDING|</p>
+<blockquote>
+<div>EJECT_TO_EE_IN_PROGRESS|EJECTED|FOREIGN|FORMAT_IN_PROGRESS|FORMAT_PENDING|
+IMPORT_IN_PROGRESS|LOST|LTFS_WITH_FOREIGN_DATA|OFFLINE|ONLINE_IN_PROGRESS|ONLINE_PENDING|
+PENDING_INSPECTION|SERIAL_NUMBER_MISMATCH|UNKNOWN</div></blockquote>
+<p>totalRawCapacity (long) : The total raw capacity of the tape in bytes.</p>
+<p>type (string) : The tape format and generation of the tape cartridge. 
+Values: LTO5|LTO6|LTO7|LTO_CLEANING_TAPE|TS_JC|TS_JY|TS_JK|TS_JD|TS_JZ|TS_JL}</p>
+<blockquote>
+<div>TS_CLEANING_TAPE|UNKNOWN|FORBIDDEN</div></blockquote>
+</div></blockquote>
+<p>Cast to string for description.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="ds3.ds3.Ds3TapeList">
+<em class="property">class </em><tt class="descclassname">ds3.ds3.</tt><tt class="descname">Ds3TapeList</tt><big>(</big><em>ds3Tapes</em><big>)</big><a class="headerlink" href="#ds3.ds3.Ds3TapeList" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Ds3Tapes returned by getPhysicalPlacement()</p>
+<dl class="docutils">
+<dt>Members:</dt>
+<dd>tapes (List&lt;Ds3Tape&gt;)</dd>
+</dl>
+</dd></dl>
+
 <dl class="function">
 <dt id="ds3.ds3.addMetadataToRequest">
 <tt class="descclassname">ds3.ds3.</tt><tt class="descname">addMetadataToRequest</tt><big>(</big><em>request</em>, <em>metadata</em><big>)</big><a class="headerlink" href="#ds3.ds3.addMetadataToRequest" title="Permalink to this definition">¶</a></dt>
@@ -438,12 +501,12 @@ if(has_response == true)</p>
 
 <dl class="function">
 <dt id="ds3.ds3.arrayToList">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2abb28f90cf8&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">arrayToList</tt><big>(</big><em>array</em>, <em>length</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b909dbcccf8&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.arrayToList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ds3.ds3.checkExistence">
-<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2abb28f90c08&gt;</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ds3.ds3.</tt><tt class="descname">checkExistence</tt><big>(</big><em>obj</em>, <em>wrapper=&lt;function &lt;lambda&gt; at 0x2b909dbccc08&gt;</em>, <em>defaultReturnValue=None</em><big>)</big><a class="headerlink" href="#ds3.ds3.checkExistence" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
