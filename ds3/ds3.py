@@ -912,11 +912,17 @@ class Ds3TapeList(object):
 
     Members:
         tapes (List<Ds3Tape>) 
+
+        length (int) : Number of tapes returned. (Same as len())
     """
     def __init__(self, ds3Tapes):
         array = ds3Tapes.contents.tapes
         length = ds3Tapes.contents.num_tapes
         self.tapes = arrayToList(array, length, Ds3Tape)
+        self.length = length
+
+    def __len__(self):
+        return self.length 
         
 class Ds3Tape(object):
     """Descibes a Tape 
