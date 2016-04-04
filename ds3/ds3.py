@@ -623,7 +623,7 @@ class Ds3Client(object):
         if realFileName:
             effectiveFileName = typeCheckString(realFileName)
         response = POINTER(libds3.LibDs3Metadata)()
-        request = libds3.lib.ds3_init_get_object_for_job(typeCheckString(bucketName), objectName, offset, jobId)
+        request = libds3.lib.ds3_init_get_object_for_job(typeCheckString(bucketName), objectName, c_ulonglong(offset), jobId)
         localFile = open(effectiveFileName, "wb")
         localFile.seek(offset, 0)
         error = libds3.lib.ds3_get_object_with_metadata(self._client, request, byref(c_int(localFile.fileno())), libds3.lib.ds3_write_to_fd, byref(response))
