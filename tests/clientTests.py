@@ -16,7 +16,6 @@ import tempfile
 import unittest
 
 from ds3.ds3 import *
-from ds3.libds3 import LibDs3JobStatus
 
 bucketName = "python_test_bucket"
 resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
