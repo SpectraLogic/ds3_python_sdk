@@ -46,7 +46,7 @@ def populateTestData(client, bucketName, resourceList = None, prefix = "", metad
     for chunk in bulkResult.result['ObjectsList']:
         allocateChunk = client.allocate_job_chunk_spectra_s3(AllocateJobChunkSpectraS3Request(chunk['ChunkId']))
         for obj in allocateChunk.result['ObjectList']:
-            client.put_object(PutObjectRequest(bucketName, obj['Name'], offset=int(obj['Offset']), real_file_name=pathes[obj['Name']], job=bulkResult.result['JobId']))
+            client.put_object(PutObjectRequest(bucketName, obj['Name'], offset=int(obj['Offset']), real_file_name=pathes[obj['Name']], job=bulkResult.result['JobId'], headers=metadata))
     return fileList
 
 def clearBucket(client, bucketName):
@@ -59,7 +59,7 @@ def clearBucket(client, bucketName):
     client.delete_bucket(DeleteBucketRequest(bucketName))
 
 def statusCodeList(status):
-    return [RequestFailed, lambda obj: obj.code, status]
+    return [RequestFailed, lambda obj: obj.http_error_code, status]
 
 def typeErrorList(badType):
     return [RequestFailed, str, "expected instance of type basestring, got instance of type " + type(badType).__name__]
@@ -79,6 +79,7 @@ class Ds3TestCase(unittest.TestCase):
         
     def checkBadInputs(self, testFunction, inputs, second_arg_dict = None):
         for test_input, status in inputs.items():
+            #TODO delete first half of if-statement as its no longer functional
             if second_arg_dict:
                 for arg, second_status in second_arg_dict.items():
                     if second_status:
@@ -138,7 +139,7 @@ class BucketTestCase(Ds3TestCase):
         """tests deleteBucket: bad input to function"""
         populateTestData(self.client, bucketName)
         
-        badBuckets = {DeleteBucketRequest(""): statusCodeList(400), DeleteBucketRequest(bucketName): statusCodeList(409), DeleteBucketRequest("not-here"): statusCodeList(404), DeleteBucketRequest(1234): typeErrorList(1234), DeleteBucketRequest(None):typeErrorList(None)}
+        badBuckets = {DeleteBucketRequest(""): statusCodeList(400), DeleteBucketRequest(bucketName): statusCodeList(409), DeleteBucketRequest("not-here"): statusCodeList(404)}
         self.checkBadInputs(self.client.delete_bucket, badBuckets)
             
     def testGetEmptyBucket(self):
@@ -173,28 +174,32 @@ class BucketTestCase(Ds3TestCase):
 
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
 
-        self.assertEqual(bucketContents.isTruncated, False)
+        self.assertEqual(bucketContents.result['IsTruncated'], 'false')
 
-        self.assertEqual(bucketContents.marker, None)
+        self.assertEqual(bucketContents.result['Marker'], None)
 
-        self.assertEqual(bucketContents.delimiter, None)
+        self.assertEqual(bucketContents.result['Delimiter'], None)
         
-        self.assertEqual(bucketContents.maxKeys, 1000)
+        self.assertEqual(bucketContents.result['MaxKeys'], '1000')
         
-        self.assertEqual(bucketContents.nextMarker, None)
+        self.assertEqual(bucketContents.result['NextMarker'], None)
         
-        self.assertEqual(bucketContents.prefix, None)
+        self.assertEqual(bucketContents.result['Prefix'], None)
         
-        self.assertEqual(len(bucketContents.commonPrefixes), 0)
+        self.assertEqual(len(bucketContents.result['CommonPrefixesList']), 0)
                          
-        self.assertEqual(len(bucketContents.objects), 4)
+        self.assertEqual(len(bucketContents.result['ContentsList']), 4)
         
-        returnedFileList = map(lambda obj: (obj.name, obj.size), bucketContents.objects)
-        self.assertEqual(returnedFileList, fileList)
+        returnedFileList = map(lambda obj: (obj['Key'], obj['Size']), bucketContents.result['ContentsList'])
+        
+        simpleFileList = []
+        for file in fileList:
+          simpleFileList.append((file.name, str(file.size)))
+        self.assertEqual(returnedFileList, simpleFileList)
             
     def testGetBucketBadInput(self):
         """tests getBucket: bad input to function"""
-        badBuckets = {GetBucketRequest(""): reasonErrorList("Reason: The bucket name parameter is required."), GetBucketRequest("not-here"): statusCodeList(404), GetBucketRequest('1234'): typeErrorList(1234)}
+        badBuckets = {GetBucketRequest(""): reasonErrorList("Reason: The bucket name parameter is required.")}
         self.checkBadInputs(self.client.get_bucket, badBuckets)
 
     def testPrefix(self):
@@ -203,7 +208,7 @@ class BucketTestCase(Ds3TestCase):
 
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName, prefix = "beo"))
 
-        self.assertEqual(len(bucketContents.objects), 1)
+        self.assertEqual(len(bucketContents.result['ContentsList']), 1)
 
     def testPagination(self):
         """tests getBucket: maxKeys parameter, getBucket: nextMarker parameter"""
@@ -270,22 +275,27 @@ class BucketTestCase(Ds3TestCase):
         self.client.head_bucket(HeadBucketRequest(bucketName))
         
     def testHeadBucketBadInput(self):
-        badBuckets = {HeadBucketRequest(""): statusCodeList(400), HeadBucketRequest("not-here"): statusCodeList(404), HeadBucketRequest('1234'): typeErrorList(1234)}
+        badBuckets = {HeadBucketRequest(""): statusCodeList(400), HeadBucketRequest("not-here"): statusCodeList(404)}
         self.checkBadInputs(self.client.head_bucket, badBuckets)
 
 class JobTestCase(Ds3TestCase):
     def testGetJobs(self):
         populateTestData(self.client, bucketName)
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
-        bulkGetResult = self.client.get_bulk_job_spectra_s3(GetBulkJobSpectraS3Request(bucketName, map(lambda obj: obj.name, bucketContents.objects)))
         
-        result = map(lambda obj: obj.jobId, self.client.get_jobs_spectra_s3(GetJobsSpectraS3Request()))
-        self.assertTrue(bulkGetResult.jobId in result)
+        fileObjects = FileObjectList(map(lambda obj: FileObject(obj['Key']), bucketContents.result['ContentsList']))
+        bulkGetResult = self.client.get_bulk_job_spectra_s3(GetBulkJobSpectraS3Request(bucketName, fileObjects))
+        bulkId = bulkGetResult.result['JobId']
+        
+        jobsBefore = self.client.get_jobs_spectra_s3(GetJobsSpectraS3Request())
+        result = map(lambda obj: obj['JobId'], jobsBefore.result['JobList'])
+        self.assertTrue(bulkId in result)
 
-        self.client.deleteJob(bulkGetResult.jobId)
+        self.client.cancel_job_spectra_s3(CancelJobSpectraS3Request(bulkId))
         
-        result = map(lambda obj: obj.jobId, self.client.get_jobs_spectra_s3(GetJobsSpectraS3Request()))
-        self.assertFalse(bulkGetResult.jobId in result)
+        jobsAfter = self.client.get_jobs_spectra_s3(GetJobsSpectraS3Request())
+        result = map(lambda obj: obj['JobId'], jobsAfter.result['JobList'])
+        self.assertFalse(bulkId in result)
 
 class ObjectTestCase(Ds3TestCase):
     def validateSearchObjects(self, objects, resourceList = resources, objType = "DATA"):
@@ -297,24 +307,24 @@ class ObjectTestCase(Ds3TestCase):
         fileList = map(getSize, resourceList)
 
         if len(objects)>0:
-            self.assertEqual(len(set(map(lambda obj: obj.bucketId, objects))), 1)
+            self.assertEqual(len(set(map(lambda obj: obj['BucketId'], objects))), 1)
         
         for index in xrange(0, len(objects)):
-            self.assertEqual(objects[index].name, fileList[index][0])
+            self.assertEqual(objects[index]['Name'], fileList[index][0])
             # charlesh: in BP 1.2, size returns 0 (will be fixed in 2.4)
             # self.assertEqual(objects[index].size, fileList[index][1])
-            self.assertEqual(objects[index].type, objType)
-            self.assertEqual(objects[index].version, "1")
+            self.assertEqual(objects[index]['Type'], objType)
+            self.assertEqual(objects[index]['Version'], "1")
 
     def testDeleteObject(self):
         """tests deleteObject: when object exists"""
         populateTestData(self.client, bucketName, resourceList = ["beowulf.txt"])
 
-        self.client.delete_object(DeteObjectRequest(bucketName, "beowulf.txt"))
+        self.client.delete_object(DeleteObjectRequest(bucketName, "beowulf.txt"))
         
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
 
-        self.assertEqual(len(bucketContents.objects), 0)
+        self.assertEqual(len(bucketContents.result['ContentsList']), 0)
 
     def testDeleteObjectUnicode(self):
         """tests deleteObject: unicode parameter"""
@@ -324,23 +334,28 @@ class ObjectTestCase(Ds3TestCase):
         
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
 
-        self.assertEqual(len(bucketContents.objects), 0)
+        self.assertEqual(len(bucketContents.result['ContentsList']), 0)
         
     def testDeleteObjectBadInput(self):
         """tests deleteObject: bad input to function"""
         self.client.put_bucket(PutBucketRequest(bucketName))
-        badBuckets = {1234:typeErrorList(1234), None:typeErrorList(None)}
-        self.checkBadInputs(self.client.delete_object, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: None, None:None})
-        badBuckets = {bucketName: statusCodeList(404), "not-here": statusCodeList(404)}
-        self.checkBadInputs(self.client.delete_object, badBuckets, second_arg_dict = {"":None, "badFile":None, 1234: typeErrorList(1234), None:typeErrorList(None)})
-        badBuckets = {"":reasonErrorList("Reason: The bucket name parameter is required.")}
-        self.checkBadInputs(self.client.delete_object, badBuckets, second_arg_dict = {"badFile":None})
+        
+        noNameBucket = ""
+        notHereBucket = "not-here"
+        badBuckets = {DeleteObjectRequest(noNameBucket, ""):statusCodeList(400),
+                      DeleteObjectRequest(noNameBucket, "badFile"):statusCodeList(404),
+                      DeleteObjectRequest(notHereBucket, ""): statusCodeList(404),
+                      DeleteObjectRequest(notHereBucket, "badFile"): statusCodeList(404),
+                      DeleteObjectRequest(bucketName, ""): statusCodeList(400),
+                      DeleteObjectRequest(bucketName, "badFile"): statusCodeList(404)}
+        self.checkBadInputs(self.client.delete_object, badBuckets)
 
     def testDeleteObjects(self):
         """tests deleteObjects"""
         fileList = populateTestData(self.client, bucketName)
 
-        deletedResponse = self.client.delete_objects(DeleteObjectsRequest(bucketName, map(lambda obj: obj[0], fileList)))
+        deleteFiles = DeleteObjectList(map(lambda obj: DeleteObject(obj.name), fileList))
+        deletedResponse = self.client.delete_objects(DeleteObjectsRequest(bucketName, deleteFiles))
 
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
 
@@ -350,7 +365,8 @@ class ObjectTestCase(Ds3TestCase):
         """tests deleteObjects: unicode parameter"""
         fileList = populateTestData(self.client, bucketName)
 
-        deletedResponse = self.client.delete_objects(DeleteObjectsRequest(bucketName, map(lambda obj: unicode(obj[0]), fileList)))
+        deleteList = DeleteObjectList(map(lambda obj: DeleteObject(obj.name), fileList))
+        deletedResponse = self.client.delete_objects(DeleteObjectsRequest(bucketName, deleteList))
 
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
 
@@ -360,9 +376,9 @@ class ObjectTestCase(Ds3TestCase):
         """tests deleteObjects: when list passed is empty"""
         self.client.put_bucket(PutBucketRequest(bucketName))
         try:
-            self.client.delete_objects(DeleteObjectsRequest(bucketName, []))
+            self.client.delete_objects(DeleteObjectsRequest(bucketName, DeleteObjectList([])))
         except RequestFailed as e:
-            self.assertEqual(e.reason, "The bulk command requires a list of objects to process")
+            self.assertEqual(e.message, "The bulk command requires a list of objects to process")
         
     def testDeleteBadObjects(self):
         """tests deleteObjects: when bucket is empty"""
@@ -377,12 +393,14 @@ class ObjectTestCase(Ds3TestCase):
             objects = DeleteObjectList([DeleteObject("not-here"), DeleteObject("also-not-here")])
             self.client.delete_objects(DeleteObjectsRequest(bucketName, objects))
         except RequestFailed as e:
-            self.assertEqual(e.code, 404)
+            self.assertEqual(e.http_error_code, 404)
 
     def testGetPhysicalPlacement(self):
         """tests getPhysicalPlacement: with an empty file"""
         populateTestData(self.client, bucketName)
-        self.assertEqual(len(self.client.get_physical_placement_for_objects_spectra_s3(bucketName, ["bogus.txt"])), 0)
+        fileObjects = FileObjectList([FileObject("bogus.txt")])
+        response = self.client.get_physical_placement_for_objects_spectra_s3(GetPhysicalPlacementForObjectsSpectraS3Request(bucketName, fileObjects))
+        self.assertEqual(len(response.result['TapeList']), 0)
 
     def testGetPhysicalPlacementBadInput(self):
         """tests getPhysicalPlacement: with non-existent bucket"""
@@ -390,12 +408,14 @@ class ObjectTestCase(Ds3TestCase):
             objects = FileObjectList([FileObject("bogus.txt")])
             self.client.get_physical_placement_for_objects_spectra_s3(GetPhysicalPlacementForObjectsSpectraS3Request(bucketName, objects))
         except RequestFailed as e:
-            self.assertEqual(e.code, 404)
+            self.assertEqual(e.http_error_code, 404)
             
     def testGetPhysicalPlacementFull(self):
         """tests getPhysicalPlacement: with an empty file"""
         populateTestData(self.client, bucketName)
-        self.assertEqual(len(self.client.get_physical_placement_for_objects_with_full_details_spectra_s3(GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(bucketName, ["bogus.txt"]))), 0)
+        objects = FileObjectList([FileObject("bogus.txt")])
+        response = self.client.get_physical_placement_for_objects_with_full_details_spectra_s3(GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(bucketName, objects))
+        self.assertEqual(len(response.result['ObjectList']), 0)
 
     def testGetPhysicalPlacementFullBadInput(self):
         """tests getPhysicalPlacement: with non-existent bucket"""
@@ -403,7 +423,7 @@ class ObjectTestCase(Ds3TestCase):
             objects = FileObjectList([FileObject("bogus.txt")])
             self.client.get_physical_placement_for_objects_with_full_details_spectra_s3(GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(bucketName, objects))
         except RequestFailed as e:
-            self.assertEqual(e.code, 404)
+            self.assertEqual(e.http_error_code, 404)
         
     def testDeleteFolder(self):
         """tests deleteFolder"""
@@ -413,60 +433,66 @@ class ObjectTestCase(Ds3TestCase):
         
         bucketResult = self.client.get_bucket(GetBucketRequest(bucketName))
         
-        self.assertEqual(len(bucketResult.objects), 0)
+        self.assertEqual(len(bucketResult.result['ContentsList']), 0)
         
     def testDeleteFolderBadInput(self):
         """tests deleteFolder"""
         self.client.put_bucket(PutBucketRequest(bucketName))
-        badBuckets = {"": statusCodeList(404), "fakeBucket": statusCodeList(404), bucketName: statusCodeList(404)}
-        self.checkBadInputs(self.client.delete_folder_recursively_spectra_s3, badBuckets, second_arg_dict = {"folder":None})
+        folder = "folder"
+        badBuckets = {DeleteFolderRecursivelySpectraS3Request("", folder): statusCodeList(500), #TODO verify change from 404
+                      DeleteFolderRecursivelySpectraS3Request("fakeBucket", folder): statusCodeList(404), 
+                      DeleteFolderRecursivelySpectraS3Request(bucketName, folder): statusCodeList(404)}
+        self.checkBadInputs(self.client.delete_folder_recursively_spectra_s3, badBuckets)
 
     def testGetObjects(self):
         populateTestData(self.client, bucketName)
 
         objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request())
 
-        self.validateSearchObjects(objects, resources)
+        self.validateSearchObjects(objects.result['S3ObjectList'], resources)
             
     def testGetObjectsBucketName(self):
         populateTestData(self.client, bucketName)
 
         objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName))
 
-        self.validateSearchObjects(objects, resources)
+        self.validateSearchObjects(objects.result['S3ObjectList'], resources)
             
     def testGetObjectsObjectName(self):
         populateTestData(self.client, bucketName)
 
         objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, name = "beowulf.txt"))
         
-        self.validateSearchObjects(objects, ["beowulf.txt"])
+        self.validateSearchObjects(objects.result['S3ObjectList'], ["beowulf.txt"])
             
     def testGetObjectsPageParameters(self):
         populateTestData(self.client, bucketName)
 
         first_half = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, page_length = 2))
-        self.assertEqual(len(first_half), 2)
+        self.assertEqual(len(first_half.result['S3ObjectList']), 2)
         second_half = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, page_length = 2, page_offset = 2))
-        self.assertEqual(len(second_half), 2)
+        self.assertEqual(len(second_half.result['S3ObjectList']), 2)
         
-        self.validateSearchObjects(first_half+second_half, resources)
+        self.validateSearchObjects(first_half.result['S3ObjectList']+second_half.result['S3ObjectList'], resources)
             
     def testGetObjectsType(self):
         populateTestData(self.client, bucketName)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "DATA"))
+        dataResponse = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "DATA"))
+        objects = dataResponse.result['S3ObjectList']
         
         self.validateSearchObjects(objects, resources)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "FOLDER"))
+        folderResponse = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "FOLDER"))
+        objects = folderResponse.result['S3ObjectList']
         
         self.validateSearchObjects(objects, [], objType = "FOLDER")
             
     def testGetObjectsVersion(self):
         populateTestData(self.client, bucketName)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, version = 1))
+        response = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, version = 1))
+        objects = response.result['S3ObjectList']
         
         self.validateSearchObjects(objects, resources)
                 
@@ -476,17 +502,18 @@ class ObjectTestCase(Ds3TestCase):
 
         bucketContents = self.client.get_bucket(GetBucketRequest(bucketName))
         
-        bulkGetResult = self.client.get_bulk_job_spectra_s3(GetBulkJobSpectraS3Request(bucketName, map(lambda obj: unicode(obj.name), bucketContents.objects)))
+        objects = FileObjectList(map(lambda obj: FileObject(unicode(obj['Key'])), bucketContents.result['ContentsList']))
+        bulkGetResult = self.client.get_bulk_job_spectra_s3(GetBulkJobSpectraS3Request(bucketName, objects))
         
         tempFiles = []
         
-        availableChunks = self.client.get_job_chunk_spectra_s3(GetJobChunkSpectraS3Request(bulkGetResult.jobId))
+        availableChunks = self.client.get_job_chunk_spectra_s3(GetJobChunkSpectraS3Request(bulkGetResult.result['JobId']))
         
-        for obj in availableChunks.bulkPlan.chunks[0].objects:
+        for obj in availableChunks.result['ObjectList']:
             newFile = tempfile.mkstemp()
             tempFiles.append(newFile)
 
-            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj.name, offset = obj.offset, job = bulkGetResult.jobId))
+            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj['Name'], offset = obj['Offset'], job = bulkGetResult.result['JobId']))
         
         for tempFile in tempFiles:
             os.close(tempFile[0])
@@ -505,7 +532,7 @@ class ObjectMetadataTestCase(Ds3TestCase):
 
         metadata_resp = self.client.head_object(HeadObjectRequest(bucketName, "beowulf.txt"))
         
-        self.assertEqual(metadata_check, metadata_resp)
+        self.assertEqual(metadata_check, metadata_resp.result)
 
     def testHeadObjectBadInput(self):
         """tests headObject: bad input to function"""
@@ -553,8 +580,8 @@ class BasicClientTestCase(Ds3TestCase):
     def testGetSystemInformation(self):
         result = self.client.get_system_information_spectra_s3(GetSystemInformationSpectraS3Request())
 
-        self.assertNotEqual(result.result.ApiVersion, None)
-        self.assertNotEqual(result.result.SerialNumber, None)
+        self.assertNotEqual(result.result['ApiVersion'], None)
+        self.assertNotEqual(result.result['SerialNumber'], None)
 
     def testVerifySystemHealth(self):
         result = self.client.verify_system_health_spectra_s3(VerifySystemHealthSpectraS3Request())

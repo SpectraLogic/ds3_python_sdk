@@ -1,3 +1,16 @@
+#   Copyright 2014-2016 Spectra Logic Corporation. All Rights Reserved.
+#   Licensed under the Apache License, Version 2.0 (the "License"). You may not use
+#   this file except in compliance with the License. A copy of the License is located at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   or in the "license" file accompanying this file.
+#   This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+#   CONDITIONS OF ANY KIND, either express or implied. See the License for the
+#   specific language governing permissions and limitations under the License.
+
+#   This code is auto-generated, do not modify
+
 import hmac
 import base64
 import xml.dom.minidom
@@ -28,14 +41,22 @@ def typeCheck(input_arg, type_to_check):
   else:
     raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
 
+class Ds3Error(object):
+  def __init__(self, code, http_error_code, message):
+    self.code = code
+    self.http_error_code = http_error_code
+    self.message = message
+    
 class RequestFailed(Exception):
-  def __init__(self, summary, response):
+  def __init__(self, summary, ds3_error):
     self.summary = summary
-    self.code = response.status
-    self.reason = response.reason
+    self.code = ds3_error.code
+    self.http_error_code = ds3_error.http_error_code
+    self.message = ds3_error.message
 
   def __str__(self):
-    return '{0} \n Code={1} \n {2}'.format(self.summary, self.code, self.reason)
+    return '{0} \n Code={1} \n HttpError={2} \n {3}'.format(self.summary, self.code, 
+                                                                self.http_error_code, self.message)
 
 class HttpVerb(object):
   """ HttpVerbs as Enums """
@@ -52,12 +73,44 @@ class Credentials(object):
       
   def is_valid(self):
     return True if self.accessId and self.key else False
-
-class Ds3Error(object):
-  def __init__(self, code, httperrorcode, message):
-    self.code = code
-    self.httperrorcode = httperrorcode
-    self.message = message
+    
+class XmlSerializer(object):
+  def __init__(self, verbose=False):
+    self.verbose = verbose
+    
+  def pretty_print_xml(self, xml_string):
+    if xml_string:
+      print xml.dom.minidom.parseString(xml_string).toprettyxml()
+      
+  def parse_string(self, xml_string):
+    if self.verbose:
+      self.pretty_print_xml(xml_string)
+    return xml.dom.minidom.parseString(xml_string)
+    
+  def get_name_from_node(self, doc, nodename, parentname=None):
+    for node in doc.getElementsByTagName(nodename):
+      if parentname and not node.parentNode.nodeName == parentname:
+        # this is not the node you are looking for
+        continue
+        
+      for childnode in node.childNodes:
+        if childnode.nodeType == Node.TEXT_NODE:
+          return childnode.data
+          
+    return ''
+    
+  def to_ds3error(self, xml_string, status_code, reason):
+    if not xml_string:
+      #There is no error payload
+      return Ds3Error(reason, status_code, None)
+    
+    doc = xml.dom.minidom.parseString(xml_string)
+    code = self.get_name_from_node(doc, "Code")
+    http_error_code = int(self.get_name_from_node(doc, "HttpErrorCode"))
+    message = self.get_name_from_node(doc, "Message") 
+    obj = Ds3Error(code, http_error_code, message)
+        
+    return obj
 
 class NetworkClient(object):
   def __init__(self, endpoint, credentials):
@@ -116,6 +169,9 @@ class NetworkClient(object):
     headers = {}
     headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
     headers['Date'] = date
+    
+    canonicalized_resource = self.canonicalize_path(request.path, request.query_params)
+    
     # add additonal header information if specficied in the request. This might be a byte range for example
     if request.headers:
       headers.update(request.headers)
@@ -123,13 +179,25 @@ class NetworkClient(object):
     if request.http_verb == HttpVerb.PUT:
       headers['Content-Type'] = 'application/octet-stream'
       headers['Authorization'] = self.build_authorization( verb=request.http_verb, date=date, 
-                                                           content_type='application/octet-stream', resource=request.path)
+                                                           content_type='application/octet-stream', resource=canonicalized_resource)
       connection.request(request.http_verb, path, body=request.body, headers=headers)
     else:
-      headers['Authorization'] = self.build_authorization(verb=request.http_verb, date=date, resource=request.path)
+      headers['Authorization'] = self.build_authorization(verb=request.http_verb, date=date, resource=canonicalized_resource)
       connection.request(request.http_verb, path, headers=headers)
-            
+    
     return connection.getresponse()
+    
+  def canonicalize_path(self, request_path, query_params):
+    path = request_path
+    if 'delete' in query_params:
+      path += '?delete'
+    if 'versioning' in query_params:
+      path += '?versioning=' + str(query_params['versioning'])
+    if 'uploads' in query_params:
+      path += '?uploads'
+      if query_params['uploads'] is not None:
+        path += '=' + str(query_params['uploads'])
+    return path
      
     
   def build_authorization(self, verb='', date='', content_type='', resource=''):
@@ -159,9 +227,14 @@ class NetworkClient(object):
       return resource
     new_path = resource + '?'
 
-    new_path += '&'.join(map(lambda tupal: (tupal[0] + '=' + str(tupal[1])), 
+    new_path += '&'.join(map(lambda tupal: self.build_query_param(tupal), 
                              query_params.iteritems()))
     return new_path
+    
+  def build_query_param(self, param):
+    if param[1] is None:
+      return param[0]
+    return param[0] + '=' + str(param[1])
 
   def get_date(self):
     return formatdate()
