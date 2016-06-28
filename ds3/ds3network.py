@@ -150,16 +150,19 @@ class NetworkClient(object):
              
     return response
     
-  def send_request(self, request):
-    """create http or https connectiong and send the DS3 request."""
+  def setup_connection(self, target):
     if self.secure:
-      connection = httplib.HTTPSConnection(self.networkconnection.endpoint)
-    else:
-      connection = httplib.HTTPConnection(self.networkconnection.endpoint)
-            
-    #use proxy if one was specified
+      return httplib.HTTPSConnection(target)
+    return httplib.HTTPConnection(target)
+    
+  def send_request(self, request):
+    """create http or https connection and send the DS3 request. Set the proxy if one is specified"""
+    connection = None
     if self.proxy:
-      connection.set_tunnel(self.proxy)
+      connection = self.setup_connection(self.proxy)
+      connection.set_tunnel(self.networkconnection.endpoint)
+    else:
+      connection = self.setup_connection(self.networkconnection.endpoint)
             
     date = self.get_date()
     path = request.path
@@ -173,19 +176,52 @@ class NetworkClient(object):
     canonicalized_resource = self.canonicalize_path(request.path, request.query_params)
     
     # add additonal header information if specficied in the request. This might be a byte range for example
-    if request.headers:
-      headers.update(request.headers)
+    amz_headers = {}
+    for key, value in request.headers.iteritems():
+      if not key.startswith('x-amz-meta-'):
+        amz_headers['x-amz-meta-' + key] = self.canonicalize_header_value(value)
+      else:
+        amz_headers[key] = self.canonicalize_header_value(value)
+    
+    headers.update(amz_headers)
             
-    if request.http_verb == HttpVerb.PUT:
+    if request.http_verb == HttpVerb.PUT or request.http_verb == HttpVerb.POST:
+      canonicalized_amz_header = self.canonicalized_amz_headers(amz_headers)
       headers['Content-Type'] = 'application/octet-stream'
-      headers['Authorization'] = self.build_authorization( verb=request.http_verb, date=date, 
-                                                           content_type='application/octet-stream', resource=canonicalized_resource)
+      headers['Authorization'] = self.build_authorization( verb=request.http_verb, 
+                                                           date=date, 
+                                                           content_type='application/octet-stream', 
+                                                           canonicalized_amz_header=canonicalized_amz_header,
+                                                           resource=canonicalized_resource)
       connection.request(request.http_verb, path, body=request.body, headers=headers)
+      if isinstance(request.body, file): #TODO remove
+        request.body.close()
     else:
       headers['Authorization'] = self.build_authorization(verb=request.http_verb, date=date, resource=canonicalized_resource)
       connection.request(request.http_verb, path, headers=headers)
     
     return connection.getresponse()
+    
+  def canonicalize_header_value(self, value):
+    #if a header value is a list, then it is converted into a comma separated list
+    if not isinstance(value, list):
+      return value
+    parts = []
+    for part in value:
+      parts.append(part)
+    return ','.join(parts)
+    
+  def canonicalized_amz_headers(self, amz_headers):
+    if not amz_headers:
+      return ''
+    
+    headers = []
+    for key, value in amz_headers.iteritems():
+      headers.append(key + ':' + str(value))
+      
+    headers.sort()
+    result = "\n".join(headers)
+    return result + '\n'
     
   def canonicalize_path(self, request_path, query_params):
     path = request_path
@@ -200,10 +236,10 @@ class NetworkClient(object):
     return path
      
     
-  def build_authorization(self, verb='', date='', content_type='', resource=''):
+  def build_authorization(self, verb='', date='', content_type='', resource='', canonicalized_amz_header=''):
     ###Build the S3 authorization###
     signature = self.aws_signature(self.credentials.key, verb=verb, content_type=content_type,
-                                  date=date, canonicalized_resource=resource)
+                                  date=date, canonicalized_amz_header=canonicalized_amz_header, canonicalized_resource=resource)
     return 'AWS ' + self.credentials.accessId + ':' + signature
     
   def aws_signature(self, key, verb='GET', md5='', content_type='', date='', canonicalized_amz_header='', canonicalized_resource=''):

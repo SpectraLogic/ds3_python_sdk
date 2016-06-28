@@ -76,7 +76,7 @@ class DeleteObject(object):
     self.key = key
 
   def to_xml(self):
-    xml_key = xmldom.Element('key')
+    xml_key = xmldom.Element('Key') #TODO capitilized
     xml_key.text = self.key
 
     xml_object = xmldom.Element('Object')
@@ -1715,7 +1715,6 @@ class AbstractRequest(object):
 class AbortMultiPartUploadRequest(AbstractRequest):
   def __init__(self, bucket_name, object_name, upload_id):
     super(AbortMultiPartUploadRequest, self).__init__()
-    self.upload_id = upload_id
     self.bucket_name = bucket_name
     self.object_name = object_name
     self.query_params['upload_id'] = upload_id
@@ -1726,9 +1725,8 @@ class AbortMultiPartUploadRequest(AbstractRequest):
     self.http_verb = HttpVerb.DELETE
 
 class CompleteMultiPartUploadRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, upload_id, part_list):
+  def __init__(self, bucket_name, object_name, part_list, upload_id):
     super(CompleteMultiPartUploadRequest, self).__init__()
-    self.upload_id = upload_id
     self.bucket_name = bucket_name
     self.object_name = object_name
     self.query_params['upload_id'] = upload_id
@@ -1737,6 +1735,7 @@ class CompleteMultiPartUploadRequest(AbstractRequest):
       if not isinstance(part_list, PartList):
         raise TypeError('CompleteMultiPartUploadRequest should have request payload of type: PartList')
       self.body = xmldom.tostring(part_list.to_xml())
+
 
 
     self.path = '/' + bucket_name + '/' + object_name
@@ -1753,10 +1752,8 @@ class PutBucketRequest(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class PutMultiPartUploadPartRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, part_number, upload_id, request_payload):
+  def __init__(self, bucket_name, object_name, part_number, request_payload, upload_id):
     super(PutMultiPartUploadPartRequest, self).__init__()
-    self.part_number = part_number
-    self.upload_id = upload_id
     self.bucket_name = bucket_name
     self.object_name = object_name
     self.query_params['part_number'] = part_number
@@ -1765,26 +1762,37 @@ class PutMultiPartUploadPartRequest(AbstractRequest):
     self.body = request_payload
 
 
+
     self.path = '/' + bucket_name + '/' + object_name
     self.http_verb = HttpVerb.PUT
 
 class PutObjectRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, real_file_name=None, job=None, offset=None, headers=None): #TODO added headers
+  def __init__(self, bucket_name, object_name, headers=None, job=None, offset=None, real_file_name=None, stream=None): #TODO added stream
     super(PutObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
+
     if headers is not None:
-      self.headers = headers #TODO added line
-
+      self.headers = headers
+    
+    #TODO change start
+    
     self.object_name = typeCheckString(object_name)
-    effectiveFileName = self.object_name
-    if real_file_name:
-      effectiveFileName = typeCheckString(real_file_name)
+    object_data = None
+    if stream:
+      object_data = stream
+    else:
+      effectiveFileName = self.object_name
+      if real_file_name:
+        effectiveFileName = typeCheckString(real_file_name)
 
-    localFile = open(effectiveFileName, "rb")
-    localFile.seek(offset, 0)
-    self.body = localFile.read()
-    localFile.close()
+      object_data = open(effectiveFileName, "rb")
+    
+    if offset:
+      object_data.seek(offset, 0)
+    self.body = object_data
+    
+    #END TODO modifications
 
     if job is not None:
       self.query_params['job'] = job
@@ -1862,11 +1870,19 @@ class GetServiceRequest(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetObjectRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, job=None, offset=None):
+  def __init__(self, bucket_name, object_name, job=None, offset=None, real_file_name=None, stream=None): #TODO added real_file_name and stream
     super(GetObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
 
+    #TODO added
+    self.offset = offset
+    self.stream = stream
+    if real_file_name:
+      self.effective_file_name = typeCheckString(real_file_name)
+    else:
+      self.effective_file_name = typeCheckString(object_name)
+    #TODO end added
 
     if job is not None:
       self.query_params['job'] = job
@@ -1912,7 +1928,6 @@ class InitiateMultiPartUploadRequest(AbstractRequest):
 class ListMultiPartUploadPartsRequest(AbstractRequest):
   def __init__(self, bucket_name, object_name, upload_id, max_parts=None, part_number_marker=None):
     super(ListMultiPartUploadPartsRequest, self).__init__()
-    self.upload_id = upload_id
     self.bucket_name = bucket_name
     self.object_name = object_name
     self.query_params['upload_id'] = upload_id
@@ -1950,9 +1965,6 @@ class ListMultiPartUploadsRequest(AbstractRequest):
 class PutBucketAclForGroupSpectraS3Request(AbstractRequest):
   def __init__(self, bucket_id, group_id, permission):
     super(PutBucketAclForGroupSpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
-    self.group_id = group_id
-    self.permission = permission
     self.query_params['bucket_id'] = bucket_id
     self.query_params['group_id'] = group_id
     self.query_params['permission'] = permission
@@ -1965,9 +1977,6 @@ class PutBucketAclForGroupSpectraS3Request(AbstractRequest):
 class PutBucketAclForUserSpectraS3Request(AbstractRequest):
   def __init__(self, bucket_id, permission, user_id):
     super(PutBucketAclForUserSpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
-    self.permission = permission
-    self.user_id = user_id
     self.query_params['bucket_id'] = bucket_id
     self.query_params['permission'] = permission
     self.query_params['user_id'] = user_id
@@ -1980,8 +1989,6 @@ class PutBucketAclForUserSpectraS3Request(AbstractRequest):
 class PutDataPolicyAclForGroupSpectraS3Request(AbstractRequest):
   def __init__(self, data_policy_id, group_id):
     super(PutDataPolicyAclForGroupSpectraS3Request, self).__init__()
-    self.data_policy_id = data_policy_id
-    self.group_id = group_id
     self.query_params['data_policy_id'] = data_policy_id
     self.query_params['group_id'] = group_id
 
@@ -1993,8 +2000,6 @@ class PutDataPolicyAclForGroupSpectraS3Request(AbstractRequest):
 class PutDataPolicyAclForUserSpectraS3Request(AbstractRequest):
   def __init__(self, data_policy_id, user_id):
     super(PutDataPolicyAclForUserSpectraS3Request, self).__init__()
-    self.data_policy_id = data_policy_id
-    self.user_id = user_id
     self.query_params['data_policy_id'] = data_policy_id
     self.query_params['user_id'] = user_id
 
@@ -2006,8 +2011,6 @@ class PutDataPolicyAclForUserSpectraS3Request(AbstractRequest):
 class PutGlobalBucketAclForGroupSpectraS3Request(AbstractRequest):
   def __init__(self, group_id, permission):
     super(PutGlobalBucketAclForGroupSpectraS3Request, self).__init__()
-    self.group_id = group_id
-    self.permission = permission
     self.query_params['group_id'] = group_id
     self.query_params['permission'] = permission
 
@@ -2019,8 +2022,6 @@ class PutGlobalBucketAclForGroupSpectraS3Request(AbstractRequest):
 class PutGlobalBucketAclForUserSpectraS3Request(AbstractRequest):
   def __init__(self, permission, user_id):
     super(PutGlobalBucketAclForUserSpectraS3Request, self).__init__()
-    self.permission = permission
-    self.user_id = user_id
     self.query_params['permission'] = permission
     self.query_params['user_id'] = user_id
 
@@ -2032,7 +2033,6 @@ class PutGlobalBucketAclForUserSpectraS3Request(AbstractRequest):
 class PutGlobalDataPolicyAclForGroupSpectraS3Request(AbstractRequest):
   def __init__(self, group_id):
     super(PutGlobalDataPolicyAclForGroupSpectraS3Request, self).__init__()
-    self.group_id = group_id
     self.query_params['group_id'] = group_id
 
 
@@ -2043,7 +2043,6 @@ class PutGlobalDataPolicyAclForGroupSpectraS3Request(AbstractRequest):
 class PutGlobalDataPolicyAclForUserSpectraS3Request(AbstractRequest):
   def __init__(self, user_id):
     super(PutGlobalDataPolicyAclForUserSpectraS3Request, self).__init__()
-    self.user_id = user_id
     self.query_params['user_id'] = user_id
 
 
@@ -2142,7 +2141,6 @@ class GetDataPolicyAclsSpectraS3Request(AbstractRequest):
 class PutBucketSpectraS3Request(AbstractRequest):
   def __init__(self, name, data_policy_id=None, user_id=None):
     super(PutBucketSpectraS3Request, self).__init__()
-    self.name = name
     self.query_params['name'] = name
 
 
@@ -2282,8 +2280,6 @@ class ModifyCacheFilesystemSpectraS3Request(AbstractRequest):
 class GetBucketCapacitySummarySpectraS3Request(AbstractRequest):
   def __init__(self, bucket_id, storage_domain_id, pool_health=None, pool_state=None, pool_type=None, tape_state=None, tape_type=None):
     super(GetBucketCapacitySummarySpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
-    self.storage_domain_id = storage_domain_id
     self.query_params['bucket_id'] = bucket_id
     self.query_params['storage_domain_id'] = storage_domain_id
 
@@ -2305,7 +2301,6 @@ class GetBucketCapacitySummarySpectraS3Request(AbstractRequest):
 class GetStorageDomainCapacitySummarySpectraS3Request(AbstractRequest):
   def __init__(self, storage_domain_id, pool_health=None, pool_state=None, pool_type=None, tape_state=None, tape_type=None):
     super(GetStorageDomainCapacitySummarySpectraS3Request, self).__init__()
-    self.storage_domain_id = storage_domain_id
     self.query_params['storage_domain_id'] = storage_domain_id
 
 
@@ -2388,10 +2383,6 @@ class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
 class PutDataPersistenceRuleSpectraS3Request(AbstractRequest):
   def __init__(self, data_policy_id, isolation_level, storage_domain_id, type, minimum_days_to_retain=None):
     super(PutDataPersistenceRuleSpectraS3Request, self).__init__()
-    self.data_policy_id = data_policy_id
-    self.isolation_level = isolation_level
-    self.storage_domain_id = storage_domain_id
-    self.type = type
     self.query_params['data_policy_id'] = data_policy_id
     self.query_params['isolation_level'] = isolation_level
     self.query_params['storage_domain_id'] = storage_domain_id
@@ -2407,7 +2398,6 @@ class PutDataPersistenceRuleSpectraS3Request(AbstractRequest):
 class PutDataPolicySpectraS3Request(AbstractRequest):
   def __init__(self, name, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_job_priority=None, end_to_end_crc_required=None, rebuild_priority=None, versioning=None):
     super(PutDataPolicySpectraS3Request, self).__init__()
-    self.name = name
     self.query_params['name'] = name
 
 
@@ -2622,8 +2612,6 @@ class GetDegradedDataPersistenceRulesSpectraS3Request(AbstractRequest):
 class PutGroupGroupMemberSpectraS3Request(AbstractRequest):
   def __init__(self, group_id, member_group_id):
     super(PutGroupGroupMemberSpectraS3Request, self).__init__()
-    self.group_id = group_id
-    self.member_group_id = member_group_id
     self.query_params['group_id'] = group_id
     self.query_params['member_group_id'] = member_group_id
 
@@ -2635,7 +2623,6 @@ class PutGroupGroupMemberSpectraS3Request(AbstractRequest):
 class PutGroupSpectraS3Request(AbstractRequest):
   def __init__(self, name):
     super(PutGroupSpectraS3Request, self).__init__()
-    self.name = name
     self.query_params['name'] = name
 
 
@@ -2646,8 +2633,6 @@ class PutGroupSpectraS3Request(AbstractRequest):
 class PutUserGroupMemberSpectraS3Request(AbstractRequest):
   def __init__(self, group_id, member_user_id):
     super(PutUserGroupMemberSpectraS3Request, self).__init__()
-    self.group_id = group_id
-    self.member_user_id = member_user_id
     self.query_params['group_id'] = group_id
     self.query_params['member_user_id'] = member_user_id
 
@@ -2832,6 +2817,7 @@ class GetBulkJobSpectraS3Request(AbstractRequest):
         raise TypeError('GetBulkJobSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
 
+
     if aggregating is not None:
       self.query_params['aggregating'] = aggregating
     if chunk_client_processing_order_guarantee is not None:
@@ -2854,6 +2840,7 @@ class PutBulkJobSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('PutBulkJobSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
     if aggregating is not None:
       self.query_params['aggregating'] = aggregating
@@ -2879,6 +2866,7 @@ class VerifyBulkJobSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('VerifyBulkJobSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
     if aggregating is not None:
       self.query_params['aggregating'] = aggregating
@@ -3004,7 +2992,6 @@ class GetJobChunkSpectraS3Request(AbstractRequest):
 class GetJobChunksReadyForClientProcessingSpectraS3Request(AbstractRequest):
   def __init__(self, job, preferred_number_of_chunks=None):
     super(GetJobChunksReadyForClientProcessingSpectraS3Request, self).__init__()
-    self.job = job
     self.query_params['job'] = job
 
 
@@ -3073,6 +3060,7 @@ class ReplicatePutJobSpectraS3Request(AbstractRequest):
 
     self.body = request_payload
 
+
     if conflict_resolution_mode is not None:
       self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if priority is not None:
@@ -3125,7 +3113,6 @@ class ModifyNodeSpectraS3Request(AbstractRequest):
 class PutJobCompletedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, job_id=None, naming_convention=None, notification_http_method=None):
     super(PutJobCompletedNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3144,7 +3131,6 @@ class PutJobCompletedNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutJobCreatedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutJobCreatedNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3161,7 +3147,6 @@ class PutJobCreatedNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutObjectCachedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, job_id=None, naming_convention=None, notification_http_method=None):
     super(PutObjectCachedNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3180,7 +3165,6 @@ class PutObjectCachedNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutObjectLostNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutObjectLostNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3197,7 +3181,6 @@ class PutObjectLostNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutObjectPersistedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, job_id=None, naming_convention=None, notification_http_method=None):
     super(PutObjectPersistedNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3216,7 +3199,6 @@ class PutObjectPersistedNotificationRegistrationSpectraS3Request(AbstractRequest
 class PutPoolFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutPoolFailureNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3233,7 +3215,6 @@ class PutPoolFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutStorageDomainFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutStorageDomainFailureNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3250,7 +3231,6 @@ class PutStorageDomainFailureNotificationRegistrationSpectraS3Request(AbstractRe
 class PutSystemFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutSystemFailureNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3267,7 +3247,6 @@ class PutSystemFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutTapeFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutTapeFailureNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3284,7 +3263,6 @@ class PutTapeFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
 class PutTapePartitionFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
     super(PutTapePartitionFailureNotificationRegistrationSpectraS3Request, self).__init__()
-    self.notification_end_point = notification_end_point
     self.query_params['notification_end_point'] = notification_end_point
 
 
@@ -3691,7 +3669,6 @@ class GetTapePartitionFailureNotificationRegistrationsSpectraS3Request(AbstractR
 class DeleteFolderRecursivelySpectraS3Request(AbstractRequest):
   def __init__(self, bucket_id, folder, roll_back=None):
     super(DeleteFolderRecursivelySpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
     self.folder = folder
     self.query_params['bucket_id'] = bucket_id
     self.query_params['recursive'] = None
@@ -3706,7 +3683,6 @@ class DeleteFolderRecursivelySpectraS3Request(AbstractRequest):
 class GetObjectSpectraS3Request(AbstractRequest):
   def __init__(self, object_name, bucket_id):
     super(GetObjectSpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
     self.object_name = object_name
     self.query_params['bucket_id'] = bucket_id
 
@@ -3789,6 +3765,7 @@ class GetPhysicalPlacementForObjectsSpectraS3Request(AbstractRequest):
         raise TypeError('GetPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
 
+
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
 
@@ -3807,6 +3784,7 @@ class GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(AbstractRequ
         raise TypeError('GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
 
+
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
 
@@ -3823,6 +3801,7 @@ class VerifyPhysicalPlacementForObjectsSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('VerifyPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
@@ -3841,6 +3820,7 @@ class VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(AbstractR
       if not isinstance(object_list, FileObjectList):
         raise TypeError('VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
@@ -3897,8 +3877,6 @@ class CompactPoolSpectraS3Request(AbstractRequest):
 class PutPoolPartitionSpectraS3Request(AbstractRequest):
   def __init__(self, name, type):
     super(PutPoolPartitionSpectraS3Request, self).__init__()
-    self.name = name
-    self.type = type
     self.query_params['name'] = name
     self.query_params['type'] = type
 
@@ -3979,7 +3957,7 @@ class FormatForeignPoolSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class GetBlobsOnPoolSpectraS3Request(AbstractRequest):
-  def __init__(self, pool, object_list):
+  def __init__(self, object_list, pool):
     super(GetBlobsOnPoolSpectraS3Request, self).__init__()
     self.pool = pool
     self.query_params['operation'] = 'get_physical_placement'
@@ -3988,6 +3966,7 @@ class GetBlobsOnPoolSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('GetBlobsOnPoolSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
 
     self.path = '/_rest_/pool/' + pool
@@ -4132,7 +4111,6 @@ class ImportPoolSpectraS3Request(AbstractRequest):
 class ModifyAllPoolsSpectraS3Request(AbstractRequest):
   def __init__(self, quiesced):
     super(ModifyAllPoolsSpectraS3Request, self).__init__()
-    self.quiesced = quiesced
     self.query_params['quiesced'] = quiesced
 
 
@@ -4194,8 +4172,6 @@ class VerifyPoolSpectraS3Request(AbstractRequest):
 class PutPoolStorageDomainMemberSpectraS3Request(AbstractRequest):
   def __init__(self, pool_partition_id, storage_domain_id, write_preference=None):
     super(PutPoolStorageDomainMemberSpectraS3Request, self).__init__()
-    self.pool_partition_id = pool_partition_id
-    self.storage_domain_id = storage_domain_id
     self.query_params['pool_partition_id'] = pool_partition_id
     self.query_params['storage_domain_id'] = storage_domain_id
 
@@ -4209,7 +4185,6 @@ class PutPoolStorageDomainMemberSpectraS3Request(AbstractRequest):
 class PutStorageDomainSpectraS3Request(AbstractRequest):
   def __init__(self, name, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, ltfs_file_naming=None, maximum_auto_verification_frequency_in_days=None, max_tape_fragmentation_percent=None, media_ejection_allowed=None, verify_prior_to_auto_eject=None, write_optimization=None):
     super(PutStorageDomainSpectraS3Request, self).__init__()
-    self.name = name
     self.query_params['name'] = name
 
 
@@ -4240,9 +4215,6 @@ class PutStorageDomainSpectraS3Request(AbstractRequest):
 class PutTapeStorageDomainMemberSpectraS3Request(AbstractRequest):
   def __init__(self, storage_domain_id, tape_partition_id, tape_type, write_preference=None):
     super(PutTapeStorageDomainMemberSpectraS3Request, self).__init__()
-    self.storage_domain_id = storage_domain_id
-    self.tape_partition_id = tape_partition_id
-    self.tape_type = tape_type
     self.query_params['storage_domain_id'] = storage_domain_id
     self.query_params['tape_partition_id'] = tape_partition_id
     self.query_params['tape_type'] = tape_type
@@ -4568,9 +4540,6 @@ class CleanTapeDriveSpectraS3Request(AbstractRequest):
 class PutTapeDensityDirectiveSpectraS3Request(AbstractRequest):
   def __init__(self, density, partition_id, tape_type):
     super(PutTapeDensityDirectiveSpectraS3Request, self).__init__()
-    self.density = density
-    self.partition_id = partition_id
-    self.tape_type = tape_type
     self.query_params['density'] = density
     self.query_params['partition_id'] = partition_id
     self.query_params['tape_type'] = tape_type
@@ -4655,10 +4624,8 @@ class EjectAllTapesSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_id, storage_domain_id, object_list=None, eject_label=None, eject_location=None):
+  def __init__(self, bucket_id, storage_domain_id, eject_label=None, eject_location=None, object_list=None):
     super(EjectStorageDomainBlobsSpectraS3Request, self).__init__()
-    self.bucket_id = bucket_id
-    self.storage_domain_id = storage_domain_id
     self.query_params['operation'] = 'eject'
     self.query_params['blobs'] = None
     self.query_params['bucket_id'] = bucket_id
@@ -4669,6 +4636,7 @@ class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
         raise TypeError('EjectStorageDomainBlobsSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
 
+
     if eject_label is not None:
       self.query_params['eject_label'] = eject_label
     if eject_location is not None:
@@ -4678,9 +4646,8 @@ class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class EjectStorageDomainSpectraS3Request(AbstractRequest):
-  def __init__(self, storage_domain_id, object_list=None, bucket_id=None, eject_label=None, eject_location=None):
+  def __init__(self, storage_domain_id, bucket_id=None, eject_label=None, eject_location=None, object_list=None):
     super(EjectStorageDomainSpectraS3Request, self).__init__()
-    self.storage_domain_id = storage_domain_id
     self.query_params['operation'] = 'eject'
     self.query_params['storage_domain_id'] = storage_domain_id
 
@@ -4688,6 +4655,7 @@ class EjectStorageDomainSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('EjectStorageDomainSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
@@ -4749,7 +4717,7 @@ class FormatTapeSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class GetBlobsOnTapeSpectraS3Request(AbstractRequest):
-  def __init__(self, tape_id, object_list):
+  def __init__(self, object_list, tape_id):
     super(GetBlobsOnTapeSpectraS3Request, self).__init__()
     self.tape_id = tape_id
     self.query_params['operation'] = 'get_physical_placement'
@@ -4758,6 +4726,7 @@ class GetBlobsOnTapeSpectraS3Request(AbstractRequest):
       if not isinstance(object_list, FileObjectList):
         raise TypeError('GetBlobsOnTapeSpectraS3Request should have request payload of type: FileObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
+
 
 
     self.path = '/_rest_/tape/' + tape_id
@@ -5165,7 +5134,6 @@ class InspectTapeSpectraS3Request(AbstractRequest):
 class ModifyAllTapePartitionsSpectraS3Request(AbstractRequest):
   def __init__(self, quiesced):
     super(ModifyAllTapePartitionsSpectraS3Request, self).__init__()
-    self.quiesced = quiesced
     self.query_params['quiesced'] = quiesced
 
 
@@ -5315,7 +5283,20 @@ class AbstractResponse(object):
     self.response = response
     self.object_data = None
     self.result = None
+    self.meta_data = None
     self.process_response(response)
+    self.process_meta_data(response)
+    
+  def process_meta_data(self, response):
+    headers = response.getheaders()
+    if not headers:
+      return
+    meta_data = {}
+    for header in headers:
+      if header[0].startswith('x-amz-meta-'):
+        values = header[1].split(',')
+        meta_data[header[0][11:]] = values
+    self.meta_data = meta_data
 
   def process_response(self, response):
     # this method must be implemented
@@ -5384,6 +5365,17 @@ class GetServiceResponse(AbstractResponse):
 class GetObjectResponse(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
+    #TODO added
+    localFile = None
+    if self.request.stream:
+      localFile = self.request.stream
+    else:
+      localFile = open(self.request.effective_file_name, "wb")
+    if self.request.offset:
+      localFile.seek(self.request.offset, 0)
+    localFile.write(response.read())
+    localFile.close()
+    
     
 
 class HeadBucketResponse(AbstractResponse):
