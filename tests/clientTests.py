@@ -539,7 +539,7 @@ class ObjectTestCase(Ds3TestCase):
             newFile = tempfile.mkstemp()
             tempFiles.append(newFile)
 
-            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj['Name'], offset = int(obj['Offset']), job = bulkGetResult.result['JobId']))
+            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj['Name'], offset = int(obj['Offset']), job = bulkGetResult.result['JobId'], real_file_name = newFile[1]))
         
         for tempFile in tempFiles:
             os.close(tempFile[0])
@@ -593,7 +593,7 @@ class ObjectMetadataTestCase(Ds3TestCase):
             newFile = tempfile.mkstemp()
             tempFiles.append(newFile)
 
-            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj['Name'], offset = int(obj['Offset']), job = bulkGetResult.result['JobId']))
+            metadata_resp = self.client.get_object(GetObjectRequest(bucketName, obj['Name'], offset = int(obj['Offset']), job = bulkGetResult.result['JobId'], real_file_name = newFile[1]))
         
         for tempFile in tempFiles:
             os.close(tempFile[0])

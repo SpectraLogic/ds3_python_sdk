@@ -76,7 +76,7 @@ class DeleteObject(object):
     self.key = key
 
   def to_xml(self):
-    xml_key = xmldom.Element('Key') #TODO capitilized
+    xml_key = xmldom.Element('Key')
     xml_key.text = self.key
 
     xml_object = xmldom.Element('Object')
@@ -1767,16 +1767,13 @@ class PutMultiPartUploadPartRequest(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class PutObjectRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, headers=None, job=None, offset=None, real_file_name=None, stream=None): #TODO added stream
+  def __init__(self, bucket_name, object_name, headers=None, job=None, offset=None, real_file_name=None, stream=None):
     super(PutObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
 
     if headers is not None:
       self.headers = headers
-    
-    #TODO change start
-    
     self.object_name = typeCheckString(object_name)
     object_data = None
     if stream:
@@ -1785,14 +1782,11 @@ class PutObjectRequest(AbstractRequest):
       effectiveFileName = self.object_name
       if real_file_name:
         effectiveFileName = typeCheckString(real_file_name)
-
       object_data = open(effectiveFileName, "rb")
-    
     if offset:
       object_data.seek(offset, 0)
     self.body = object_data
-    
-    #END TODO modifications
+
 
     if job is not None:
       self.query_params['job'] = job
@@ -1836,6 +1830,7 @@ class DeleteObjectsRequest(AbstractRequest):
         raise TypeError('DeleteObjectsRequest should have request payload of type: DeleteObjectList')
       self.body = xmldom.tostring(object_list.to_xml())
 
+
     if roll_back is not None:
       self.query_params['roll_back'] = roll_back
 
@@ -1870,19 +1865,18 @@ class GetServiceRequest(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetObjectRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, job=None, offset=None, real_file_name=None, stream=None): #TODO added real_file_name and stream
+  def __init__(self, bucket_name, object_name, job=None, offset=None, real_file_name=None, stream=None):
     super(GetObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
 
-    #TODO added
     self.offset = offset
     self.stream = stream
     if real_file_name:
       self.effective_file_name = typeCheckString(real_file_name)
     else:
       self.effective_file_name = typeCheckString(object_name)
-    #TODO end added
+
 
     if job is not None:
       self.query_params['job'] = job
@@ -5286,7 +5280,7 @@ class AbstractResponse(object):
     self.meta_data = None
     self.process_response(response)
     self.process_meta_data(response)
-    
+
   def process_meta_data(self, response):
     headers = response.getheaders()
     if not headers:
@@ -5365,7 +5359,6 @@ class GetServiceResponse(AbstractResponse):
 class GetObjectResponse(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
-    #TODO added
     localFile = None
     if self.request.stream:
       localFile = self.request.stream
@@ -5375,8 +5368,7 @@ class GetObjectResponse(AbstractResponse):
       localFile.seek(self.request.offset, 0)
     localFile.write(response.read())
     localFile.close()
-    
-    
+
 
 class HeadBucketResponse(AbstractResponse):
   def process_response(self, response):
