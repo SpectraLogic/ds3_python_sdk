@@ -29,7 +29,7 @@ def pathForFileName(resourceName, fileName):
     currentPath = os.path.dirname(unicode(__file__, encoding))
     return os.path.join(currentPath, fileName, resourceName)
 
-def populateTestData(client, bucketName, resourceList = None, prefix = "", metadata = None):
+def populateTestData(client, bucketName, resourceList = None, prefix = "", metadata = None, createBucket=True):
     if not resourceList:
         resourceList = resources
 
@@ -37,7 +37,8 @@ def populateTestData(client, bucketName, resourceList = None, prefix = "", metad
         size = os.stat(pathForResource(fileName)).st_size
         return FileObject(prefix + fileName, size)
 
-    client.put_bucket(PutBucketRequest(bucketName))
+    if createBucket:
+        client.put_bucket(PutBucketRequest(bucketName))
 
     pathes = {prefix + fileName: pathForResource(fileName) for fileName in resourceList}
 
@@ -69,6 +70,31 @@ def typeErrorList(badType):
 
 def reasonErrorList(reason):
     return [RequestFailed, str, reason]
+    
+def setupStorageDomainMember(client, storageDomainName, poolPartitionName):
+    '''Creates a storage domain, pool partition, and links the two via a storage domain member'''
+    storageResponse = client.put_storage_domain_spectra_s3(
+                PutStorageDomainSpectraS3Request(storageDomainName))
+    poolResponse = client.put_pool_partition_spectra_s3(
+                PutPoolPartitionSpectraS3Request(poolPartitionName, "ONLINE"))
+    memberResponse = client.put_pool_storage_domain_member_spectra_s3(
+                PutPoolStorageDomainMemberSpectraS3Request(poolPartitionName, storageDomainName))
+    ids = {}
+    ids["StorageId"] = storageResponse.result['Id']
+    ids["PoolId"] = poolResponse.result['Id']
+    ids["MemberId"] = memberResponse.result['Id']
+    return ids
+    
+def teardownStorageDomainMember(client, ids):
+    '''Deletes the storage domain member, the storage domain, and the pool partition'''
+    client.delete_storage_domain_member_spectra_s3(
+                DeleteStorageDomainMemberSpectraS3Request(ids["MemberId"]))
+    
+    client.delete_pool_partition_spectra_s3(
+                DeletePoolPartitionSpectraS3Request(ids["PoolId"]))
+    
+    client.delete_storage_domain_spectra_s3(
+                DeleteStorageDomainSpectraS3Request(ids["StorageId"]))
 
 class Ds3TestCase(unittest.TestCase):
     def setUp(self):
@@ -628,3 +654,216 @@ class ParserTestCase(unittest.TestCase):
         result = parseModel(xmldom.fromstring(responsePayload), ListAllMyBucketsResult())
         self.assertTrue(result['Owner'] is not None)
         self.assertEqual(len(result['BucketList']), 5)
+        
+class ABMTestCase(Ds3TestCase):
+    def testPutDeleteDataPolicy(self):
+        name = "test_put_delete_data_policy"
+        # Create a data policy
+        putResponse = self.client.put_data_policy_spectra_s3(
+                    PutDataPolicySpectraS3Request(name))
+        self.assertEqual(putResponse.response.status, 201)
+        
+        # Verify that the data policy exists on the BP
+        getResponse = self.client.get_data_policy_spectra_s3(
+                    GetDataPolicySpectraS3Request(name))
+        self.assertEqual(getResponse.result['Name'], name)
+        
+        # Delete the data policy
+        deleteResponse = self.client.delete_data_policy_spectra_s3(
+                    DeleteDataPolicySpectraS3Request(name))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+        # Verify that the data policy no longer exists on the BP
+        try:
+            self.client.get_data_policy_spectra_s3(GetDataPolicySpectraS3Request(name))
+        except RequestFailed as e:
+            self.assertEqual(e.code, "NotFound")
+    
+    def testPutDeleteEmptyStorageDomain(self):
+        name = "test_put_delete_empty_storage_domain"
+        
+        # Create an empty storage domain
+        putResponse = self.client.put_storage_domain_spectra_s3(
+                    PutStorageDomainSpectraS3Request(name))
+        self.assertEqual(putResponse.response.status, 201)
+        
+        # Verify that the storage domain exits
+        getResponse = self.client.get_storage_domain_spectra_s3(
+                    GetStorageDomainSpectraS3Request(name))
+        self.assertEqual(getResponse.result['Name'], name)
+        
+        # Delete the storage domain
+        deleteResponse = self.client.delete_storage_domain_spectra_s3(
+                    DeleteStorageDomainSpectraS3Request(name))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+        # Verify that the storage domain no longer exists on the BP
+        try:
+            self.client.get_storage_domain_spectra_s3(
+                        GetStorageDomainSpectraS3Request(name))
+        except RequestFailed as e:
+            self.assertEqual(e.code, "NotFound")
+        
+    def testPutDeletePoolPartition(self):
+        name = "test_put_delete_pool_partition"
+        putResponse = self.client.put_pool_partition_spectra_s3(
+                    PutPoolPartitionSpectraS3Request(name, "ONLINE"))
+        self.assertEqual(putResponse.response.status, 201)
+        
+        getResponse = self.client.get_pool_partition_spectra_s3(
+                    GetPoolPartitionSpectraS3Request(name))
+        self.assertEqual(getResponse.result['Name'], name)
+        
+        deleteResponse = self.client.delete_pool_partition_spectra_s3(
+                    DeletePoolPartitionSpectraS3Request(name))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+        try:
+            self.client.get_pool_partition_spectra_s3(
+                        GetPoolPartitionSpectraS3Request(name))
+        except RequestFailed as e:
+            self.assertEqual(e.code, "NotFound")
+
+    def testPutDeletePoolStorageDomainMember(self):
+        poolName = "put_delete_pool_storage_domain_member_pool"
+        domainName = "put_delete_pool_storage_domain_member_domain"
+        
+        ids = setupStorageDomainMember(self.client, domainName, poolName)
+        
+        getResponse = self.client.get_storage_domain_member_spectra_s3(
+                    GetStorageDomainMemberSpectraS3Request(ids['MemberId']))
+        
+        self.assertEqual(getResponse.result['PoolPartitionId'], ids['PoolId'])
+        self.assertEqual(getResponse.result['StorageDomainId'], ids['StorageId'])
+        
+        teardownStorageDomainMember(self.client, ids)
+        
+        try:
+            self.client.get_storage_domain_member_spectra_s3(
+                        GetStorageDomainMemberSpectraS3Request(ids['MemberId']))
+        except RequestFailed as e:
+            self.assertEqual(e.code, "NotFound")
+        
+    
+    def testPutBucketWithDataPolicy(self):
+        poolName = "put_bucket_with_data_policy_pool"
+        domainName = "put_bucket_with_data_policy_domain"
+        policyName = "put_bucket_with_data_policy"
+        bucketName = "put_bucket_with_data_policy_bucket"
+        
+        ids = setupStorageDomainMember(self.client, domainName, poolName)
+        
+        putPolicyResponse = self.client.put_data_policy_spectra_s3(
+                    PutDataPolicySpectraS3Request(policyName))
+        
+        putRuleResponse = self.client.put_data_persistence_rule_spectra_s3(
+                    PutDataPersistenceRuleSpectraS3Request(putPolicyResponse.result['Id'], 
+                                                           "STANDARD", 
+                                                           ids['StorageId'], 
+                                                           "PERMANENT"))
+        self.assertEqual(putRuleResponse.response.status, 201)
+        
+        putBucketResponse = self.client.put_bucket_spectra_s3(
+                    PutBucketSpectraS3Request(bucketName, data_policy_id=policyName))
+        
+        self.assertEqual(putBucketResponse.response.status, 201)
+        self.assertEqual(putBucketResponse.result['Name'], bucketName)
+        self.assertEqual(putBucketResponse.result['DataPolicyId'], putPolicyResponse.result['Id'])
+        
+        # Delete test items
+        self.client.delete_bucket_spectra_s3(DeleteBucketSpectraS3Request(bucketName))
+        
+        self.client.delete_data_persistence_rule_spectra_s3(
+                    DeleteDataPersistenceRuleSpectraS3Request(putRuleResponse.result['Id']))
+        
+        self.client.delete_data_policy_spectra_s3(
+                    DeleteDataPolicySpectraS3Request(policyName))
+        
+        teardownStorageDomainMember(self.client, ids)
+        
+    def testDuplicateObjectsVersioningKeepLatest(self):
+        poolName = "duplicate_objects_versioning_keep_latest_pool"
+        domainName = "duplicate_objects_versioning_keep_latest_domain"
+        policyName = "duplicate_objects_versioning_keep_latest_policy"
+        bucketName = "duplicate_objects_versioning_keep_latest_bucket"
+        
+        ids = setupStorageDomainMember(self.client, domainName, poolName)
+        
+        putPolicyResponse = self.client.put_data_policy_spectra_s3(
+                    PutDataPolicySpectraS3Request(policyName, versioning="KEEP_LATEST"))
+        
+        putRuleResponse = self.client.put_data_persistence_rule_spectra_s3(
+                    PutDataPersistenceRuleSpectraS3Request(putPolicyResponse.result['Id'], 
+                                                           "STANDARD", 
+                                                           ids['StorageId'], 
+                                                           "PERMANENT"))
+        
+        putBucketResponse = self.client.put_bucket_spectra_s3(
+                    PutBucketSpectraS3Request(bucketName, data_policy_id=policyName))
+        
+        # Load test data and verify they exist on BP
+        populateTestData(self.client, bucketName, createBucket=False)
+        
+        getBucketResponse = self.client.get_bucket(GetBucketRequest(bucketName))
+        self.assertEqual(len(getBucketResponse.result['ContentsList']), 4)
+        
+        # Load test data a second time and verify no errors
+        populateTestData(self.client, bucketName, createBucket=False)
+        
+        getBucketResponse = self.client.get_bucket(GetBucketRequest(bucketName))
+        self.assertEqual(len(getBucketResponse.result['ContentsList']), 4)
+        
+        # Delete test items
+        clearBucket(self.client, bucketName)
+        
+        self.client.delete_data_persistence_rule_spectra_s3(
+                    DeleteDataPersistenceRuleSpectraS3Request(putRuleResponse.result['Id']))
+        
+        self.client.delete_data_policy_spectra_s3(
+                    DeleteDataPolicySpectraS3Request(policyName))
+        
+        teardownStorageDomainMember(self.client, ids)
+        
+    def testDuplicateObjectsVersioningNone(self):
+        poolName = "duplicate_objects_versioning_keep_latest_pool"
+        domainName = "duplicate_objects_versioning_keep_latest_domain"
+        policyName = "duplicate_objects_versioning_keep_latest_policy"
+        bucketName = "duplicate_objects_versioning_keep_latest_bucket"
+        
+        ids = setupStorageDomainMember(self.client, domainName, poolName)
+        
+        putPolicyResponse = self.client.put_data_policy_spectra_s3(
+                    PutDataPolicySpectraS3Request(policyName, versioning="NONE"))
+        
+        putRuleResponse = self.client.put_data_persistence_rule_spectra_s3(
+                    PutDataPersistenceRuleSpectraS3Request(putPolicyResponse.result['Id'], 
+                                                           "STANDARD", 
+                                                           ids['StorageId'], 
+                                                           "PERMANENT"))
+        
+        putBucketResponse = self.client.put_bucket_spectra_s3(
+                    PutBucketSpectraS3Request(bucketName, data_policy_id=policyName))
+        
+        # Load test data and verify they exist on BP
+        populateTestData(self.client, bucketName, createBucket=False)
+        
+        getBucketResponse = self.client.get_bucket(GetBucketRequest(bucketName))
+        self.assertEqual(len(getBucketResponse.result['ContentsList']), 4)
+        
+        # Load test data a second time and verify no errors
+        try:
+            populateTestData(self.client, bucketName, createBucket=False)
+        except RequestFailed as e:
+            self.assertEqual(e.http_error_code, 409)
+            self.assertEqual(e.code, "CONFLICT")
+        
+        # Delete test items
+        clearBucket(self.client, bucketName)
+        
+        self.client.delete_data_persistence_rule_spectra_s3(
+                    DeleteDataPersistenceRuleSpectraS3Request(putRuleResponse.result['Id']))
+        
+        self.client.delete_data_policy_spectra_s3(
+                    DeleteDataPolicySpectraS3Request(policyName))
+        
+        teardownStorageDomainMember(self.client, ids)
