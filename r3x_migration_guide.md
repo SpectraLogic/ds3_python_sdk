@@ -3,6 +3,8 @@ Spectra S3 API Python_SDK r1.x to r3.x Migration Guide
 
 The Python SDK no longer wraps the C SDK, which removes the previous dependency on the C SDK.
 
+Python target: 2.7 (unchanged)
+
 All command names have changed. Spectra S3 commands are namespaced from AWS commands with `spectra_s3` for client commands, and `SpectraS3` for request and response names. See Table 1 for the r3.x commands that corresponds to the r1.x commands.
 
 Commands with full details parameters have been separated into two commands, one with the full details parameter and one without. See Table 2 for a complete list of commands with the full details parameter.
