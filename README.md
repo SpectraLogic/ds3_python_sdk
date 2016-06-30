@@ -17,9 +17,15 @@ To install the ds3_python_sdk, either clone the latest code, or download a relea
 
 Once `setup.py` completes the ds3_python_sdk should be installed and available to be imported into python scripts.
 
+Upgrading from 1.x to 3.x
+-------------------------
+
+Please read our [migration guide](r3x_migration_guide.md) for information on upgrading any
+code written with the 1.x sdk to the 3.x sdk.
+
 Documentation
 -------------
-The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk/sphinx/v1.0-0/](http://spectralogic.github.io/ds3_python_sdk/sphinx/v1.0-0/)
+The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.0.0-beta/](http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.0.0-beta/)
 
 SDK
 ---
