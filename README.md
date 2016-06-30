@@ -13,15 +13,19 @@ Join us at our [Google Groups](https://groups.google.com/d/forum/spectralogicds3
 Installing
 ----------
 
-Follow the instructions for installing the [ds3_c_sdk](https://github.com/SpectraLogic/ds3_c_sdk) first.  The ds3_python_sdk uses the ds3_c_sdk to communicate with a Spectra S3 endpoint, and will not function without it.
-
 To install the ds3_python_sdk, either clone the latest code, or download a release bundle from [Releases](http://github.com/SpectraLogic/ds3_python_sdk/releases).  Once the code has been download, cd into the bundle, and install it with `sudo python setup.py install`
 
 Once `setup.py` completes the ds3_python_sdk should be installed and available to be imported into python scripts.
 
+Upgrading from 1.x to 3.x
+-------------------------
+
+Please read our [migration guide](r3x_migration_guide.md) for information on upgrading any
+code written with the 1.x sdk to the 3.x sdk.
+
 Documentation
 -------------
-The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk/sphinx/v1.0-0/](http://spectralogic.github.io/ds3_python_sdk/sphinx/v1.0-0/)
+The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.0.0-beta/](http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.0.0-beta/)
 
 SDK
 ---
@@ -34,10 +38,12 @@ from ds3 import ds3
 
 client = ds3.createClientFromEnv()
 
-client.putBucket("testBucket")
+client.put_bucket(ds3.PutBucketRequest("TestBucket"))
 
-for bucket in client.getService():
-        print bucket.name
+getServiceResponse = client.get_service(ds3.GetServiceRequest())
+
+for bucket in getServiceResponse.result['BucketList']:
+    print bucket['Name']
 ```
 
 Ds3Client
