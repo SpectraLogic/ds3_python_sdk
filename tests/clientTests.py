@@ -867,9 +867,6 @@ class ABMTestCase(Ds3TestCase):
                     DeleteDataPolicySpectraS3Request(policyName))
         
         teardownStorageDomainMember(self.client, ids)
-
-def normalizePath(url):
-    return urllib.quote(url)
     
 class SpecialCharacterTestCase(Ds3TestCase):
     def testObjectNameWithSpace(self):
