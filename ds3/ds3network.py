@@ -19,6 +19,7 @@ import xml.etree.ElementTree as xmldom
 
 from hashlib import sha1
 import httplib
+import urllib
 import urllib2
 import urlparse
 import StringIO
@@ -165,15 +166,13 @@ class NetworkClient(object):
       connection = self.setup_connection(self.networkconnection.endpoint)
             
     date = self.get_date()
-    path = request.path
-    if request.query_params:
-      path = self.build_path(request.path, request.query_params)
+    path = self.build_path(request.path, request.query_params)
             
     headers = {}
     headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
     headers['Date'] = date
     
-    canonicalized_resource = self.canonicalize_path(request.path, request.query_params)
+    canonicalized_resource = self.canonicalize_path(self.build_path(request.path), request.query_params)
     
     # add additonal header information if specficied in the request. This might be a byte range for example
     amz_headers = {}
@@ -258,10 +257,13 @@ class NetworkClient(object):
     digest = signer.digest()
     return base64.encodestring(digest).strip().decode('utf-8')
 
+  def normalize_path(self, url):
+    return urllib.quote(url)
+    
   def build_path(self, resource, query_params={}):
     if len(query_params) == 0:
-      return resource
-    new_path = resource + '?'
+      return self.normalize_path(resource)
+    new_path = self.normalize_path(resource) + '?'
 
     new_path += '&'.join(map(lambda tupal: self.build_query_param(tupal), 
                              query_params.iteritems()))
