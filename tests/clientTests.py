@@ -867,3 +867,58 @@ class ABMTestCase(Ds3TestCase):
                     DeleteDataPolicySpectraS3Request(policyName))
         
         teardownStorageDomainMember(self.client, ids)
+
+def normalizePath(url):
+    return urllib.quote(url)
+    
+class SpecialCharacterTestCase(Ds3TestCase):
+    def testObjectNameWithSpace(self):
+        bucketName = "test_name_with_space"
+        objectName = "beowulf with spaces.txt"
+        fileName = "beowulf.txt"
+        
+        self.client.put_bucket(PutBucketRequest(bucketName))
+        
+        localFile = open(pathForResource(fileName), "rb")
+        self.client.put_object(PutObjectRequest(bucketName, objectName, stream=localFile))
+        localFile.close()
+        
+        getObjectSpectra = self.client.get_object_spectra_s3(GetObjectSpectraS3Request(objectName, bucketName))
+        self.assertEqual(getObjectSpectra.result['Name'], objectName)
+        
+        fd, tempName = tempfile.mkstemp()
+        
+        getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
+        
+        self.assertEqual(getObjectResponse.response.status, 200)
+        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        
+        os.close(fd)
+        
+        clearBucket(self.client, bucketName)
+        
+    def testObjectNameWithSpecialChars(self):
+        bucketName = "test_name_with_space"
+        objectName = "object!@#$%^&*_-+=with()[]{}symbols"
+        fileName = "beowulf.txt"
+        
+        self.client.put_bucket(PutBucketRequest(bucketName))
+        
+        localFile = open(pathForResource(fileName), "rb")
+        self.client.put_object(PutObjectRequest(bucketName, objectName, stream=localFile))
+        localFile.close()
+        
+        getObjectSpectra = self.client.get_object_spectra_s3(GetObjectSpectraS3Request(objectName, bucketName))
+        self.assertEqual(getObjectSpectra.result['Name'], objectName)
+        
+        fd, tempName = tempfile.mkstemp()
+        
+        getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
+        
+        self.assertEqual(getObjectResponse.response.status, 200)
+        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        
+        os.close(fd)
+        
+        clearBucket(self.client, bucketName)
+        
