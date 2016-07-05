@@ -260,13 +260,13 @@ class NetworkClient(object):
     digest = signer.digest()
     return base64.encodestring(digest).strip().decode('utf-8')
 
-  def normalize_path(self, url):
+  def normalize_string(self, url):
     return urllib.quote(url)
     
   def build_path(self, resource, query_params={}):
     if len(query_params) == 0:
-      return self.normalize_path(resource)
-    new_path = self.normalize_path(resource) + '?'
+      return self.normalize_string(resource)
+    new_path = self.normalize_string(resource) + '?'
 
     new_path += '&'.join(map(lambda tupal: self.build_query_param(tupal), 
                              query_params.iteritems()))
@@ -275,7 +275,7 @@ class NetworkClient(object):
   def build_query_param(self, param):
     if param[1] is None:
       return param[0]
-    return param[0] + '=' + str(param[1])
+    return param[0] + '=' + self.normalize_string(str(param[1]))
 
   def get_date(self):
     return formatdate()

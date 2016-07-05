@@ -870,7 +870,6 @@ class ABMTestCase(Ds3TestCase):
     
 class SpecialCharacterTestCase(Ds3TestCase):
     def testObjectNameWithSpace(self):
-        bucketName = "test_name_with_space"
         objectName = "beowulf with spaces.txt"
         fileName = "beowulf.txt"
         
@@ -892,10 +891,7 @@ class SpecialCharacterTestCase(Ds3TestCase):
         
         os.close(fd)
         
-        clearBucket(self.client, bucketName)
-        
     def testObjectNameWithSpecialChars(self):
-        bucketName = "test_name_with_space"
         objectName = "object!@#$%^&*_-+=with()[]{}symbols"
         fileName = "beowulf.txt"
         
@@ -916,6 +912,26 @@ class SpecialCharacterTestCase(Ds3TestCase):
         self.assertEqual(os.stat(tempName).st_size, 301063L)
         
         os.close(fd)
+    
+    def testSpecialCharactersInQueryParam(self):
+        objectName = "object!@#$%^&*_-+=with()[]{}  symbols"
+        fileName = "beowulf.txt"
         
-        clearBucket(self.client, bucketName)
+        self.client.put_bucket(PutBucketRequest(bucketName))
+        
+        localFile = open(pathForResource(fileName), "rb")
+        self.client.put_object(PutObjectRequest(bucketName, objectName, stream=localFile))
+        localFile.close()
+        
+        bucketContents = self.client.get_bucket(GetBucketRequest(bucketName, marker=objectName))
+        self.assertEqual(bucketContents.result['Marker'], objectName)
+        
+        fd, tempName = tempfile.mkstemp()
+        
+        getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
+        
+        self.assertEqual(getObjectResponse.response.status, 200)
+        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        
+        os.close(fd)
         
