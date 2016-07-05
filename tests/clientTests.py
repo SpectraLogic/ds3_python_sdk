@@ -914,7 +914,7 @@ class SpecialCharacterTestCase(Ds3TestCase):
         os.close(fd)
     
     def testSpecialCharactersInQueryParam(self):
-        objectName = "object!@#$%^&*_-+=with()[]{}symbols"
+        objectName = "object!@#$%^&*_-+=with()[]{}  symbols"
         fileName = "beowulf.txt"
         
         self.client.put_bucket(PutBucketRequest(bucketName))
