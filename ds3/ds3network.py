@@ -104,7 +104,6 @@ class XmlSerializer(object):
     if not xml_string:
       #There is no error payload
       return Ds3Error(reason, status_code, None)
-    
     doc = xml.dom.minidom.parseString(xml_string)
     code = self.get_name_from_node(doc, "Code")
     http_error_code = int(self.get_name_from_node(doc, "HttpErrorCode"))
@@ -118,13 +117,14 @@ class NetworkClient(object):
     self.networkconnection = NetworkConnection(endpoint)
     self.credentials = credentials
     self.maxredirects = 5
-    self.secure = False  # the default is HTTP. If true use HTTPS
+    self.secure = self.endpoint_secure(endpoint)
     self.proxy = None
     
-  def with_secure(self, secure):
-    """If true the client will use HTTPS instead of HTTP."""
-    self.secure = secure
-    return self
+  def endpoint_secure(self, endpoint):
+    """Determines type of connection based on HTTP or HTTPS in endpoint path"""
+    if endpoint.startswith('https://'):
+      return True
+    return False # The default is HTTP
 
   def with_proxy(self, proxy):
     """Set HTTP proxy"""
@@ -169,7 +169,10 @@ class NetworkClient(object):
     path = self.build_path(request.path, request.query_params)
             
     headers = {}
-    headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
+    if self.networkconnection.port:
+      headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
+    else:
+      headers['Host'] = self.networkconnection.hostname
     headers['Date'] = date
     
     canonicalized_resource = self.canonicalize_path(self.build_path(request.path), request.query_params)
@@ -193,7 +196,7 @@ class NetworkClient(object):
                                                            canonicalized_amz_header=canonicalized_amz_header,
                                                            resource=canonicalized_resource)
       connection.request(request.http_verb, path, body=request.body, headers=headers)
-      if isinstance(request.body, file): #TODO remove
+      if isinstance(request.body, file):
         request.body.close()
     else:
       headers['Authorization'] = self.build_authorization(verb=request.http_verb, date=date, resource=canonicalized_resource)
@@ -285,7 +288,15 @@ class NetworkConnection(object):
     self.url = urlparse.urlparse(self.ensure_schema(endpoint))
     self.hostname = self.url.hostname
     self.port = self.url.port
-    self.endpoint = endpoint
+    self.endpoint = self.remove_http_from_endpoint(endpoint)
+    
+  def remove_http_from_endpoint(self, endpoint):
+    if not endpoint.startswith('http'):
+      return endpoint
+    index = endpoint.find('://')
+    if endpoint >= 0:
+      return endpoint[index+3:]
+    return endpoint
         
   def ensure_schema(self, endpoint):
     if endpoint.startswith('http'):
