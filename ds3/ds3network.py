@@ -104,7 +104,6 @@ class XmlSerializer(object):
     if not xml_string:
       #There is no error payload
       return Ds3Error(reason, status_code, None)
-    
     doc = xml.dom.minidom.parseString(xml_string)
     code = self.get_name_from_node(doc, "Code")
     http_error_code = int(self.get_name_from_node(doc, "HttpErrorCode"))
@@ -169,7 +168,10 @@ class NetworkClient(object):
     path = self.build_path(request.path, request.query_params)
             
     headers = {}
-    headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
+    if self.networkconnection.port:
+      headers['Host'] = self.networkconnection.hostname +":"+ str(self.networkconnection.port)
+    else:
+      headers['Host'] = self.networkconnection.hostname
     headers['Date'] = date
     
     canonicalized_resource = self.canonicalize_path(self.build_path(request.path), request.query_params)
