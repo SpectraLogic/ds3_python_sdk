@@ -935,3 +935,113 @@ class SpecialCharacterTestCase(Ds3TestCase):
         
         os.close(fd)
         
+class GroupManagementTestCase(Ds3TestCase):
+    def testCreateDeleteGroup(self):
+        groupName = "create_delete_group"
+        
+        createGroup = self.client.put_group_spectra_s3(PutGroupSpectraS3Request(groupName))
+        self.assertEqual(createGroup.result['Name'], groupName)
+        self.assertEqual(createGroup.response.status, 201)
+        
+        getGroup = self.client.get_group_spectra_s3(GetGroupSpectraS3Request(groupName))
+        self.assertEqual(getGroup.result['Name'], groupName)
+        
+        deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(groupName))
+        self.assertEqual(deleteGroup.response.status, 204)
+        
+    def testDataPolicyForGroup(self):
+        groupName = "data_policy_for_group_Group"
+        policyName = "data_policy_for_group_Policy"
+        
+        createGroup = self.client.put_group_spectra_s3(PutGroupSpectraS3Request(groupName))
+        self.assertEqual(createGroup.result['Name'], groupName)
+        
+        createPolicy = self.client.put_data_policy_spectra_s3(PutDataPolicySpectraS3Request(policyName))
+        self.assertEqual(createPolicy.result['Name'], policyName)
+        
+        createAcl = self.client.put_data_policy_acl_for_group_spectra_s3(
+                    PutDataPolicyAclForGroupSpectraS3Request(policyName, groupName))
+        self.assertEqual(createAcl.response.status, 201)
+        
+        getAcl = self.client.get_data_policy_acls_spectra_s3(
+                    GetDataPolicyAclsSpectraS3Request(data_policy_id=policyName, group_id=groupName))
+        
+        aclId = getAcl.result['DataPolicyAclList'][0]['Id']
+        
+        deleteAcl = self.client.delete_data_policy_acl_spectra_s3(
+                    DeleteDataPolicyAclSpectraS3Request(aclId))
+        self.assertEqual(deleteAcl.response.status, 204)
+        
+        deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(groupName))
+        self.assertEqual(deleteGroup.response.status, 204)
+        
+        deletePolicy = self.client.delete_data_policy_spectra_s3(
+                    DeleteDataPolicySpectraS3Request(policyName))
+        self.assertEqual(deletePolicy.response.status, 204)
+        
+    def testGroupGroupMember(self):
+        parentName = "create_group_group_member_Parent"
+        childName = "create_group_group_member_Child"
+        
+        createParent = self.client.put_group_spectra_s3(PutGroupSpectraS3Request(parentName))
+        self.assertEqual(createParent.result['Name'], parentName)
+        
+        createChild = self.client.put_group_spectra_s3(PutGroupSpectraS3Request(childName))
+        self.assertEqual(createChild.result['Name'], childName)
+        
+        parentId = createParent.result['Id']
+        childId = createChild.result['Id']
+        
+        createGroupGroup = self.client.put_group_group_member_spectra_s3(
+                    PutGroupGroupMemberSpectraS3Request(group_id=parentId, member_group_id=childId))
+        self.assertEqual(createGroupGroup.response.status, 201)
+        self.assertEqual(createGroupGroup.result['GroupId'], parentId)
+        self.assertEqual(createGroupGroup.result['MemberGroupId'], childId)
+        
+        deleteGroupGroup = self.client.delete_group_member_spectra_s3(
+                    DeleteGroupMemberSpectraS3Request(createGroupGroup.result['Id']))
+        self.assertEqual(deleteGroupGroup.response.status, 204)
+        
+        getGroup = self.client.get_group_members_spectra_s3(
+                    GetGroupMembersSpectraS3Request(parentId))
+        
+        deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(childName))
+        self.assertEqual(deleteGroup.response.status, 204)
+        
+        deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(parentName))
+        self.assertEqual(deleteGroup.response.status, 204)
+        
+    def testBucketAclForGroup(self):
+        groupName = "bucket_acl_for_group"
+        permission = "READ"
+        
+        # Create bucket and group
+        self.client.put_bucket(PutBucketRequest(bucketName))
+        
+        createGroup = self.client.put_group_spectra_s3(PutGroupSpectraS3Request(groupName))
+        self.assertEqual(createGroup.result['Name'], groupName)
+        
+        # Create acl between bucket and group
+        createAcl = self.client.put_bucket_acl_for_group_spectra_s3(
+                    PutBucketAclForGroupSpectraS3Request(bucketName, groupName, permission))
+        
+        # Verify that acl exists
+        getAcls = self.client.get_bucket_acls_spectra_s3(
+                    GetBucketAclsSpectraS3Request(bucket_id=bucketName, group_id=groupName))
+        self.assertEqual(len(getAcls.result['BucketAclList']), 1)
+        self.assertEqual(getAcls.result['BucketAclList'][0]['Permission'], permission)
+        
+        # Delete the acl
+        deleteAcl = self.client.delete_bucket_acl_spectra_s3(
+                    DeleteBucketAclSpectraS3Request(createAcl.result['Id']))
+        self.assertEqual(deleteAcl.response.status, 204)
+        
+        # Verify the acl was deleted
+        getAcls = self.client.get_bucket_acls_spectra_s3(
+                    GetBucketAclsSpectraS3Request(bucket_id=bucketName, group_id=groupName))
+        self.assertEqual(len(getAcls.result['BucketAclList']), 0)
+        
+        # Cleanup
+        deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(groupName))
+        self.assertEqual(deleteGroup.response.status, 204)
+        
