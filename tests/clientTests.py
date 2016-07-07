@@ -1143,7 +1143,7 @@ class NotificationsTestCase(Ds3TestCase):
             size = os.stat(pathForResource(fileName)).st_size
             return FileObject(fileName, size)
 
-        # Greate bulk put
+        # Create bulk put
         self.client.put_bucket(PutBucketRequest(bucketName))
 
         pathes = {fileName: pathForResource(fileName) for fileName in resources}
