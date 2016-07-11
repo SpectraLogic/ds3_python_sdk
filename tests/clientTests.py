@@ -500,9 +500,17 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjects(self):
         populateTestData(self.client, bucketName)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request())
-
-        self.validateSearchObjects(objects.result['S3ObjectList'], resources)
+        response = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request())
+        objects = response.result['S3ObjectList']
+        
+        # Note that there may be additional objects on the BP
+        self.assertTrue(len(objects) >= len(resources))
+        testObjects = []
+        for obj in objects:
+            if obj['Name'] in resources:
+                testObjects.append(obj)
+        
+        self.validateSearchObjects(testObjects, resources)
             
     def testGetObjectsBucketName(self):
         populateTestData(self.client, bucketName)
@@ -856,7 +864,7 @@ class ABMTestCase(Ds3TestCase):
             populateTestData(self.client, bucketName, createBucket=False)
         except RequestFailed as e:
             self.assertEqual(e.http_error_code, 409)
-            self.assertEqual(e.code, "CONFLICT")
+            self.assertEqual(e.code, "OBJECT_ALREADY_EXISTS")
         
         # Delete test items
         clearBucket(self.client, bucketName)
