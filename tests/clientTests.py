@@ -51,6 +51,7 @@ def populateTestData(client, bucketName, resourceList = None, prefix = "", metad
         allocateChunk = client.allocate_job_chunk_spectra_s3(AllocateJobChunkSpectraS3Request(chunk['ChunkId']))
         for obj in allocateChunk.result['ObjectList']:
             client.put_object(PutObjectRequest(bucketName, obj['Name'], offset=int(obj['Offset']), real_file_name=pathes[obj['Name']], job=bulkResult.result['JobId'], headers=metadata))
+            
     return fileList
 
 def clearBucket(client, bucketName):
@@ -1044,4 +1045,135 @@ class GroupManagementTestCase(Ds3TestCase):
         # Cleanup
         deleteGroup = self.client.delete_group_spectra_s3(DeleteGroupSpectraS3Request(groupName))
         self.assertEqual(deleteGroup.response.status, 204)
+        
+class NotificationsTestCase(Ds3TestCase):
+    def testObjectCompletionRegistration(self):
+        response = self.client.put_object_cached_notification_registration_spectra_s3(
+                    PutObjectCachedNotificationRegistrationSpectraS3Request("192.168.56.101"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_object_cached_notification_registration_spectra_s3(
+                    GetObjectCachedNotificationRegistrationSpectraS3Request(registrationId))
+        
+        self.assertEqual(getResponse.result['Id'], registrationId)
+        
+        deleteResponse = self.client.delete_object_cached_notification_registration_spectra_s3(
+                    DeleteObjectCachedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testCompletionRegistration(self):
+        response = self.client.put_job_completed_notification_registration_spectra_s3(
+                    PutJobCompletedNotificationRegistrationSpectraS3Request("192.168.56.101/other"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_job_completed_notification_registration_spectra_s3(
+                    GetJobCompletedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        
+        deleteResponse = self.client.delete_job_completed_notification_registration_spectra_s3(
+                    DeleteJobCompletedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testJobCreateRegistration(self):
+        response = self.client.put_job_created_notification_registration_spectra_s3(
+                    PutJobCreatedNotificationRegistrationSpectraS3Request("192.168.56.101/other"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_job_created_notification_registration_spectra_s3(
+                    GetJobCreatedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        
+        deleteResponse = self.client.delete_job_created_notification_registration_spectra_s3(
+                    DeleteJobCreatedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testObjectLostRegistration(self):
+        response = self.client.put_object_lost_notification_registration_spectra_s3(
+                    PutObjectLostNotificationRegistrationSpectraS3Request("192.168.56.101/other"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_object_lost_notification_registration_spectra_s3(
+                    GetObjectLostNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        
+        deleteResponse = self.client.delete_object_lost_notification_registration_spectra_s3(
+                    DeleteObjectLostNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testPartitionFailureRegistration(self):
+        response = self.client.put_tape_partition_failure_notification_registration_spectra_s3(
+                    PutTapePartitionFailureNotificationRegistrationSpectraS3Request("192.168.56.101/other"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_tape_partition_failure_notification_registration_spectra_s3(
+                    GetTapePartitionFailureNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        
+        deleteResponse = self.client.delete_tape_partition_failure_notification_registration_spectra_s3(
+                    DeleteTapePartitionFailureNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testTapeFailureRegistration(self):
+        response = self.client.put_tape_failure_notification_registration_spectra_s3(
+                    PutTapeFailureNotificationRegistrationSpectraS3Request("192.168.56.101/other"))
+        self.assertTrue(response.result['Id'])
+        
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_tape_failure_notification_registration_spectra_s3(
+                    GetTapeFailureNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        
+        deleteResponse = self.client.delete_tape_failure_notification_registration_spectra_s3(
+                    DeleteTapeFailureNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
+        
+    def testObjectPersistedRegistration(self):
+        def getSize(fileName):
+            size = os.stat(pathForResource(fileName)).st_size
+            return FileObject(fileName, size)
+
+        # Create bulk put
+        self.client.put_bucket(PutBucketRequest(bucketName))
+
+        pathes = {fileName: pathForResource(fileName) for fileName in resources}
+
+        fileList = map(getSize, resources)
+        fileObjectList = FileObjectList(fileList)
+
+        bulkResult = self.client.put_bulk_job_spectra_s3(PutBulkJobSpectraS3Request(bucketName, fileObjectList))
+        bulkJobId = bulkResult.result['JobId']
+        
+        # Register the notification
+        response = self.client.put_object_persisted_notification_registration_spectra_s3(
+                    PutObjectPersistedNotificationRegistrationSpectraS3Request("192.168.56.101/other", job_id=bulkJobId))
+        self.assertEqual(response.response.status, 201)
+        
+        # Transfer data
+        for chunk in bulkResult.result['ObjectsList']:
+            allocateChunk = self.client.allocate_job_chunk_spectra_s3(AllocateJobChunkSpectraS3Request(chunk['ChunkId']))
+            for obj in allocateChunk.result['ObjectList']:
+                self.client.put_object(PutObjectRequest(bucketName, obj['Name'], offset=int(obj['Offset']), real_file_name=pathes[obj['Name']], job=bulkJobId))
+            
+        # Verify notification and then delete
+        registrationId = response.result['Id']
+        
+        getResponse = self.client.get_object_persisted_notification_registration_spectra_s3(
+                    GetObjectPersistedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(getResponse.response.status, 200)
+        self.assertEqual(getResponse.result['JobId'], bulkJobId)
+        
+        deleteResponse = self.client.delete_object_persisted_notification_registration_spectra_s3(
+                    DeleteObjectPersistedNotificationRegistrationSpectraS3Request(registrationId))
+        self.assertEqual(deleteResponse.response.status, 204)
         
