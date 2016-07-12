@@ -1,6 +1,6 @@
 
 #!/bin/bash
-echo Using Git Repo: ${GIT_REPO:="https://github.com/SpectraLogic/ds3_c_sdk.git"}
+echo Using Git Repo: ${GIT_REPO:="https://github.com/SpectraLogic/ds3_python_sdk.git"}
 echo Using Git Branch: ${GIT_BRANCH:="master"}
 echo Using Git Sha: ${GIT_SHA:=""}
 
@@ -24,14 +24,9 @@ if [${GIT_SHA} != "" ]; then
   git reset --hard ${GIT_SHA}
 fi
 
-cd ds3_c_sdk
-autoreconf --install
-./configure
-make install
-ldconfig
-
 cd /opt
 git clone https://github.com/SpectraLogic/ds3_python_sdk.git
+
 cd ds3_python_sdk
 python setup.py install
 
