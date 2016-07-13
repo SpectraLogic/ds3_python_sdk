@@ -97,15 +97,52 @@ def teardownStorageDomainMember(client, ids):
     client.delete_storage_domain_spectra_s3(
                 DeleteStorageDomainSpectraS3Request(ids["StorageId"]))
 
+def setupTestEnvironment(client):
+    # Set up test storage domain
+    ids = setupStorageDomainMember(client, "PythonTestEnvDomain", "PythonTestEnvPoolPartition")
+    
+    # Create data policy
+    dataPolicyResponse = client.put_data_policy_spectra_s3(
+                PutDataPolicySpectraS3Request("PythonTestEnvDataPolicy"))
+    
+    ids['DataPolicyId'] = dataPolicyResponse.result['Id']
+    
+    # Create data persistence rule
+    persistenceRuleResponse = client.put_data_persistence_rule_spectra_s3(
+                PutDataPersistenceRuleSpectraS3Request(ids['DataPolicyId'], 
+                                                       'STANDARD', 
+                                                       ids['StorageId'], 
+                                                       'PERMANENT'))
+    
+    ids['PersistenceRuleId'] = persistenceRuleResponse.result['Id']
+    return ids
+    
+def teardownTestEnvironment(client, ids):
+    # Delete data persistence rule
+    client.delete_data_persistence_rule_spectra_s3(
+                DeleteDataPersistenceRuleSpectraS3Request(ids['PersistenceRuleId']))
+    
+    # Delete data policy
+    client.delete_data_policy_spectra_s3(DeleteDataPolicySpectraS3Request(ids['DataPolicyId']))
+    
+    # Tear down test storage domain
+    teardownStorageDomainMember(client, ids)
+    
 class Ds3TestCase(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(Ds3TestCase, self).__init__(*args, **kwargs)
+        self.envStorageIds = []
+        
     def setUp(self):
         self.client = createClientFromEnv()
+        self.envStorageIds = setupTestEnvironment(self.client)
 
     def tearDown(self):
         try:
             clearBucket(self.client, bucketName)
         except RequestFailed as e:
             pass
+        teardownTestEnvironment(self.client, self.envStorageIds)
         
     def checkBadInputs(self, testFunction, inputs):
         for test_input, status in inputs.items():
@@ -348,6 +385,16 @@ class ObjectTestCase(Ds3TestCase):
         
         os.close(fd)
         os.remove(tempname)
+        
+    def testGetObjectDetails(self):
+        fileName = "beowulf.txt"
+        populateTestData(self.client, bucketName, resourceList = [fileName])
+        
+        response = self.client.get_object_details_spectra_s3(
+                    GetObjectDetailsSpectraS3Request(fileName, bucketName))
+        
+        self.assertEqual(response.result['Name'], fileName)
+        self.assertEqual(response.result['Type'], 'DATA')
         
     def testGetAndPutObjectStream(self):
         self.client.put_bucket(PutBucketRequest(bucketName))
@@ -880,8 +927,8 @@ class SpecialCharacterTestCase(Ds3TestCase):
         self.client.put_object(PutObjectRequest(bucketName, objectName, stream=localFile))
         localFile.close()
         
-        getObjectSpectra = self.client.get_object_spectra_s3(GetObjectSpectraS3Request(objectName, bucketName))
-        self.assertEqual(getObjectSpectra.result['Name'], objectName)
+        getObjectDetails = self.client.get_object_details_spectra_s3(GetObjectDetailsSpectraS3Request(objectName, bucketName))
+        self.assertEqual(getObjectDetails.result['Name'], objectName)
         
         fd, tempName = tempfile.mkstemp()
         
@@ -902,8 +949,8 @@ class SpecialCharacterTestCase(Ds3TestCase):
         self.client.put_object(PutObjectRequest(bucketName, objectName, stream=localFile))
         localFile.close()
         
-        getObjectSpectra = self.client.get_object_spectra_s3(GetObjectSpectraS3Request(objectName, bucketName))
-        self.assertEqual(getObjectSpectra.result['Name'], objectName)
+        getObjectDetails = self.client.get_object_details_spectra_s3(GetObjectDetailsSpectraS3Request(objectName, bucketName))
+        self.assertEqual(getObjectDetails.result['Name'], objectName)
         
         fd, tempName = tempfile.mkstemp()
         
