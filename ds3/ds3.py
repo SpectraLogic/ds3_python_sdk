@@ -3674,9 +3674,9 @@ class DeleteFolderRecursivelySpectraS3Request(AbstractRequest):
     self.path = '/_rest_/folder/' + folder
     self.http_verb = HttpVerb.DELETE
 
-class GetObjectSpectraS3Request(AbstractRequest):
+class GetObjectDetailsSpectraS3Request(AbstractRequest):
   def __init__(self, object_name, bucket_id):
-    super(GetObjectSpectraS3Request, self).__init__()
+    super(GetObjectDetailsSpectraS3Request, self).__init__()
     self.object_name = object_name
     self.query_params['bucket_id'] = bucket_id
 
@@ -6080,7 +6080,7 @@ class DeleteFolderRecursivelySpectraS3Response(AbstractResponse):
     self.__check_status_codes__([204])
     
 
-class GetObjectSpectraS3Response(AbstractResponse):
+class GetObjectDetailsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
@@ -7078,8 +7078,8 @@ class Client(object):
   def delete_folder_recursively_spectra_s3(self, request):
     return DeleteFolderRecursivelySpectraS3Response(self.net_client.get_response(request), request)
 
-  def get_object_spectra_s3(self, request):
-    return GetObjectSpectraS3Response(self.net_client.get_response(request), request)
+  def get_object_details_spectra_s3(self, request):
+    return GetObjectDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_objects_spectra_s3(self, request):
     return GetObjectsSpectraS3Response(self.net_client.get_response(request), request)
