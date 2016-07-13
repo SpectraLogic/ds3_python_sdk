@@ -1,4 +1,4 @@
-FROM spectralogic/ds3_c_docker:latest
+FROM denverm80/c_sdk_test:latest
 
 ADD run_tests.sh /opt/
 
