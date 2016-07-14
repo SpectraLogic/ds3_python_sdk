@@ -375,13 +375,13 @@ class ObjectTestCase(Ds3TestCase):
         
         self.assertEqual(len(fileList), 1)
         self.assertEqual(fileList[0].name, fileName)
-        self.assertEqual(fileList[0].size, 301063L)
+        self.assertEqual(fileList[0].size, 294059L)
         
         fd, tempname = tempfile.mkstemp()
         
         getObjectResult = self.client.get_object(GetObjectRequest(bucketName, fileName, real_file_name=tempname))
         self.assertEqual(getObjectResult.response.status, 200)
-        self.assertEqual(os.stat(tempname).st_size, 301063L)
+        self.assertEqual(os.stat(tempname).st_size, 294059L)
         
         os.close(fd)
         os.remove(tempname)
@@ -409,7 +409,7 @@ class ObjectTestCase(Ds3TestCase):
         
         getObjectResult = self.client.get_object(GetObjectRequest(bucketName, fileName, stream=f))
         self.assertEqual(getObjectResult.response.status, 200)
-        self.assertEqual(os.stat(tempname).st_size, 301063L)
+        self.assertEqual(os.stat(tempname).st_size, 294059L)
         
         f.close()
         os.close(fd)
@@ -943,7 +943,7 @@ class SpecialCharacterTestCase(Ds3TestCase):
         getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
         
         self.assertEqual(getObjectResponse.response.status, 200)
-        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        self.assertEqual(os.stat(tempName).st_size, 294059L)
         
         os.close(fd)
         
@@ -965,7 +965,7 @@ class SpecialCharacterTestCase(Ds3TestCase):
         getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
         
         self.assertEqual(getObjectResponse.response.status, 200)
-        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        self.assertEqual(os.stat(tempName).st_size, 294059L)
         
         os.close(fd)
     
@@ -987,7 +987,7 @@ class SpecialCharacterTestCase(Ds3TestCase):
         getObjectResponse = self.client.get_object(GetObjectRequest(bucketName, objectName, real_file_name=tempName))
         
         self.assertEqual(getObjectResponse.response.status, 200)
-        self.assertEqual(os.stat(tempName).st_size, 301063L)
+        self.assertEqual(os.stat(tempName).st_size, 294059L)
         
         os.close(fd)
         
