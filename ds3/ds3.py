@@ -4455,9 +4455,9 @@ class GetObjectDetailsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/object/' + object_name
     self.http_verb = HttpVerb.GET
 
-class GetObjectsSpectraS3Request(AbstractRequest):
+class GetObjectsDetailsSpectraS3Request(AbstractRequest):
   def __init__(self, bucket_id=None, folder=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
-    super(GetObjectsSpectraS3Request, self).__init__()
+    super(GetObjectsDetailsSpectraS3Request, self).__init__()
 
 
     if bucket_id is not None:
@@ -7413,7 +7413,7 @@ class GetObjectDetailsSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3Object())
 
-class GetObjectsSpectraS3Response(AbstractResponse):
+class GetObjectsDetailsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
@@ -8639,8 +8639,8 @@ class Client(object):
   def get_object_details_spectra_s3(self, request):
     return GetObjectDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
-  def get_objects_spectra_s3(self, request):
-    return GetObjectsSpectraS3Response(self.net_client.get_response(request), request)
+  def get_objects_details_spectra_s3(self, request):
+    return GetObjectsDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_objects_with_full_details_spectra_s3(self, request):
     return GetObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)

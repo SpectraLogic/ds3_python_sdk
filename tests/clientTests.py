@@ -547,7 +547,7 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjects(self):
         populateTestData(self.client, bucketName)
 
-        response = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request())
+        response = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request())
         objects = response.result['S3ObjectList']
         
         # Note that there may be additional objects on the BP
@@ -562,23 +562,25 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjectsBucketName(self):
         populateTestData(self.client, bucketName)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName))
+        objects = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request(bucket_id = bucketName))
 
         self.validateSearchObjects(objects.result['S3ObjectList'], resources)
             
     def testGetObjectsObjectName(self):
         populateTestData(self.client, bucketName)
 
-        objects = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, name = "beowulf.txt"))
+        objects = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, name = "beowulf.txt"))
         
         self.validateSearchObjects(objects.result['S3ObjectList'], ["beowulf.txt"])
             
     def testGetObjectsPageParameters(self):
         populateTestData(self.client, bucketName)
 
-        first_half = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, page_length = 2))
+        first_half = self.client.get_objects_details_spectra_s3(
+                    GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, page_length = 2))
         self.assertEqual(len(first_half.result['S3ObjectList']), 2)
-        second_half = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, page_length = 2, page_offset = 2))
+        second_half = self.client.get_objects_details_spectra_s3(
+                    GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, page_length = 2, page_offset = 2))
         self.assertEqual(len(second_half.result['S3ObjectList']), 2)
         
         self.validateSearchObjects(first_half.result['S3ObjectList']+second_half.result['S3ObjectList'], resources)
@@ -586,12 +588,13 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjectsType(self):
         populateTestData(self.client, bucketName)
 
-        dataResponse = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "DATA"))
+        dataResponse = self.client.get_objects_details_spectra_s3(
+                    GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, type = "DATA"))
         objects = dataResponse.result['S3ObjectList']
         
         self.validateSearchObjects(objects, resources)
 
-        folderResponse = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, type = "FOLDER"))
+        folderResponse = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, type = "FOLDER"))
         objects = folderResponse.result['S3ObjectList']
         
         self.validateSearchObjects(objects, [], objType = "FOLDER")
@@ -599,7 +602,7 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjectsVersion(self):
         populateTestData(self.client, bucketName)
 
-        response = self.client.get_objects_spectra_s3(GetObjectsSpectraS3Request(bucket_id = bucketName, version = 1))
+        response = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, version = 1))
         objects = response.result['S3ObjectList']
         
         self.validateSearchObjects(objects, resources)
