@@ -1224,3 +1224,14 @@ class NotificationsTestCase(Ds3TestCase):
                     DeleteObjectPersistedNotificationRegistrationSpectraS3Request(registrationId))
         self.assertEqual(deleteResponse.response.status, 204)
         
+class MetadataTestCase(Ds3TestCase):
+    def testPutObjectRequestWithMetadata(self):
+        metadata = {"name1":"value1", "name2":"", "name3":None}
+        expected_metadata = {"name1":"value1"}
+        
+        fd, tempname = tempfile.mkstemp()
+        
+        request = PutObjectRequest(bucketName, "beowulf.txt", real_file_name=tempname, headers=metadata)
+        self.assertEqual(expected_metadata, request.headers)
+        
+        os.close(fd)
