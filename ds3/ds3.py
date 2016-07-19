@@ -1773,7 +1773,9 @@ class PutObjectRequest(AbstractRequest):
     self.object_name = object_name
 
     if headers is not None:
-      self.headers = headers
+      for key, val in headers.iteritems():
+        if val:
+          self.headers[key] = val
     self.object_name = typeCheckString(object_name)
     object_data = None
     if stream:
