@@ -625,11 +625,10 @@ class ObjectTestCase(Ds3TestCase):
     def testGetObjectsWithFullDetails(self):
         populateTestData(self.client, bucketName)
         
-        request = GetObjectsWithFullDetailsSpectraS3Request(include_physical_placement=True)
+        request = GetObjectsWithFullDetailsSpectraS3Request(include_physical_placement=True, bucket_id=bucketName)
         response = self.client.get_objects_with_full_details_spectra_s3(request)
         
-        print response.result
-        self.assertEqual(len(response.result['DetailedS3ObjectList']), 4)
+        self.assertEqual(len(response.result['ObjectList']), 4)
     
 class ObjectMetadataTestCase(Ds3TestCase):
     def testHeadObject(self):
