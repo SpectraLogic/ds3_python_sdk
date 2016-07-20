@@ -632,6 +632,15 @@ class ObjectTestCase(Ds3TestCase):
 
         #jobStatusResponse = self.client.getJob(bulkGetResult.jobId)
         #self.assertEqual(jobStatusResponse.status, LibDs3JobStatus.COMPLETED)
+        
+    def testGetObjectsWithFullDetails(self):
+        populateTestData(self.client, bucketName)
+        
+        request = GetObjectsWithFullDetailsSpectraS3Request(include_physical_placement=True)
+        response = self.client.get_objects_with_full_details_spectra_s3(request)
+        
+        print response.result
+        self.assertEqual(len(response.result['DetailedS3ObjectList']), 4)
     
 class ObjectMetadataTestCase(Ds3TestCase):
     def testHeadObject(self):

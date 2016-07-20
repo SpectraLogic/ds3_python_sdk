@@ -1662,7 +1662,7 @@ class DetailedS3ObjectList(object):
     self.attributes = []
     self.elements = {}
     self.element_lists = {
-      ('DetailedS3Object', None, DetailedS3Object())
+      ('Object', None, DetailedS3Object())
     }
 
 class PoolFailureList(object):
@@ -1774,7 +1774,7 @@ class NamedDetailedTapePartitionList(object):
     self.attributes = []
     self.elements = {}
     self.element_lists = {
-      ('NamedDetailedTapePartition', None, NamedDetailedTapePartition())
+      ('TapePartition', None, NamedDetailedTapePartition())
     }
 
 class TapeList(object):
