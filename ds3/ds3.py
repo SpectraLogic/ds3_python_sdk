@@ -133,6 +133,7 @@ class PhysicalPlacement(object):
     self.attributes = []
     self.elements = {}
     self.element_lists = {
+      ('Ds3Target', 'Ds3Targets', Ds3Target()),
       ('Pool', 'Pools', Pool()),
       ('Tape', 'Tapes', Tape())
     }
@@ -182,6 +183,7 @@ class CanceledJob(object):
     self.elements = {
       'BucketId' : None,
       'CachedSizeInBytes' : None,
+      'CanceledDueToTimeout' : None,
       'ChunkClientProcessingOrderGuarantee' : None,
       'CompletedSizeInBytes' : None,
       'CreatedAt' : None,
@@ -240,6 +242,7 @@ class DataPathBackend(object):
       'AutoInspect' : None,
       'DefaultImportConflictResolutionMode' : None,
       'Id' : None,
+      'InstanceId' : None,
       'LastHeartbeat' : None,
       'UnavailableMediaPolicy' : None,
       'UnavailablePoolMaxJobRetryInMins' : None,
@@ -265,6 +268,9 @@ class DataPolicy(object):
   def __init__(self):
     self.attributes = []
     self.elements = {
+      'AlwaysForcePutJobCreation' : None,
+      'AlwaysMinimizeSpanningAcrossMedia' : None,
+      'AlwaysReplicateDeletes' : None,
       'BlobbingEnabled' : None,
       'ChecksumType' : None,
       'CreationDate' : None,
@@ -289,6 +295,31 @@ class DataPolicyAcl(object):
       'GroupId' : None,
       'Id' : None,
       'UserId' : None
+    }
+    self.element_lists = {}
+
+class DataReplicationRule(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'DataPolicyId' : None,
+      'Ds3TargetDataPolicy' : None,
+      'Ds3TargetId' : None,
+      'Id' : None,
+      'State' : None,
+      'Type' : None
+    }
+    self.element_lists = {}
+
+class DegradedBlob(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BlobId' : None,
+      'BucketId' : None,
+      'Id' : None,
+      'PersistenceRuleId' : None,
+      'ReplicationRuleId' : None
     }
     self.element_lists = {}
 
@@ -325,6 +356,7 @@ class ActiveJob(object):
       'CreatedAt' : None,
       'ErrorMessage' : None,
       'Id' : None,
+      'MinimizeSpanningAcrossMedia' : None,
       'Naked' : None,
       'Name' : None,
       'OriginalSizeInBytes' : None,
@@ -333,6 +365,23 @@ class ActiveJob(object):
       'RequestType' : None,
       'Truncated' : None,
       'UserId' : None
+    }
+    self.element_lists = {}
+
+class JobChunk(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BlobStoreState' : None,
+      'ChunkNumber' : None,
+      'Id' : None,
+      'JobCreationDate' : None,
+      'JobId' : None,
+      'NodeId' : None,
+      'PendingTargetCommit' : None,
+      'ReadFromDs3TargetId' : None,
+      'ReadFromPoolId' : None,
+      'ReadFromTapeId' : None
     }
     self.element_lists = {}
 
@@ -369,6 +418,7 @@ class StorageDomain(object):
   def __init__(self):
     self.attributes = []
     self.elements = {
+      'AutoEjectMediaFullThreshold' : None,
       'AutoEjectUponCron' : None,
       'AutoEjectUponJobCancellation' : None,
       'AutoEjectUponJobCompletion' : None,
@@ -379,6 +429,7 @@ class StorageDomain(object):
       'MaximumAutoVerificationFrequencyInDays' : None,
       'MediaEjectionAllowed' : None,
       'Name' : None,
+      'SecureMediaAllocation' : None,
       'VerifyPriorToAutoEject' : None,
       'WriteOptimization' : None
     }
@@ -443,6 +494,24 @@ class SpectraUser(object):
     }
     self.element_lists = {}
 
+class Ds3TargetFailureNotificationRegistration(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'CreationDate' : None,
+      'Format' : None,
+      'Id' : None,
+      'LastFailure' : None,
+      'LastHttpResponseCode' : None,
+      'LastNotification' : None,
+      'NamingConvention' : None,
+      'NotificationEndPoint' : None,
+      'NotificationHttpMethod' : None,
+      'NumberOfFailuresSinceLastSuccess' : None,
+      'UserId' : None
+    }
+    self.element_lists = {}
+
 class JobCompletedNotificationRegistration(object):
   def __init__(self):
     self.attributes = []
@@ -463,6 +532,24 @@ class JobCompletedNotificationRegistration(object):
     self.element_lists = {}
 
 class JobCreatedNotificationRegistration(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'CreationDate' : None,
+      'Format' : None,
+      'Id' : None,
+      'LastFailure' : None,
+      'LastHttpResponseCode' : None,
+      'LastNotification' : None,
+      'NamingConvention' : None,
+      'NotificationEndPoint' : None,
+      'NotificationHttpMethod' : None,
+      'NumberOfFailuresSinceLastSuccess' : None,
+      'UserId' : None
+    }
+    self.element_lists = {}
+
+class JobCreationFailedNotificationRegistration(object):
   def __init__(self):
     self.attributes = []
     self.elements = {
@@ -690,6 +777,30 @@ class PoolPartition(object):
     }
     self.element_lists = {}
 
+class SuspectBlobPool(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BlobId' : None,
+      'BucketId' : None,
+      'DateWritten' : None,
+      'Id' : None,
+      'LastAccessed' : None,
+      'PoolId' : None
+    }
+    self.element_lists = {}
+
+class SuspectBlobTape(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BlobId' : None,
+      'Id' : None,
+      'OrderIndex' : None,
+      'TapeId' : None
+    }
+    self.element_lists = {}
+
 class Tape(object):
   def __init__(self):
     self.attributes = []
@@ -801,9 +912,66 @@ class TapePartitionFailure(object):
     }
     self.element_lists = {}
 
+class Ds3Target(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'AccessControlReplication' : None,
+      'AdminAuthId' : None,
+      'AdminSecretKey' : None,
+      'DataPathEndPoint' : None,
+      'DataPathHttps' : None,
+      'DataPathPort' : None,
+      'DataPathProxy' : None,
+      'DataPathVerifyCertificate' : None,
+      'DefaultReadPreference' : None,
+      'Id' : None,
+      'Name' : None,
+      'PermitGoingOutOfSync' : None,
+      'Quiesced' : None,
+      'ReplicatedUserDefaultDataPolicy' : None,
+      'State' : None
+    }
+    self.element_lists = {}
+
+class Ds3TargetFailure(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'Date' : None,
+      'ErrorMessage' : None,
+      'Id' : None,
+      'TargetId' : None,
+      'Type' : None
+    }
+    self.element_lists = {}
+
+class Ds3TargetReadPreference(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BucketId' : None,
+      'Id' : None,
+      'ReadPreference' : None,
+      'TargetId' : None
+    }
+    self.element_lists = {}
+
+class SuspectBlobTarget(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {
+      'BlobId' : None,
+      'Ds3TargetId' : None,
+      'Id' : None
+    }
+    self.element_lists = {}
+
 class BulkObject(object):
   def __init__(self):
     self.attributes = [
+      'Bucket',
+      'Id',
       'InCache',
       'Latest',
       'Length',
@@ -812,7 +980,6 @@ class BulkObject(object):
       'Version'
     ]
     self.elements = {
-      'Id' : None,
       'PhysicalPlacement' : PhysicalPlacement()
     }
     self.element_lists = {}
@@ -843,6 +1010,7 @@ class BlobStoreTaskInformation(object):
       'DateStarted' : None,
       'Description' : None,
       'DriveId' : None,
+      'Ds3TargetId' : None,
       'Id' : None,
       'Name' : None,
       'PoolId' : None,
@@ -959,39 +1127,6 @@ class DeleteResult(object):
       ('Error', None, DeleteObjectError())
     }
 
-class DetailedTape(object):
-  def __init__(self):
-    self.attributes = []
-    self.elements = {
-      'AssignedToStorageDomain' : None,
-      'AvailableRawCapacity' : None,
-      'BarCode' : None,
-      'BucketId' : None,
-      'DescriptionForIdentification' : None,
-      'EjectDate' : None,
-      'EjectLabel' : None,
-      'EjectLocation' : None,
-      'EjectPending' : None,
-      'FullOfData' : None,
-      'Id' : None,
-      'LastAccessed' : None,
-      'LastCheckpoint' : None,
-      'LastModified' : None,
-      'LastVerified' : None,
-      'MostRecentFailure' : DetailedTapeFailure(),
-      'PartitionId' : None,
-      'PreviousState' : None,
-      'SerialNumber' : None,
-      'State' : None,
-      'StorageDomainId' : None,
-      'TakeOwnershipPending' : None,
-      'TotalRawCapacity' : None,
-      'Type' : None,
-      'VerifyPending' : None,
-      'WriteProtected' : None
-    }
-    self.element_lists = {}
-
 class DetailedTapePartition(object):
   def __init__(self):
     self.attributes = []
@@ -1041,6 +1176,7 @@ class Job(object):
       'CachedSizeInBytes',
       'ChunkClientProcessingOrderGuarantee',
       'CompletedSizeInBytes',
+      'EntirelyInCache',
       'JobId',
       'Naked',
       'Name',
@@ -1050,8 +1186,7 @@ class Job(object):
       'StartDate',
       'Status',
       'UserId',
-      'UserName',
-      'WriteOptimization'
+      'UserName'
     ]
     self.elements = {}
     self.element_lists = {
@@ -1078,6 +1213,7 @@ class MasterObjectList(object):
       'CachedSizeInBytes',
       'ChunkClientProcessingOrderGuarantee',
       'CompletedSizeInBytes',
+      'EntirelyInCache',
       'JobId',
       'Naked',
       'Name',
@@ -1230,6 +1366,8 @@ class SystemInformation(object):
       'ApiVersion' : None,
       'BackendActivated' : None,
       'BuildInformation' : BuildInformation(),
+      'InstanceId' : None,
+      'Now' : None,
       'SerialNumber' : None
     }
     self.element_lists = {}
@@ -1261,39 +1399,6 @@ class NamedDetailedTapePartition(object):
       ('DriveTypes', None, None),
       ('TapeTypes', None, None)
     }
-
-class NamedDetailedTape(object):
-  def __init__(self):
-    self.attributes = []
-    self.elements = {
-      'AssignedToStorageDomain' : None,
-      'AvailableRawCapacity' : None,
-      'BarCode' : None,
-      'BucketId' : None,
-      'DescriptionForIdentification' : None,
-      'EjectDate' : None,
-      'EjectLabel' : None,
-      'EjectLocation' : None,
-      'EjectPending' : None,
-      'FullOfData' : None,
-      'Id' : None,
-      'LastAccessed' : None,
-      'LastCheckpoint' : None,
-      'LastModified' : None,
-      'LastVerified' : None,
-      'MostRecentFailure' : DetailedTapeFailure(),
-      'PartitionId' : None,
-      'PreviousState' : None,
-      'SerialNumber' : None,
-      'State' : None,
-      'StorageDomainId' : None,
-      'TakeOwnershipPending' : None,
-      'TotalRawCapacity' : None,
-      'Type' : None,
-      'VerifyPending' : None,
-      'WriteProtected' : None
-    }
-    self.element_lists = {}
 
 class TapeFailure(object):
   def __init__(self):
@@ -1360,6 +1465,46 @@ class DataPolicyList(object):
       ('DataPolicy', None, DataPolicy())
     }
 
+class DataReplicationRuleList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('DataReplicationRule', None, DataReplicationRule())
+    }
+
+class DegradedBlobList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('DegradedBlob', None, DegradedBlob())
+    }
+
+class SuspectBlobPoolList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('SuspectBlobPool', None, SuspectBlobPool())
+    }
+
+class SuspectBlobTapeList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('SuspectBlobTape', None, SuspectBlobTape())
+    }
+
+class SuspectBlobTargetList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('SuspectBlobTarget', None, SuspectBlobTarget())
+    }
+
 class GroupMemberList(object):
   def __init__(self):
     self.attributes = []
@@ -1408,6 +1553,14 @@ class NodeList(object):
       ('Node', None, Node())
     }
 
+class Ds3TargetFailureNotificationRegistrationList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('Ds3TargetFailureNotificationRegistration', None, Ds3TargetFailureNotificationRegistration())
+    }
+
 class JobCompletedNotificationRegistrationList(object):
   def __init__(self):
     self.attributes = []
@@ -1422,6 +1575,14 @@ class JobCreatedNotificationRegistrationList(object):
     self.elements = {}
     self.element_lists = {
       ('JobCreatedNotificationRegistration', None, JobCreatedNotificationRegistration())
+    }
+
+class JobCreationFailedNotificationRegistrationList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('JobCreationFailedNotificationRegistration', None, JobCreationFailedNotificationRegistration())
     }
 
 class S3ObjectCachedNotificationRegistrationList(object):
@@ -1624,12 +1785,28 @@ class TapeList(object):
       ('Tape', None, Tape())
     }
 
-class NamedDetailedTapeList(object):
+class Ds3TargetFailureList(object):
   def __init__(self):
     self.attributes = []
     self.elements = {}
     self.element_lists = {
-      ('Tape', None, NamedDetailedTape())
+      ('Ds3TargetFailure', None, Ds3TargetFailure())
+    }
+
+class Ds3TargetReadPreferenceList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('Ds3TargetReadPreference', None, Ds3TargetReadPreference())
+    }
+
+class Ds3TargetList(object):
+  def __init__(self):
+    self.attributes = []
+    self.elements = {}
+    self.element_lists = {
+      ('Ds3Target', None, Ds3Target())
     }
 
 class SpectraUserList(object):
@@ -1809,12 +1986,14 @@ class DeleteBucketRequest(AbstractRequest):
     self.http_verb = HttpVerb.DELETE
 
 class DeleteObjectRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_name, roll_back=None):
+  def __init__(self, bucket_name, object_name, replicate=None, roll_back=None):
     super(DeleteObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
 
 
+    if replicate is not None:
+      self.query_params['replicate'] = replicate
     if roll_back is not None:
       self.query_params['roll_back'] = roll_back
 
@@ -1822,7 +2001,7 @@ class DeleteObjectRequest(AbstractRequest):
     self.http_verb = HttpVerb.DELETE
 
 class DeleteObjectsRequest(AbstractRequest):
-  def __init__(self, bucket_name, object_list, roll_back=None):
+  def __init__(self, bucket_name, object_list, replicate=None, roll_back=None):
     super(DeleteObjectsRequest, self).__init__()
     self.bucket_name = bucket_name
     self.query_params['delete'] = None
@@ -1833,6 +2012,8 @@ class DeleteObjectsRequest(AbstractRequest):
       self.body = xmldom.tostring(object_list.to_xml())
 
 
+    if replicate is not None:
+      self.query_params['replicate'] = replicate
     if roll_back is not None:
       self.query_params['roll_back'] = roll_back
 
@@ -2135,13 +2316,15 @@ class GetDataPolicyAclsSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class PutBucketSpectraS3Request(AbstractRequest):
-  def __init__(self, name, data_policy_id=None, user_id=None):
+  def __init__(self, name, data_policy_id=None, id=None, user_id=None):
     super(PutBucketSpectraS3Request, self).__init__()
     self.query_params['name'] = name
 
 
     if data_policy_id is not None:
       self.query_params['data_policy_id'] = data_policy_id
+    if id is not None:
+      self.query_params['id'] = id
     if user_id is not None:
       self.query_params['user_id'] = user_id
 
@@ -2149,13 +2332,15 @@ class PutBucketSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.POST
 
 class DeleteBucketSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_name, force=None):
+  def __init__(self, bucket_name, force=None, replicate=None):
     super(DeleteBucketSpectraS3Request, self).__init__()
     self.bucket_name = bucket_name
 
 
     if force is not None:
       self.query_params['force'] = force
+    if replicate is not None:
+      self.query_params['replicate'] = replicate
 
     self.path = '/_rest_/bucket/' + bucket_name
     self.http_verb = HttpVerb.DELETE
@@ -2392,11 +2577,17 @@ class PutDataPersistenceRuleSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.POST
 
 class PutDataPolicySpectraS3Request(AbstractRequest):
-  def __init__(self, name, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_job_priority=None, end_to_end_crc_required=None, rebuild_priority=None, versioning=None):
+  def __init__(self, name, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, always_replicate_deletes=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_job_priority=None, end_to_end_crc_required=None, rebuild_priority=None, versioning=None):
     super(PutDataPolicySpectraS3Request, self).__init__()
     self.query_params['name'] = name
 
 
+    if always_force_put_job_creation is not None:
+      self.query_params['always_force_put_job_creation'] = always_force_put_job_creation
+    if always_minimize_spanning_across_media is not None:
+      self.query_params['always_minimize_spanning_across_media'] = always_minimize_spanning_across_media
+    if always_replicate_deletes is not None:
+      self.query_params['always_replicate_deletes'] = always_replicate_deletes
     if blobbing_enabled is not None:
       self.query_params['blobbing_enabled'] = blobbing_enabled
     if checksum_type is not None:
@@ -2419,6 +2610,20 @@ class PutDataPolicySpectraS3Request(AbstractRequest):
     self.path = '/_rest_/data_policy'
     self.http_verb = HttpVerb.POST
 
+class PutDataReplicationRuleSpectraS3Request(AbstractRequest):
+  def __init__(self, data_policy_id, ds3_target_id, type, ds3_target_data_policy=None):
+    super(PutDataReplicationRuleSpectraS3Request, self).__init__()
+    self.query_params['data_policy_id'] = data_policy_id
+    self.query_params['ds3_target_id'] = ds3_target_id
+    self.query_params['type'] = type
+
+
+    if ds3_target_data_policy is not None:
+      self.query_params['ds3_target_data_policy'] = ds3_target_data_policy
+
+    self.path = '/_rest_/data_replication_rule'
+    self.http_verb = HttpVerb.POST
+
 class DeleteDataPersistenceRuleSpectraS3Request(AbstractRequest):
   def __init__(self, data_persistence_rule):
     super(DeleteDataPersistenceRuleSpectraS3Request, self).__init__()
@@ -2437,6 +2642,16 @@ class DeleteDataPolicySpectraS3Request(AbstractRequest):
 
 
     self.path = '/_rest_/data_policy/' + data_policy_id
+    self.http_verb = HttpVerb.DELETE
+
+class DeleteDataReplicationRuleSpectraS3Request(AbstractRequest):
+  def __init__(self, data_replication_rule):
+    super(DeleteDataReplicationRuleSpectraS3Request, self).__init__()
+    self.data_replication_rule = data_replication_rule
+
+
+
+    self.path = '/_rest_/data_replication_rule/' + data_replication_rule
     self.http_verb = HttpVerb.DELETE
 
 class GetDataPersistenceRuleSpectraS3Request(AbstractRequest):
@@ -2477,10 +2692,16 @@ class GetDataPersistenceRulesSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetDataPoliciesSpectraS3Request(AbstractRequest):
-  def __init__(self, checksum_type=None, end_to_end_crc_required=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None):
+  def __init__(self, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, always_replicate_deletes=None, checksum_type=None, end_to_end_crc_required=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None):
     super(GetDataPoliciesSpectraS3Request, self).__init__()
 
 
+    if always_force_put_job_creation is not None:
+      self.query_params['always_force_put_job_creation'] = always_force_put_job_creation
+    if always_minimize_spanning_across_media is not None:
+      self.query_params['always_minimize_spanning_across_media'] = always_minimize_spanning_across_media
+    if always_replicate_deletes is not None:
+      self.query_params['always_replicate_deletes'] = always_replicate_deletes
     if checksum_type is not None:
       self.query_params['checksum_type'] = checksum_type
     if end_to_end_crc_required is not None:
@@ -2509,6 +2730,41 @@ class GetDataPolicySpectraS3Request(AbstractRequest):
     self.path = '/_rest_/data_policy/' + data_policy_id
     self.http_verb = HttpVerb.GET
 
+class GetDataReplicationRuleSpectraS3Request(AbstractRequest):
+  def __init__(self, data_replication_rule):
+    super(GetDataReplicationRuleSpectraS3Request, self).__init__()
+    self.data_replication_rule = data_replication_rule
+
+
+
+    self.path = '/_rest_/data_replication_rule/' + data_replication_rule
+    self.http_verb = HttpVerb.GET
+
+class GetDataReplicationRulesSpectraS3Request(AbstractRequest):
+  def __init__(self, data_policy_id=None, ds3_target_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, state=None, type=None):
+    super(GetDataReplicationRulesSpectraS3Request, self).__init__()
+
+
+    if data_policy_id is not None:
+      self.query_params['data_policy_id'] = data_policy_id
+    if ds3_target_id is not None:
+      self.query_params['ds3_target_id'] = ds3_target_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if state is not None:
+      self.query_params['state'] = state
+    if type is not None:
+      self.query_params['type'] = type
+
+    self.path = '/_rest_/data_replication_rule'
+    self.http_verb = HttpVerb.GET
+
 class ModifyDataPersistenceRuleSpectraS3Request(AbstractRequest):
   def __init__(self, data_persistence_rule, isolation_level=None, minimum_days_to_retain=None, type=None):
     super(ModifyDataPersistenceRuleSpectraS3Request, self).__init__()
@@ -2526,11 +2782,17 @@ class ModifyDataPersistenceRuleSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class ModifyDataPolicySpectraS3Request(AbstractRequest):
-  def __init__(self, data_policy_id, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_job_priority=None, end_to_end_crc_required=None, name=None, rebuild_priority=None, versioning=None):
+  def __init__(self, data_policy_id, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, always_replicate_deletes=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_job_priority=None, end_to_end_crc_required=None, name=None, rebuild_priority=None, versioning=None):
     super(ModifyDataPolicySpectraS3Request, self).__init__()
     self.data_policy_id = data_policy_id
 
 
+    if always_force_put_job_creation is not None:
+      self.query_params['always_force_put_job_creation'] = always_force_put_job_creation
+    if always_minimize_spanning_across_media is not None:
+      self.query_params['always_minimize_spanning_across_media'] = always_minimize_spanning_across_media
+    if always_replicate_deletes is not None:
+      self.query_params['always_replicate_deletes'] = always_replicate_deletes
     if blobbing_enabled is not None:
       self.query_params['blobbing_enabled'] = blobbing_enabled
     if checksum_type is not None:
@@ -2554,6 +2816,78 @@ class ModifyDataPolicySpectraS3Request(AbstractRequest):
 
     self.path = '/_rest_/data_policy/' + data_policy_id
     self.http_verb = HttpVerb.PUT
+
+class ModifyDataReplicationRuleSpectraS3Request(AbstractRequest):
+  def __init__(self, data_replication_rule, ds3_target_data_policy=None, type=None):
+    super(ModifyDataReplicationRuleSpectraS3Request, self).__init__()
+    self.data_replication_rule = data_replication_rule
+
+
+    if ds3_target_data_policy is not None:
+      self.query_params['ds3_target_data_policy'] = ds3_target_data_policy
+    if type is not None:
+      self.query_params['type'] = type
+
+    self.path = '/_rest_/data_replication_rule/' + data_replication_rule
+    self.http_verb = HttpVerb.PUT
+
+class ClearSuspectBlobPoolsSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(ClearSuspectBlobPoolsSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_pool'
+    self.http_verb = HttpVerb.DELETE
+
+class ClearSuspectBlobTapesSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(ClearSuspectBlobTapesSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_tape'
+    self.http_verb = HttpVerb.DELETE
+
+class ClearSuspectBlobTargetsSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(ClearSuspectBlobTargetsSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_target'
+    self.http_verb = HttpVerb.DELETE
+
+class GetDegradedBlobsSpectraS3Request(AbstractRequest):
+  def __init__(self, blob_id=None, bucket_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, persistence_rule_id=None, replication_rule_id=None):
+    super(GetDegradedBlobsSpectraS3Request, self).__init__()
+
+
+    if blob_id is not None:
+      self.query_params['blob_id'] = blob_id
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if persistence_rule_id is not None:
+      self.query_params['persistence_rule_id'] = persistence_rule_id
+    if replication_rule_id is not None:
+      self.query_params['replication_rule_id'] = replication_rule_id
+
+    self.path = '/_rest_/degraded_blob'
+    self.http_verb = HttpVerb.GET
 
 class GetDegradedBucketsSpectraS3Request(AbstractRequest):
   def __init__(self, data_policy_id=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, user_id=None):
@@ -2604,6 +2938,177 @@ class GetDegradedDataPersistenceRulesSpectraS3Request(AbstractRequest):
 
     self.path = '/_rest_/degraded_data_persistence_rule'
     self.http_verb = HttpVerb.GET
+
+class GetDegradedDataReplicationRulesSpectraS3Request(AbstractRequest):
+  def __init__(self, data_policy_id=None, ds3_target_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, state=None, type=None):
+    super(GetDegradedDataReplicationRulesSpectraS3Request, self).__init__()
+
+
+    if data_policy_id is not None:
+      self.query_params['data_policy_id'] = data_policy_id
+    if ds3_target_id is not None:
+      self.query_params['ds3_target_id'] = ds3_target_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if state is not None:
+      self.query_params['state'] = state
+    if type is not None:
+      self.query_params['type'] = type
+
+    self.path = '/_rest_/degraded_data_replication_rule'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectBlobPoolsSpectraS3Request(AbstractRequest):
+  def __init__(self, blob_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, pool_id=None):
+    super(GetSuspectBlobPoolsSpectraS3Request, self).__init__()
+
+
+    if blob_id is not None:
+      self.query_params['blob_id'] = blob_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if pool_id is not None:
+      self.query_params['pool_id'] = pool_id
+
+    self.path = '/_rest_/suspect_blob_pool'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectBlobTapesSpectraS3Request(AbstractRequest):
+  def __init__(self, blob_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, tape_id=None):
+    super(GetSuspectBlobTapesSpectraS3Request, self).__init__()
+
+
+    if blob_id is not None:
+      self.query_params['blob_id'] = blob_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if tape_id is not None:
+      self.query_params['tape_id'] = tape_id
+
+    self.path = '/_rest_/suspect_blob_tape'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectBlobTargetsSpectraS3Request(AbstractRequest):
+  def __init__(self, blob_id=None, ds3_target_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None):
+    super(GetSuspectBlobTargetsSpectraS3Request, self).__init__()
+
+
+    if blob_id is not None:
+      self.query_params['blob_id'] = blob_id
+    if ds3_target_id is not None:
+      self.query_params['ds3_target_id'] = ds3_target_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+
+    self.path = '/_rest_/suspect_blob_target'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectBucketsSpectraS3Request(AbstractRequest):
+  def __init__(self, data_policy_id=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, user_id=None):
+    super(GetSuspectBucketsSpectraS3Request, self).__init__()
+
+
+    if data_policy_id is not None:
+      self.query_params['data_policy_id'] = data_policy_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if name is not None:
+      self.query_params['name'] = name
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if user_id is not None:
+      self.query_params['user_id'] = user_id
+
+    self.path = '/_rest_/suspect_bucket'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectObjectsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, storage_domain_id=None):
+    super(GetSuspectObjectsSpectraS3Request, self).__init__()
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if storage_domain_id is not None:
+      self.query_params['storage_domain_id'] = storage_domain_id
+
+    self.path = '/_rest_/suspect_object'
+    self.http_verb = HttpVerb.GET
+
+class GetSuspectObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, storage_domain_id=None):
+    super(GetSuspectObjectsWithFullDetailsSpectraS3Request, self).__init__()
+    self.query_params['full_details'] = None
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if storage_domain_id is not None:
+      self.query_params['storage_domain_id'] = storage_domain_id
+
+    self.path = '/_rest_/suspect_object'
+    self.http_verb = HttpVerb.GET
+
+class MarkSuspectBlobPoolsAsDegradedSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(MarkSuspectBlobPoolsAsDegradedSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_pool'
+    self.http_verb = HttpVerb.PUT
+
+class MarkSuspectBlobTapesAsDegradedSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(MarkSuspectBlobTapesAsDegradedSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_tape'
+    self.http_verb = HttpVerb.PUT
+
+class MarkSuspectBlobTargetsAsDegradedSpectraS3Request(AbstractRequest):
+  def __init__(self, force=None):
+    super(MarkSuspectBlobTargetsAsDegradedSpectraS3Request, self).__init__()
+
+
+    if force is not None:
+      self.query_params['force'] = force
+
+    self.path = '/_rest_/suspect_blob_target'
+    self.http_verb = HttpVerb.PUT
 
 class PutGroupGroupMemberSpectraS3Request(AbstractRequest):
   def __init__(self, group_id, member_group_id):
@@ -2757,15 +3262,39 @@ class AllocateJobChunkSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/job_chunk/' + job_chunk_id
     self.http_verb = HttpVerb.PUT
 
-class CancelAllJobsSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_id=None, force=None, request_type=None):
-    super(CancelAllJobsSpectraS3Request, self).__init__()
+class CancelActiveJobSpectraS3Request(AbstractRequest):
+  def __init__(self, active_job_id):
+    super(CancelActiveJobSpectraS3Request, self).__init__()
+    self.active_job_id = active_job_id
+    self.query_params['force'] = None
+
+
+
+    self.path = '/_rest_/active_job/' + active_job_id
+    self.http_verb = HttpVerb.DELETE
+
+class CancelAllActiveJobsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, request_type=None):
+    super(CancelAllActiveJobsSpectraS3Request, self).__init__()
+    self.query_params['force'] = None
 
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
-    if force is not None:
-      self.query_params['force'] = force
+    if request_type is not None:
+      self.query_params['request_type'] = request_type
+
+    self.path = '/_rest_/active_job'
+    self.http_verb = HttpVerb.DELETE
+
+class CancelAllJobsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, request_type=None):
+    super(CancelAllJobsSpectraS3Request, self).__init__()
+    self.query_params['force'] = None
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
     if request_type is not None:
       self.query_params['request_type'] = request_type
 
@@ -2773,13 +3302,12 @@ class CancelAllJobsSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.DELETE
 
 class CancelJobSpectraS3Request(AbstractRequest):
-  def __init__(self, job_id, force=None):
+  def __init__(self, job_id):
     super(CancelJobSpectraS3Request, self).__init__()
     self.job_id = job_id
+    self.query_params['force'] = None
 
 
-    if force is not None:
-      self.query_params['force'] = force
 
     self.path = '/_rest_/job/' + job_id
     self.http_verb = HttpVerb.DELETE
@@ -2827,7 +3355,7 @@ class GetBulkJobSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class PutBulkJobSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_name, object_list, aggregating=None, ignore_naming_conflicts=None, max_upload_size=None, name=None, priority=None):
+  def __init__(self, bucket_name, object_list, aggregating=None, force=None, ignore_naming_conflicts=None, max_upload_size=None, minimize_spanning_across_media=None, name=None, priority=None):
     super(PutBulkJobSpectraS3Request, self).__init__()
     self.bucket_name = bucket_name
     self.query_params['operation'] = 'start_bulk_put'
@@ -2840,10 +3368,14 @@ class PutBulkJobSpectraS3Request(AbstractRequest):
 
     if aggregating is not None:
       self.query_params['aggregating'] = aggregating
+    if force is not None:
+      self.query_params['force'] = force
     if ignore_naming_conflicts is not None:
       self.query_params['ignore_naming_conflicts'] = ignore_naming_conflicts
     if max_upload_size is not None:
       self.query_params['max_upload_size'] = max_upload_size
+    if minimize_spanning_across_media is not None:
+      self.query_params['minimize_spanning_across_media'] = minimize_spanning_across_media
     if name is not None:
       self.query_params['name'] = name
     if priority is not None:
@@ -2873,6 +3405,16 @@ class VerifyBulkJobSpectraS3Request(AbstractRequest):
 
     self.path = '/_rest_/bucket/' + bucket_name
     self.http_verb = HttpVerb.PUT
+
+class GetActiveJobSpectraS3Request(AbstractRequest):
+  def __init__(self, active_job_id):
+    super(GetActiveJobSpectraS3Request, self).__init__()
+    self.active_job_id = active_job_id
+
+
+
+    self.path = '/_rest_/active_job/' + active_job_id
+    self.http_verb = HttpVerb.GET
 
 class GetActiveJobsSpectraS3Request(AbstractRequest):
   def __init__(self, aggregating=None, bucket_id=None, chunk_client_processing_order_guarantee=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, priority=None, rechunked=None, request_type=None, truncated=None, user_id=None):
@@ -2909,13 +3451,25 @@ class GetActiveJobsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/active_job'
     self.http_verb = HttpVerb.GET
 
+class GetCanceledJobSpectraS3Request(AbstractRequest):
+  def __init__(self, canceled_job):
+    super(GetCanceledJobSpectraS3Request, self).__init__()
+    self.canceled_job = canceled_job
+
+
+
+    self.path = '/_rest_/canceled_job/' + canceled_job
+    self.http_verb = HttpVerb.GET
+
 class GetCanceledJobsSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_id=None, chunk_client_processing_order_guarantee=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, priority=None, rechunked=None, request_type=None, truncated=None, user_id=None):
+  def __init__(self, bucket_id=None, canceled_due_to_timeout=None, chunk_client_processing_order_guarantee=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, priority=None, rechunked=None, request_type=None, truncated=None, user_id=None):
     super(GetCanceledJobsSpectraS3Request, self).__init__()
 
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
+    if canceled_due_to_timeout is not None:
+      self.query_params['canceled_due_to_timeout'] = canceled_due_to_timeout
     if chunk_client_processing_order_guarantee is not None:
       self.query_params['chunk_client_processing_order_guarantee'] = chunk_client_processing_order_guarantee
     if last_page is not None:
@@ -2940,6 +3494,16 @@ class GetCanceledJobsSpectraS3Request(AbstractRequest):
       self.query_params['user_id'] = user_id
 
     self.path = '/_rest_/canceled_job'
+    self.http_verb = HttpVerb.GET
+
+class GetCompletedJobSpectraS3Request(AbstractRequest):
+  def __init__(self, completed_job):
+    super(GetCompletedJobSpectraS3Request, self).__init__()
+    self.completed_job = completed_job
+
+
+
+    self.path = '/_rest_/completed_job/' + completed_job
     self.http_verb = HttpVerb.GET
 
 class GetCompletedJobsSpectraS3Request(AbstractRequest):
@@ -2975,6 +3539,16 @@ class GetCompletedJobsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/completed_job'
     self.http_verb = HttpVerb.GET
 
+class GetJobChunkDaoSpectraS3Request(AbstractRequest):
+  def __init__(self, job_chunk_dao):
+    super(GetJobChunkDaoSpectraS3Request, self).__init__()
+    self.job_chunk_dao = job_chunk_dao
+
+
+
+    self.path = '/_rest_/job_chunk_dao/' + job_chunk_dao
+    self.http_verb = HttpVerb.GET
+
 class GetJobChunkSpectraS3Request(AbstractRequest):
   def __init__(self, job_chunk_id):
     super(GetJobChunkSpectraS3Request, self).__init__()
@@ -2986,11 +3560,13 @@ class GetJobChunkSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetJobChunksReadyForClientProcessingSpectraS3Request(AbstractRequest):
-  def __init__(self, job, preferred_number_of_chunks=None):
+  def __init__(self, job, job_chunk=None, preferred_number_of_chunks=None):
     super(GetJobChunksReadyForClientProcessingSpectraS3Request, self).__init__()
     self.query_params['job'] = job
 
 
+    if job_chunk is not None:
+      self.query_params['job_chunk'] = job_chunk
     if preferred_number_of_chunks is not None:
       self.query_params['preferred_number_of_chunks'] = preferred_number_of_chunks
 
@@ -3001,6 +3577,17 @@ class GetJobSpectraS3Request(AbstractRequest):
   def __init__(self, job_id):
     super(GetJobSpectraS3Request, self).__init__()
     self.job_id = job_id
+
+
+
+    self.path = '/_rest_/job/' + job_id
+    self.http_verb = HttpVerb.GET
+
+class GetJobToReplicateSpectraS3Request(AbstractRequest):
+  def __init__(self, job_id):
+    super(GetJobToReplicateSpectraS3Request, self).__init__()
+    self.job_id = job_id
+    self.query_params['replicate'] = None
 
 
 
@@ -3020,16 +3607,21 @@ class GetJobsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/job'
     self.http_verb = HttpVerb.GET
 
-class GetPutJobToReplicateSpectraS3Request(AbstractRequest):
-  def __init__(self, job_id):
-    super(GetPutJobToReplicateSpectraS3Request, self).__init__()
-    self.job_id = job_id
-    self.query_params['replicate'] = None
+class ModifyActiveJobSpectraS3Request(AbstractRequest):
+  def __init__(self, active_job_id, created_at=None, name=None, priority=None):
+    super(ModifyActiveJobSpectraS3Request, self).__init__()
+    self.active_job_id = active_job_id
 
 
+    if created_at is not None:
+      self.query_params['created_at'] = created_at
+    if name is not None:
+      self.query_params['name'] = name
+    if priority is not None:
+      self.query_params['priority'] = priority
 
-    self.path = '/_rest_/job/' + job_id
-    self.http_verb = HttpVerb.GET
+    self.path = '/_rest_/active_job/' + active_job_id
+    self.http_verb = HttpVerb.PUT
 
 class ModifyJobSpectraS3Request(AbstractRequest):
   def __init__(self, job_id, created_at=None, name=None, priority=None):
@@ -3048,7 +3640,7 @@ class ModifyJobSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class ReplicatePutJobSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_name, request_payload, conflict_resolution_mode=None, priority=None):
+  def __init__(self, bucket_name, request_payload, priority=None):
     super(ReplicatePutJobSpectraS3Request, self).__init__()
     self.bucket_name = bucket_name
     self.query_params['operation'] = 'start_bulk_put'
@@ -3057,10 +3649,65 @@ class ReplicatePutJobSpectraS3Request(AbstractRequest):
     self.body = request_payload
 
 
-    if conflict_resolution_mode is not None:
-      self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if priority is not None:
       self.query_params['priority'] = priority
+
+    self.path = '/_rest_/bucket/' + bucket_name
+    self.http_verb = HttpVerb.PUT
+
+class TruncateActiveJobSpectraS3Request(AbstractRequest):
+  def __init__(self, active_job_id):
+    super(TruncateActiveJobSpectraS3Request, self).__init__()
+    self.active_job_id = active_job_id
+
+
+
+    self.path = '/_rest_/active_job/' + active_job_id
+    self.http_verb = HttpVerb.DELETE
+
+class TruncateAllActiveJobsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, request_type=None):
+    super(TruncateAllActiveJobsSpectraS3Request, self).__init__()
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if request_type is not None:
+      self.query_params['request_type'] = request_type
+
+    self.path = '/_rest_/active_job'
+    self.http_verb = HttpVerb.DELETE
+
+class TruncateAllJobsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, request_type=None):
+    super(TruncateAllJobsSpectraS3Request, self).__init__()
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if request_type is not None:
+      self.query_params['request_type'] = request_type
+
+    self.path = '/_rest_/job'
+    self.http_verb = HttpVerb.DELETE
+
+class TruncateJobSpectraS3Request(AbstractRequest):
+  def __init__(self, job_id):
+    super(TruncateJobSpectraS3Request, self).__init__()
+    self.job_id = job_id
+
+
+
+    self.path = '/_rest_/job/' + job_id
+    self.http_verb = HttpVerb.DELETE
+
+class VerifySafeToCreatePutJobSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_name):
+    super(VerifySafeToCreatePutJobSpectraS3Request, self).__init__()
+    self.bucket_name = bucket_name
+    self.query_params['operation'] = 'verify_safe_to_start_bulk_put'
+
+
 
     self.path = '/_rest_/bucket/' + bucket_name
     self.http_verb = HttpVerb.PUT
@@ -3106,6 +3753,22 @@ class ModifyNodeSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/node/' + node
     self.http_verb = HttpVerb.PUT
 
+class PutDs3TargetFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
+    super(PutDs3TargetFailureNotificationRegistrationSpectraS3Request, self).__init__()
+    self.query_params['notification_end_point'] = notification_end_point
+
+
+    if format is not None:
+      self.query_params['format'] = format
+    if naming_convention is not None:
+      self.query_params['naming_convention'] = naming_convention
+    if notification_http_method is not None:
+      self.query_params['notification_http_method'] = notification_http_method
+
+    self.path = '/_rest_/ds3_target_failure_notification_registration'
+    self.http_verb = HttpVerb.POST
+
 class PutJobCompletedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_end_point, format=None, job_id=None, naming_convention=None, notification_http_method=None):
     super(PutJobCompletedNotificationRegistrationSpectraS3Request, self).__init__()
@@ -3138,6 +3801,22 @@ class PutJobCreatedNotificationRegistrationSpectraS3Request(AbstractRequest):
       self.query_params['notification_http_method'] = notification_http_method
 
     self.path = '/_rest_/job_created_notification_registration'
+    self.http_verb = HttpVerb.POST
+
+class PutJobCreationFailedNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_end_point, format=None, naming_convention=None, notification_http_method=None):
+    super(PutJobCreationFailedNotificationRegistrationSpectraS3Request, self).__init__()
+    self.query_params['notification_end_point'] = notification_end_point
+
+
+    if format is not None:
+      self.query_params['format'] = format
+    if naming_convention is not None:
+      self.query_params['naming_convention'] = naming_convention
+    if notification_http_method is not None:
+      self.query_params['notification_http_method'] = notification_http_method
+
+    self.path = '/_rest_/job_creation_failed_notification_registration'
     self.http_verb = HttpVerb.POST
 
 class PutObjectCachedNotificationRegistrationSpectraS3Request(AbstractRequest):
@@ -3272,6 +3951,16 @@ class PutTapePartitionFailureNotificationRegistrationSpectraS3Request(AbstractRe
     self.path = '/_rest_/tape_partition_failure_notification_registration'
     self.http_verb = HttpVerb.POST
 
+class DeleteDs3TargetFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_id):
+    super(DeleteDs3TargetFailureNotificationRegistrationSpectraS3Request, self).__init__()
+    self.notification_id = notification_id
+
+
+
+    self.path = '/_rest_/ds3_target_failure_notification_registration/' + notification_id
+    self.http_verb = HttpVerb.DELETE
+
 class DeleteJobCompletedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_id):
     super(DeleteJobCompletedNotificationRegistrationSpectraS3Request, self).__init__()
@@ -3290,6 +3979,16 @@ class DeleteJobCreatedNotificationRegistrationSpectraS3Request(AbstractRequest):
 
 
     self.path = '/_rest_/job_created_notification_registration/' + notification_id
+    self.http_verb = HttpVerb.DELETE
+
+class DeleteJobCreationFailedNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_id):
+    super(DeleteJobCreationFailedNotificationRegistrationSpectraS3Request, self).__init__()
+    self.notification_id = notification_id
+
+
+
+    self.path = '/_rest_/job_creation_failed_notification_registration/' + notification_id
     self.http_verb = HttpVerb.DELETE
 
 class DeleteObjectCachedNotificationRegistrationSpectraS3Request(AbstractRequest):
@@ -3372,6 +4071,35 @@ class DeleteTapePartitionFailureNotificationRegistrationSpectraS3Request(Abstrac
     self.path = '/_rest_/tape_partition_failure_notification_registration/' + notification_id
     self.http_verb = HttpVerb.DELETE
 
+class GetDs3TargetFailureNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_id):
+    super(GetDs3TargetFailureNotificationRegistrationSpectraS3Request, self).__init__()
+    self.notification_id = notification_id
+
+
+
+    self.path = '/_rest_/ds3_target_failure_notification_registration/' + notification_id
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetFailureNotificationRegistrationsSpectraS3Request(AbstractRequest):
+  def __init__(self, last_page=None, page_length=None, page_offset=None, page_start_marker=None, user_id=None):
+    super(GetDs3TargetFailureNotificationRegistrationsSpectraS3Request, self).__init__()
+
+
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if user_id is not None:
+      self.query_params['user_id'] = user_id
+
+    self.path = '/_rest_/ds3_target_failure_notification_registration'
+    self.http_verb = HttpVerb.GET
+
 class GetJobCompletedNotificationRegistrationSpectraS3Request(AbstractRequest):
   def __init__(self, notification_id):
     super(GetJobCompletedNotificationRegistrationSpectraS3Request, self).__init__()
@@ -3428,6 +4156,35 @@ class GetJobCreatedNotificationRegistrationsSpectraS3Request(AbstractRequest):
       self.query_params['user_id'] = user_id
 
     self.path = '/_rest_/job_created_notification_registration'
+    self.http_verb = HttpVerb.GET
+
+class GetJobCreationFailedNotificationRegistrationSpectraS3Request(AbstractRequest):
+  def __init__(self, notification_id):
+    super(GetJobCreationFailedNotificationRegistrationSpectraS3Request, self).__init__()
+    self.notification_id = notification_id
+
+
+
+    self.path = '/_rest_/job_creation_failed_notification_registration/' + notification_id
+    self.http_verb = HttpVerb.GET
+
+class GetJobCreationFailedNotificationRegistrationsSpectraS3Request(AbstractRequest):
+  def __init__(self, last_page=None, page_length=None, page_offset=None, page_start_marker=None, user_id=None):
+    super(GetJobCreationFailedNotificationRegistrationsSpectraS3Request, self).__init__()
+
+
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if user_id is not None:
+      self.query_params['user_id'] = user_id
+
+    self.path = '/_rest_/job_creation_failed_notification_registration'
     self.http_verb = HttpVerb.GET
 
 class GetObjectCachedNotificationRegistrationSpectraS3Request(AbstractRequest):
@@ -3663,18 +4420,31 @@ class GetTapePartitionFailureNotificationRegistrationsSpectraS3Request(AbstractR
     self.http_verb = HttpVerb.GET
 
 class DeleteFolderRecursivelySpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_id, folder, roll_back=None):
+  def __init__(self, bucket_id, folder, replicate=None, roll_back=None):
     super(DeleteFolderRecursivelySpectraS3Request, self).__init__()
     self.folder = folder
     self.query_params['bucket_id'] = bucket_id
     self.query_params['recursive'] = None
 
 
+    if replicate is not None:
+      self.query_params['replicate'] = replicate
     if roll_back is not None:
       self.query_params['roll_back'] = roll_back
 
     self.path = '/_rest_/folder/' + folder
     self.http_verb = HttpVerb.DELETE
+
+class GetBlobPersistenceSpectraS3Request(AbstractRequest):
+  def __init__(self, request_payload):
+    super(GetBlobPersistenceSpectraS3Request, self).__init__()
+
+    self.body = request_payload
+
+
+
+    self.path = '/_rest_/blob_persistence'
+    self.http_verb = HttpVerb.GET
 
 class GetObjectDetailsSpectraS3Request(AbstractRequest):
   def __init__(self, object_name, bucket_id):
@@ -3687,17 +4457,15 @@ class GetObjectDetailsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/object/' + object_name
     self.http_verb = HttpVerb.GET
 
-class GetObjectsSpectraS3Request(AbstractRequest):
-  def __init__(self, bucket_id=None, folder=None, include_physical_placement=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
-    super(GetObjectsSpectraS3Request, self).__init__()
+class GetObjectsDetailsSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, folder=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
+    super(GetObjectsDetailsSpectraS3Request, self).__init__()
 
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
     if folder is not None:
       self.query_params['folder'] = folder
-    if include_physical_placement is not None:
-      self.query_params['include_physical_placement'] = include_physical_placement
     if last_page is not None:
       self.query_params['last_page'] = last_page
     if latest is not None:
@@ -4068,7 +4836,7 @@ class GetPoolsSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class ImportAllPoolsSpectraS3Request(AbstractRequest):
-  def __init__(self, conflict_resolution_mode=None, data_policy_id=None, storage_domain_id=None, user_id=None):
+  def __init__(self, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
     super(ImportAllPoolsSpectraS3Request, self).__init__()
     self.query_params['operation'] = 'import'
 
@@ -4077,16 +4845,22 @@ class ImportAllPoolsSpectraS3Request(AbstractRequest):
       self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if data_policy_id is not None:
       self.query_params['data_policy_id'] = data_policy_id
+    if priority is not None:
+      self.query_params['priority'] = priority
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
     if user_id is not None:
       self.query_params['user_id'] = user_id
+    if verify_data_after_import is not None:
+      self.query_params['verify_data_after_import'] = verify_data_after_import
+    if verify_data_prior_to_import is not None:
+      self.query_params['verify_data_prior_to_import'] = verify_data_prior_to_import
 
     self.path = '/_rest_/pool'
     self.http_verb = HttpVerb.PUT
 
 class ImportPoolSpectraS3Request(AbstractRequest):
-  def __init__(self, pool, conflict_resolution_mode=None, data_policy_id=None, storage_domain_id=None, user_id=None):
+  def __init__(self, pool, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
     super(ImportPoolSpectraS3Request, self).__init__()
     self.pool = pool
     self.query_params['operation'] = 'import'
@@ -4096,10 +4870,16 @@ class ImportPoolSpectraS3Request(AbstractRequest):
       self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if data_policy_id is not None:
       self.query_params['data_policy_id'] = data_policy_id
+    if priority is not None:
+      self.query_params['priority'] = priority
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
     if user_id is not None:
       self.query_params['user_id'] = user_id
+    if verify_data_after_import is not None:
+      self.query_params['verify_data_after_import'] = verify_data_after_import
+    if verify_data_prior_to_import is not None:
+      self.query_params['verify_data_prior_to_import'] = verify_data_prior_to_import
 
     self.path = '/_rest_/pool/' + pool
     self.http_verb = HttpVerb.PUT
@@ -4165,6 +4945,17 @@ class VerifyPoolSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/pool/' + pool
     self.http_verb = HttpVerb.PUT
 
+class ConvertStorageDomainToDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, convert_to_ds3_target, storage_domain):
+    super(ConvertStorageDomainToDs3TargetSpectraS3Request, self).__init__()
+    self.storage_domain = storage_domain
+    self.query_params['convert_to_ds3_target'] = convert_to_ds3_target
+
+
+
+    self.path = '/_rest_/storage_domain/' + storage_domain
+    self.http_verb = HttpVerb.PUT
+
 class PutPoolStorageDomainMemberSpectraS3Request(AbstractRequest):
   def __init__(self, pool_partition_id, storage_domain_id, write_preference=None):
     super(PutPoolStorageDomainMemberSpectraS3Request, self).__init__()
@@ -4179,11 +4970,13 @@ class PutPoolStorageDomainMemberSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.POST
 
 class PutStorageDomainSpectraS3Request(AbstractRequest):
-  def __init__(self, name, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, ltfs_file_naming=None, maximum_auto_verification_frequency_in_days=None, max_tape_fragmentation_percent=None, media_ejection_allowed=None, verify_prior_to_auto_eject=None, write_optimization=None):
+  def __init__(self, name, auto_eject_media_full_threshold=None, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, ltfs_file_naming=None, maximum_auto_verification_frequency_in_days=None, max_tape_fragmentation_percent=None, media_ejection_allowed=None, secure_media_allocation=None, verify_prior_to_auto_eject=None, write_optimization=None):
     super(PutStorageDomainSpectraS3Request, self).__init__()
     self.query_params['name'] = name
 
 
+    if auto_eject_media_full_threshold is not None:
+      self.query_params['auto_eject_media_full_threshold'] = auto_eject_media_full_threshold
     if auto_eject_upon_cron is not None:
       self.query_params['auto_eject_upon_cron'] = auto_eject_upon_cron
     if auto_eject_upon_job_cancellation is not None:
@@ -4200,6 +4993,8 @@ class PutStorageDomainSpectraS3Request(AbstractRequest):
       self.query_params['maximum_auto_verification_frequency_in_days'] = maximum_auto_verification_frequency_in_days
     if media_ejection_allowed is not None:
       self.query_params['media_ejection_allowed'] = media_ejection_allowed
+    if secure_media_allocation is not None:
+      self.query_params['secure_media_allocation'] = secure_media_allocation
     if verify_prior_to_auto_eject is not None:
       self.query_params['verify_prior_to_auto_eject'] = verify_prior_to_auto_eject
     if write_optimization is not None:
@@ -4325,7 +5120,7 @@ class GetStorageDomainSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetStorageDomainsSpectraS3Request(AbstractRequest):
-  def __init__(self, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, last_page=None, media_ejection_allowed=None, name=None, page_length=None, page_offset=None, page_start_marker=None, write_optimization=None):
+  def __init__(self, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, last_page=None, media_ejection_allowed=None, name=None, page_length=None, page_offset=None, page_start_marker=None, secure_media_allocation=None, write_optimization=None):
     super(GetStorageDomainsSpectraS3Request, self).__init__()
 
 
@@ -4349,6 +5144,8 @@ class GetStorageDomainsSpectraS3Request(AbstractRequest):
       self.query_params['page_offset'] = page_offset
     if page_start_marker is not None:
       self.query_params['page_start_marker'] = page_start_marker
+    if secure_media_allocation is not None:
+      self.query_params['secure_media_allocation'] = secure_media_allocation
     if write_optimization is not None:
       self.query_params['write_optimization'] = write_optimization
 
@@ -4368,11 +5165,13 @@ class ModifyStorageDomainMemberSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.PUT
 
 class ModifyStorageDomainSpectraS3Request(AbstractRequest):
-  def __init__(self, storage_domain, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, ltfs_file_naming=None, maximum_auto_verification_frequency_in_days=None, max_tape_fragmentation_percent=None, media_ejection_allowed=None, name=None, verify_prior_to_auto_eject=None, write_optimization=None):
+  def __init__(self, storage_domain, auto_eject_media_full_threshold=None, auto_eject_upon_cron=None, auto_eject_upon_job_cancellation=None, auto_eject_upon_job_completion=None, auto_eject_upon_media_full=None, ltfs_file_naming=None, maximum_auto_verification_frequency_in_days=None, max_tape_fragmentation_percent=None, media_ejection_allowed=None, name=None, secure_media_allocation=None, verify_prior_to_auto_eject=None, write_optimization=None):
     super(ModifyStorageDomainSpectraS3Request, self).__init__()
     self.storage_domain = storage_domain
 
 
+    if auto_eject_media_full_threshold is not None:
+      self.query_params['auto_eject_media_full_threshold'] = auto_eject_media_full_threshold
     if auto_eject_upon_cron is not None:
       self.query_params['auto_eject_upon_cron'] = auto_eject_upon_cron
     if auto_eject_upon_job_cancellation is not None:
@@ -4391,6 +5190,8 @@ class ModifyStorageDomainSpectraS3Request(AbstractRequest):
       self.query_params['media_ejection_allowed'] = media_ejection_allowed
     if name is not None:
       self.query_params['name'] = name
+    if secure_media_allocation is not None:
+      self.query_params['secure_media_allocation'] = secure_media_allocation
     if verify_prior_to_auto_eject is not None:
       self.query_params['verify_prior_to_auto_eject'] = verify_prior_to_auto_eject
     if write_optimization is not None:
@@ -4428,6 +5229,15 @@ class GetSystemInformationSpectraS3Request(AbstractRequest):
 
     self.path = '/_rest_/system_information'
     self.http_verb = HttpVerb.GET
+
+class ResetInstanceIdentifierSpectraS3Request(AbstractRequest):
+  def __init__(self):
+    super(ResetInstanceIdentifierSpectraS3Request, self).__init__()
+
+
+
+    self.path = '/_rest_/instance_identifier'
+    self.http_verb = HttpVerb.PUT
 
 class VerifySystemHealthSpectraS3Request(AbstractRequest):
   def __init__(self):
@@ -4516,6 +5326,27 @@ class CancelOnlineTapeSpectraS3Request(AbstractRequest):
     super(CancelOnlineTapeSpectraS3Request, self).__init__()
     self.tape_id = tape_id
     self.query_params['operation'] = 'cancel_online'
+
+
+
+    self.path = '/_rest_/tape/' + tape_id
+    self.http_verb = HttpVerb.PUT
+
+class CancelVerifyOnAllTapesSpectraS3Request(AbstractRequest):
+  def __init__(self):
+    super(CancelVerifyOnAllTapesSpectraS3Request, self).__init__()
+    self.query_params['operation'] = 'cancel_verify'
+
+
+
+    self.path = '/_rest_/tape'
+    self.http_verb = HttpVerb.PUT
+
+class CancelVerifyTapeSpectraS3Request(AbstractRequest):
+  def __init__(self, tape_id):
+    super(CancelVerifyTapeSpectraS3Request, self).__init__()
+    self.tape_id = tape_id
+    self.query_params['operation'] = 'cancel_verify'
 
 
 
@@ -4967,17 +5798,6 @@ class GetTapeSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/tape/' + tape_id
     self.http_verb = HttpVerb.GET
 
-class GetTapeWithFullDetailsSpectraS3Request(AbstractRequest):
-  def __init__(self, tape_id):
-    super(GetTapeWithFullDetailsSpectraS3Request, self).__init__()
-    self.tape_id = tape_id
-    self.query_params['full_details'] = None
-
-
-
-    self.path = '/_rest_/tape/' + tape_id
-    self.http_verb = HttpVerb.GET
-
 class GetTapesSpectraS3Request(AbstractRequest):
   def __init__(self, assigned_to_storage_domain=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, previous_state=None, serial_number=None, state=None, storage_domain_id=None, type=None, write_protected=None):
     super(GetTapesSpectraS3Request, self).__init__()
@@ -5021,52 +5841,8 @@ class GetTapesSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/tape'
     self.http_verb = HttpVerb.GET
 
-class GetTapesWithFullDetailsSpectraS3Request(AbstractRequest):
-  def __init__(self, assigned_to_storage_domain=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, previous_state=None, serial_number=None, state=None, storage_domain_id=None, type=None, write_protected=None):
-    super(GetTapesWithFullDetailsSpectraS3Request, self).__init__()
-    self.query_params['full_details'] = None
-
-
-    if assigned_to_storage_domain is not None:
-      self.query_params['assigned_to_storage_domain'] = assigned_to_storage_domain
-    if bar_code is not None:
-      self.query_params['bar_code'] = bar_code
-    if bucket_id is not None:
-      self.query_params['bucket_id'] = bucket_id
-    if eject_label is not None:
-      self.query_params['eject_label'] = eject_label
-    if eject_location is not None:
-      self.query_params['eject_location'] = eject_location
-    if full_of_data is not None:
-      self.query_params['full_of_data'] = full_of_data
-    if last_page is not None:
-      self.query_params['last_page'] = last_page
-    if page_length is not None:
-      self.query_params['page_length'] = page_length
-    if page_offset is not None:
-      self.query_params['page_offset'] = page_offset
-    if page_start_marker is not None:
-      self.query_params['page_start_marker'] = page_start_marker
-    if partition_id is not None:
-      self.query_params['partition_id'] = partition_id
-    if previous_state is not None:
-      self.query_params['previous_state'] = previous_state
-    if serial_number is not None:
-      self.query_params['serial_number'] = serial_number
-    if state is not None:
-      self.query_params['state'] = state
-    if storage_domain_id is not None:
-      self.query_params['storage_domain_id'] = storage_domain_id
-    if type is not None:
-      self.query_params['type'] = type
-    if write_protected is not None:
-      self.query_params['write_protected'] = write_protected
-
-    self.path = '/_rest_/tape'
-    self.http_verb = HttpVerb.GET
-
 class ImportAllTapesSpectraS3Request(AbstractRequest):
-  def __init__(self, conflict_resolution_mode=None, data_policy_id=None, storage_domain_id=None, user_id=None):
+  def __init__(self, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
     super(ImportAllTapesSpectraS3Request, self).__init__()
     self.query_params['operation'] = 'import'
 
@@ -5075,16 +5851,22 @@ class ImportAllTapesSpectraS3Request(AbstractRequest):
       self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if data_policy_id is not None:
       self.query_params['data_policy_id'] = data_policy_id
+    if priority is not None:
+      self.query_params['priority'] = priority
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
     if user_id is not None:
       self.query_params['user_id'] = user_id
+    if verify_data_after_import is not None:
+      self.query_params['verify_data_after_import'] = verify_data_after_import
+    if verify_data_prior_to_import is not None:
+      self.query_params['verify_data_prior_to_import'] = verify_data_prior_to_import
 
     self.path = '/_rest_/tape'
     self.http_verb = HttpVerb.PUT
 
 class ImportTapeSpectraS3Request(AbstractRequest):
-  def __init__(self, tape_id, conflict_resolution_mode=None, data_policy_id=None, storage_domain_id=None, user_id=None):
+  def __init__(self, tape_id, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
     super(ImportTapeSpectraS3Request, self).__init__()
     self.tape_id = tape_id
     self.query_params['operation'] = 'import'
@@ -5094,10 +5876,16 @@ class ImportTapeSpectraS3Request(AbstractRequest):
       self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
     if data_policy_id is not None:
       self.query_params['data_policy_id'] = data_policy_id
+    if priority is not None:
+      self.query_params['priority'] = priority
     if storage_domain_id is not None:
       self.query_params['storage_domain_id'] = storage_domain_id
     if user_id is not None:
       self.query_params['user_id'] = user_id
+    if verify_data_after_import is not None:
+      self.query_params['verify_data_after_import'] = verify_data_after_import
+    if verify_data_prior_to_import is not None:
+      self.query_params['verify_data_prior_to_import'] = verify_data_prior_to_import
 
     self.path = '/_rest_/tape/' + tape_id
     self.http_verb = HttpVerb.PUT
@@ -5211,6 +5999,319 @@ class VerifyTapeSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/tape/' + tape_id
     self.http_verb = HttpVerb.PUT
 
+class PutDs3TargetReadPreferenceSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id, read_preference, target_id):
+    super(PutDs3TargetReadPreferenceSpectraS3Request, self).__init__()
+    self.query_params['bucket_id'] = bucket_id
+    self.query_params['read_preference'] = read_preference
+    self.query_params['target_id'] = target_id
+
+
+
+    self.path = '/_rest_/ds3_target_read_preference'
+    self.http_verb = HttpVerb.POST
+
+class DeleteDs3TargetFailureSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target_failure):
+    super(DeleteDs3TargetFailureSpectraS3Request, self).__init__()
+    self.ds3_target_failure = ds3_target_failure
+
+
+
+    self.path = '/_rest_/ds3_target_failure/' + ds3_target_failure
+    self.http_verb = HttpVerb.DELETE
+
+class DeleteDs3TargetReadPreferenceSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target_read_preference):
+    super(DeleteDs3TargetReadPreferenceSpectraS3Request, self).__init__()
+    self.ds3_target_read_preference = ds3_target_read_preference
+
+
+
+    self.path = '/_rest_/ds3_target_read_preference/' + ds3_target_read_preference
+    self.http_verb = HttpVerb.DELETE
+
+class DeleteDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target):
+    super(DeleteDs3TargetSpectraS3Request, self).__init__()
+    self.ds3_target = ds3_target
+
+
+
+    self.path = '/_rest_/ds3_target/' + ds3_target
+    self.http_verb = HttpVerb.DELETE
+
+class ForceTargetEnvironmentRefreshSpectraS3Request(AbstractRequest):
+  def __init__(self):
+    super(ForceTargetEnvironmentRefreshSpectraS3Request, self).__init__()
+
+
+
+    self.path = '/_rest_/target_environment'
+    self.http_verb = HttpVerb.PUT
+
+class GetDs3TargetDataPoliciesSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target_data_policies):
+    super(GetDs3TargetDataPoliciesSpectraS3Request, self).__init__()
+    self.ds3_target_data_policies = ds3_target_data_policies
+
+
+
+    self.path = '/_rest_/ds3_target_data_policies/' + ds3_target_data_policies
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetFailuresSpectraS3Request(AbstractRequest):
+  def __init__(self, error_message=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, target_id=None, type=None):
+    super(GetDs3TargetFailuresSpectraS3Request, self).__init__()
+
+
+    if error_message is not None:
+      self.query_params['error_message'] = error_message
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if target_id is not None:
+      self.query_params['target_id'] = target_id
+    if type is not None:
+      self.query_params['type'] = type
+
+    self.path = '/_rest_/ds3_target_failure'
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetReadPreferenceSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target_read_preference):
+    super(GetDs3TargetReadPreferenceSpectraS3Request, self).__init__()
+    self.ds3_target_read_preference = ds3_target_read_preference
+
+
+
+    self.path = '/_rest_/ds3_target_read_preference/' + ds3_target_read_preference
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetReadPreferencesSpectraS3Request(AbstractRequest):
+  def __init__(self, bucket_id=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, read_preference=None, target_id=None):
+    super(GetDs3TargetReadPreferencesSpectraS3Request, self).__init__()
+
+
+    if bucket_id is not None:
+      self.query_params['bucket_id'] = bucket_id
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if read_preference is not None:
+      self.query_params['read_preference'] = read_preference
+    if target_id is not None:
+      self.query_params['target_id'] = target_id
+
+    self.path = '/_rest_/ds3_target_read_preference'
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target):
+    super(GetDs3TargetSpectraS3Request, self).__init__()
+    self.ds3_target = ds3_target
+
+
+
+    self.path = '/_rest_/ds3_target/' + ds3_target
+    self.http_verb = HttpVerb.GET
+
+class GetDs3TargetsSpectraS3Request(AbstractRequest):
+  def __init__(self, admin_auth_id=None, data_path_end_point=None, data_path_https=None, data_path_port=None, data_path_proxy=None, data_path_verify_certificate=None, default_read_preference=None, last_page=None, name=None, page_length=None, page_offset=None, page_start_marker=None, permit_going_out_of_sync=None, quiesced=None, state=None):
+    super(GetDs3TargetsSpectraS3Request, self).__init__()
+
+
+    if admin_auth_id is not None:
+      self.query_params['admin_auth_id'] = admin_auth_id
+    if data_path_end_point is not None:
+      self.query_params['data_path_end_point'] = data_path_end_point
+    if data_path_https is not None:
+      self.query_params['data_path_https'] = data_path_https
+    if data_path_port is not None:
+      self.query_params['data_path_port'] = data_path_port
+    if data_path_proxy is not None:
+      self.query_params['data_path_proxy'] = data_path_proxy
+    if data_path_verify_certificate is not None:
+      self.query_params['data_path_verify_certificate'] = data_path_verify_certificate
+    if default_read_preference is not None:
+      self.query_params['default_read_preference'] = default_read_preference
+    if last_page is not None:
+      self.query_params['last_page'] = last_page
+    if name is not None:
+      self.query_params['name'] = name
+    if page_length is not None:
+      self.query_params['page_length'] = page_length
+    if page_offset is not None:
+      self.query_params['page_offset'] = page_offset
+    if page_start_marker is not None:
+      self.query_params['page_start_marker'] = page_start_marker
+    if permit_going_out_of_sync is not None:
+      self.query_params['permit_going_out_of_sync'] = permit_going_out_of_sync
+    if quiesced is not None:
+      self.query_params['quiesced'] = quiesced
+    if state is not None:
+      self.query_params['state'] = state
+
+    self.path = '/_rest_/ds3_target'
+    self.http_verb = HttpVerb.GET
+
+class ModifyAllDs3TargetsSpectraS3Request(AbstractRequest):
+  def __init__(self, quiesced):
+    super(ModifyAllDs3TargetsSpectraS3Request, self).__init__()
+    self.query_params['quiesced'] = quiesced
+
+
+
+    self.path = '/_rest_/ds3_target'
+    self.http_verb = HttpVerb.PUT
+
+class ModifyDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target, access_control_replication=None, admin_auth_id=None, admin_secret_key=None, data_path_end_point=None, data_path_https=None, data_path_port=None, data_path_proxy=None, data_path_verify_certificate=None, default_read_preference=None, name=None, permit_going_out_of_sync=None, quiesced=None, replicated_user_default_data_policy=None):
+    super(ModifyDs3TargetSpectraS3Request, self).__init__()
+    self.ds3_target = ds3_target
+
+
+    if access_control_replication is not None:
+      self.query_params['access_control_replication'] = access_control_replication
+    if admin_auth_id is not None:
+      self.query_params['admin_auth_id'] = admin_auth_id
+    if admin_secret_key is not None:
+      self.query_params['admin_secret_key'] = admin_secret_key
+    if data_path_end_point is not None:
+      self.query_params['data_path_end_point'] = data_path_end_point
+    if data_path_https is not None:
+      self.query_params['data_path_https'] = data_path_https
+    if data_path_port is not None:
+      self.query_params['data_path_port'] = data_path_port
+    if data_path_proxy is not None:
+      self.query_params['data_path_proxy'] = data_path_proxy
+    if data_path_verify_certificate is not None:
+      self.query_params['data_path_verify_certificate'] = data_path_verify_certificate
+    if default_read_preference is not None:
+      self.query_params['default_read_preference'] = default_read_preference
+    if name is not None:
+      self.query_params['name'] = name
+    if permit_going_out_of_sync is not None:
+      self.query_params['permit_going_out_of_sync'] = permit_going_out_of_sync
+    if quiesced is not None:
+      self.query_params['quiesced'] = quiesced
+    if replicated_user_default_data_policy is not None:
+      self.query_params['replicated_user_default_data_policy'] = replicated_user_default_data_policy
+
+    self.path = '/_rest_/ds3_target/' + ds3_target
+    self.http_verb = HttpVerb.PUT
+
+class PairBackRegisteredDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target, access_control_replication=None, admin_auth_id=None, admin_secret_key=None, data_path_end_point=None, data_path_https=None, data_path_port=None, data_path_proxy=None, data_path_verify_certificate=None, default_read_preference=None, name=None, permit_going_out_of_sync=None, replicated_user_default_data_policy=None):
+    super(PairBackRegisteredDs3TargetSpectraS3Request, self).__init__()
+    self.ds3_target = ds3_target
+    self.query_params['operation'] = 'pair_back'
+
+
+    if access_control_replication is not None:
+      self.query_params['access_control_replication'] = access_control_replication
+    if admin_auth_id is not None:
+      self.query_params['admin_auth_id'] = admin_auth_id
+    if admin_secret_key is not None:
+      self.query_params['admin_secret_key'] = admin_secret_key
+    if data_path_end_point is not None:
+      self.query_params['data_path_end_point'] = data_path_end_point
+    if data_path_https is not None:
+      self.query_params['data_path_https'] = data_path_https
+    if data_path_port is not None:
+      self.query_params['data_path_port'] = data_path_port
+    if data_path_proxy is not None:
+      self.query_params['data_path_proxy'] = data_path_proxy
+    if data_path_verify_certificate is not None:
+      self.query_params['data_path_verify_certificate'] = data_path_verify_certificate
+    if default_read_preference is not None:
+      self.query_params['default_read_preference'] = default_read_preference
+    if name is not None:
+      self.query_params['name'] = name
+    if permit_going_out_of_sync is not None:
+      self.query_params['permit_going_out_of_sync'] = permit_going_out_of_sync
+    if replicated_user_default_data_policy is not None:
+      self.query_params['replicated_user_default_data_policy'] = replicated_user_default_data_policy
+
+    self.path = '/_rest_/ds3_target/' + ds3_target
+    self.http_verb = HttpVerb.PUT
+
+class RegisterDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, admin_auth_id, admin_secret_key, data_path_end_point, name, access_control_replication=None, data_path_https=None, data_path_port=None, data_path_proxy=None, data_path_verify_certificate=None, default_read_preference=None, permit_going_out_of_sync=None, replicated_user_default_data_policy=None):
+    super(RegisterDs3TargetSpectraS3Request, self).__init__()
+    self.query_params['admin_auth_id'] = admin_auth_id
+    self.query_params['admin_secret_key'] = admin_secret_key
+    self.query_params['data_path_end_point'] = data_path_end_point
+    self.query_params['name'] = name
+
+
+    if access_control_replication is not None:
+      self.query_params['access_control_replication'] = access_control_replication
+    if data_path_https is not None:
+      self.query_params['data_path_https'] = data_path_https
+    if data_path_port is not None:
+      self.query_params['data_path_port'] = data_path_port
+    if data_path_proxy is not None:
+      self.query_params['data_path_proxy'] = data_path_proxy
+    if data_path_verify_certificate is not None:
+      self.query_params['data_path_verify_certificate'] = data_path_verify_certificate
+    if default_read_preference is not None:
+      self.query_params['default_read_preference'] = default_read_preference
+    if permit_going_out_of_sync is not None:
+      self.query_params['permit_going_out_of_sync'] = permit_going_out_of_sync
+    if replicated_user_default_data_policy is not None:
+      self.query_params['replicated_user_default_data_policy'] = replicated_user_default_data_policy
+
+    self.path = '/_rest_/ds3_target'
+    self.http_verb = HttpVerb.POST
+
+class VerifyDs3TargetSpectraS3Request(AbstractRequest):
+  def __init__(self, ds3_target, full_details=None):
+    super(VerifyDs3TargetSpectraS3Request, self).__init__()
+    self.ds3_target = ds3_target
+    self.query_params['operation'] = 'verify'
+
+
+    if full_details is not None:
+      self.query_params['full_details'] = full_details
+
+    self.path = '/_rest_/ds3_target/' + ds3_target
+    self.http_verb = HttpVerb.PUT
+
+class DelegateCreateUserSpectraS3Request(AbstractRequest):
+  def __init__(self, name, id=None, secret_key=None):
+    super(DelegateCreateUserSpectraS3Request, self).__init__()
+    self.query_params['name'] = name
+
+
+    if id is not None:
+      self.query_params['id'] = id
+    if secret_key is not None:
+      self.query_params['secret_key'] = secret_key
+
+    self.path = '/_rest_/user'
+    self.http_verb = HttpVerb.POST
+
+class DelegateDeleteUserSpectraS3Request(AbstractRequest):
+  def __init__(self, user_id):
+    super(DelegateDeleteUserSpectraS3Request, self).__init__()
+    self.user_id = user_id
+
+
+
+    self.path = '/_rest_/user/' + user_id
+    self.http_verb = HttpVerb.DELETE
+
 class GetUserSpectraS3Request(AbstractRequest):
   def __init__(self, user_id):
     super(GetUserSpectraS3Request, self).__init__()
@@ -5245,7 +6346,7 @@ class GetUsersSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class ModifyUserSpectraS3Request(AbstractRequest):
-  def __init__(self, user_id, default_data_policy_id=None, name=None):
+  def __init__(self, user_id, default_data_policy_id=None, name=None, secret_key=None):
     super(ModifyUserSpectraS3Request, self).__init__()
     self.user_id = user_id
 
@@ -5254,6 +6355,8 @@ class ModifyUserSpectraS3Request(AbstractRequest):
       self.query_params['default_data_policy_id'] = default_data_policy_id
     if name is not None:
       self.query_params['name'] = name
+    if secret_key is not None:
+      self.query_params['secret_key'] = secret_key
 
     self.path = '/_rest_/user/' + user_id
     self.http_verb = HttpVerb.PUT
@@ -5603,12 +6706,23 @@ class PutDataPolicySpectraS3Response(AbstractResponse):
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
+class PutDataReplicationRuleSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
+
 class DeleteDataPersistenceRuleSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDataPolicySpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class DeleteDataReplicationRuleSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([204])
     
@@ -5637,6 +6751,18 @@ class GetDataPolicySpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
+class GetDataReplicationRuleSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
+
+class GetDataReplicationRulesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
+
 class ModifyDataPersistenceRuleSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
@@ -5649,6 +6775,33 @@ class ModifyDataPolicySpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
+class ModifyDataReplicationRuleSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
+
+class ClearSuspectBlobPoolsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class ClearSuspectBlobTapesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class ClearSuspectBlobTargetsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class GetDegradedBlobsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DegradedBlobList())
+
 class GetDegradedBucketsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
@@ -5660,6 +6813,63 @@ class GetDegradedDataPersistenceRulesSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRuleList())
+
+class GetDegradedDataReplicationRulesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
+
+class GetSuspectBlobPoolsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobPoolList())
+
+class GetSuspectBlobTapesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTapeList())
+
+class GetSuspectBlobTargetsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTargetList())
+
+class GetSuspectBucketsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
+
+class GetSuspectObjectsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), PhysicalPlacement())
+
+class GetSuspectObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
+
+class MarkSuspectBlobPoolsAsDegradedSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class MarkSuspectBlobTapesAsDegradedSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class MarkSuspectBlobTargetsAsDegradedSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
 
 class PutGroupGroupMemberSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5731,6 +6941,16 @@ class AllocateJobChunkSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Objects())
 
+class CancelActiveJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class CancelAllActiveJobsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
 class CancelAllJobsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([204])
@@ -5769,11 +6989,23 @@ class VerifyBulkJobSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
+class GetActiveJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), ActiveJob())
+
 class GetActiveJobsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ActiveJobList())
+
+class GetCanceledJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), CanceledJob())
 
 class GetCanceledJobsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5781,11 +7013,23 @@ class GetCanceledJobsSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CanceledJobList())
 
+class GetCompletedJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), CompletedJob())
+
 class GetCompletedJobsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CompletedJobList())
+
+class GetJobChunkDaoSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), JobChunk())
 
 class GetJobChunkSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5805,17 +7049,23 @@ class GetJobSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
+class GetJobToReplicateSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), String())
+
 class GetJobsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobList())
 
-class GetPutJobToReplicateSpectraS3Response(AbstractResponse):
+class ModifyActiveJobSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
-      self.result = parseModel(xmldom.fromstring(response.read()), String())
+      self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class ModifyJobSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5828,6 +7078,31 @@ class ReplicatePutJobSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([200, 204])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
+
+class TruncateActiveJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class TruncateAllActiveJobsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class TruncateAllJobsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class TruncateJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class VerifySafeToCreatePutJobSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    
 
 class GetNodeSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5847,6 +7122,12 @@ class ModifyNodeSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Node())
 
+class PutDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistration())
+
 class PutJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([201])
@@ -5858,6 +7139,12 @@ class PutJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistration())
+
+class PutJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistration())
 
 class PutObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -5907,12 +7194,22 @@ class PutTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractR
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistration())
 
+class DeleteDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
 class DeleteJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class DeleteJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([204])
     
@@ -5957,6 +7254,18 @@ class DeleteTapePartitionFailureNotificationRegistrationSpectraS3Response(Abstra
     self.__check_status_codes__([204])
     
 
+class GetDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistration())
+
+class GetDs3TargetFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistrationList())
+
 class GetJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
@@ -5980,6 +7289,18 @@ class GetJobCreatedNotificationRegistrationsSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistrationList())
+
+class GetJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistration())
+
+class GetJobCreationFailedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistrationList())
 
 class GetObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -6082,13 +7403,19 @@ class DeleteFolderRecursivelySpectraS3Response(AbstractResponse):
     self.__check_status_codes__([204])
     
 
+class GetBlobPersistenceSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), String())
+
 class GetObjectDetailsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3Object())
 
-class GetObjectsSpectraS3Response(AbstractResponse):
+class GetObjectsDetailsSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
@@ -6263,6 +7590,11 @@ class VerifyPoolSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
+class ConvertStorageDomainToDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
 class PutPoolStorageDomainMemberSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([201])
@@ -6350,6 +7682,12 @@ class GetSystemInformationSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemInformation())
 
+class ResetInstanceIdentifierSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataPathBackend())
+
 class VerifySystemHealthSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
@@ -6399,6 +7737,18 @@ class CancelOnlineOnAllTapesSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelOnlineTapeSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Tape())
+
+class CancelVerifyOnAllTapesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204, 207])
+    if self.response.status == 207:
+      self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
+
+class CancelVerifyTapeSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
@@ -6570,29 +7920,16 @@ class GetTapeSpectraS3Response(AbstractResponse):
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
-class GetTapeWithFullDetailsSpectraS3Response(AbstractResponse):
-  def process_response(self, response):
-    self.__check_status_codes__([200])
-    if self.response.status == 200:
-      self.result = parseModel(xmldom.fromstring(response.read()), DetailedTape())
-
 class GetTapesSpectraS3Response(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeList())
 
-class GetTapesWithFullDetailsSpectraS3Response(AbstractResponse):
-  def process_response(self, response):
-    self.__check_status_codes__([200])
-    if self.response.status == 200:
-      self.result = parseModel(xmldom.fromstring(response.read()), NamedDetailedTapeList())
-
 class ImportAllTapesSpectraS3Response(AbstractResponse):
   def process_response(self, response):
-    self.__check_status_codes__([204, 207])
-    if self.response.status == 207:
-      self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
+    self.__check_status_codes__([204])
+    
 
 class ImportTapeSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -6652,6 +7989,107 @@ class VerifyTapeSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
+
+class PutDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreference())
+
+class DeleteDs3TargetFailureSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class DeleteDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class DeleteDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class ForceTargetEnvironmentRefreshSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class GetDs3TargetDataPoliciesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyList())
+
+class GetDs3TargetFailuresSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureList())
+
+class GetDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreference())
+
+class GetDs3TargetReadPreferencesSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreferenceList())
+
+class GetDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
+
+class GetDs3TargetsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetList())
+
+class ModifyAllDs3TargetsSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class ModifyDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
+
+class PairBackRegisteredDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
+
+class RegisterDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
+
+class VerifyDs3TargetSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
+
+class DelegateCreateUserSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([201])
+    if self.response.status == 201:
+      self.result = parseModel(xmldom.fromstring(response.read()), SpectraUser())
+
+class DelegateDeleteUserSpectraS3Response(AbstractResponse):
+  def process_response(self, response):
+    self.__check_status_codes__([204])
+    
 
 class GetUserSpectraS3Response(AbstractResponse):
   def process_response(self, response):
@@ -6831,11 +8269,17 @@ class Client(object):
   def put_data_policy_spectra_s3(self, request):
     return PutDataPolicySpectraS3Response(self.net_client.get_response(request), request)
 
+  def put_data_replication_rule_spectra_s3(self, request):
+    return PutDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
+
   def delete_data_persistence_rule_spectra_s3(self, request):
     return DeleteDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
 
   def delete_data_policy_spectra_s3(self, request):
     return DeleteDataPolicySpectraS3Response(self.net_client.get_response(request), request)
+
+  def delete_data_replication_rule_spectra_s3(self, request):
+    return DeleteDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_data_persistence_rule_spectra_s3(self, request):
     return GetDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
@@ -6849,17 +8293,68 @@ class Client(object):
   def get_data_policy_spectra_s3(self, request):
     return GetDataPolicySpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_data_replication_rule_spectra_s3(self, request):
+    return GetDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_data_replication_rules_spectra_s3(self, request):
+    return GetDataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
+
   def modify_data_persistence_rule_spectra_s3(self, request):
     return ModifyDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
 
   def modify_data_policy_spectra_s3(self, request):
     return ModifyDataPolicySpectraS3Response(self.net_client.get_response(request), request)
 
+  def modify_data_replication_rule_spectra_s3(self, request):
+    return ModifyDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
+
+  def clear_suspect_blob_pools_spectra_s3(self, request):
+    return ClearSuspectBlobPoolsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def clear_suspect_blob_tapes_spectra_s3(self, request):
+    return ClearSuspectBlobTapesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def clear_suspect_blob_targets_spectra_s3(self, request):
+    return ClearSuspectBlobTargetsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_degraded_blobs_spectra_s3(self, request):
+    return GetDegradedBlobsSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_degraded_buckets_spectra_s3(self, request):
     return GetDegradedBucketsSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_degraded_data_persistence_rules_spectra_s3(self, request):
     return GetDegradedDataPersistenceRulesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_degraded_data_replication_rules_spectra_s3(self, request):
+    return GetDegradedDataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_blob_pools_spectra_s3(self, request):
+    return GetSuspectBlobPoolsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_blob_tapes_spectra_s3(self, request):
+    return GetSuspectBlobTapesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_blob_targets_spectra_s3(self, request):
+    return GetSuspectBlobTargetsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_buckets_spectra_s3(self, request):
+    return GetSuspectBucketsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_objects_spectra_s3(self, request):
+    return GetSuspectObjectsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_suspect_objects_with_full_details_spectra_s3(self, request):
+    return GetSuspectObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def mark_suspect_blob_pools_as_degraded_spectra_s3(self, request):
+    return MarkSuspectBlobPoolsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
+
+  def mark_suspect_blob_tapes_as_degraded_spectra_s3(self, request):
+    return MarkSuspectBlobTapesAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
+
+  def mark_suspect_blob_targets_as_degraded_spectra_s3(self, request):
+    return MarkSuspectBlobTargetsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
 
   def put_group_group_member_spectra_s3(self, request):
     return PutGroupGroupMemberSpectraS3Response(self.net_client.get_response(request), request)
@@ -6897,6 +8392,12 @@ class Client(object):
   def allocate_job_chunk_spectra_s3(self, request):
     return AllocateJobChunkSpectraS3Response(self.net_client.get_response(request), request)
 
+  def cancel_active_job_spectra_s3(self, request):
+    return CancelActiveJobSpectraS3Response(self.net_client.get_response(request), request)
+
+  def cancel_all_active_jobs_spectra_s3(self, request):
+    return CancelAllActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
+
   def cancel_all_jobs_spectra_s3(self, request):
     return CancelAllJobsSpectraS3Response(self.net_client.get_response(request), request)
 
@@ -6918,14 +8419,26 @@ class Client(object):
   def verify_bulk_job_spectra_s3(self, request):
     return VerifyBulkJobSpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_active_job_spectra_s3(self, request):
+    return GetActiveJobSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_active_jobs_spectra_s3(self, request):
     return GetActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_canceled_job_spectra_s3(self, request):
+    return GetCanceledJobSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_canceled_jobs_spectra_s3(self, request):
     return GetCanceledJobsSpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_completed_job_spectra_s3(self, request):
+    return GetCompletedJobSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_completed_jobs_spectra_s3(self, request):
     return GetCompletedJobsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_job_chunk_dao_spectra_s3(self, request):
+    return GetJobChunkDaoSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_job_chunk_spectra_s3(self, request):
     return GetJobChunkSpectraS3Response(self.net_client.get_response(request), request)
@@ -6936,17 +8449,35 @@ class Client(object):
   def get_job_spectra_s3(self, request):
     return GetJobSpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_job_to_replicate_spectra_s3(self, request):
+    return GetJobToReplicateSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_jobs_spectra_s3(self, request):
     return GetJobsSpectraS3Response(self.net_client.get_response(request), request)
 
-  def get_put_job_to_replicate_spectra_s3(self, request):
-    return GetPutJobToReplicateSpectraS3Response(self.net_client.get_response(request), request)
+  def modify_active_job_spectra_s3(self, request):
+    return ModifyActiveJobSpectraS3Response(self.net_client.get_response(request), request)
 
   def modify_job_spectra_s3(self, request):
     return ModifyJobSpectraS3Response(self.net_client.get_response(request), request)
 
   def replicate_put_job_spectra_s3(self, request):
     return ReplicatePutJobSpectraS3Response(self.net_client.get_response(request), request)
+
+  def truncate_active_job_spectra_s3(self, request):
+    return TruncateActiveJobSpectraS3Response(self.net_client.get_response(request), request)
+
+  def truncate_all_active_jobs_spectra_s3(self, request):
+    return TruncateAllActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def truncate_all_jobs_spectra_s3(self, request):
+    return TruncateAllJobsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def truncate_job_spectra_s3(self, request):
+    return TruncateJobSpectraS3Response(self.net_client.get_response(request), request)
+
+  def verify_safe_to_create_put_job_spectra_s3(self, request):
+    return VerifySafeToCreatePutJobSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_node_spectra_s3(self, request):
     return GetNodeSpectraS3Response(self.net_client.get_response(request), request)
@@ -6957,11 +8488,17 @@ class Client(object):
   def modify_node_spectra_s3(self, request):
     return ModifyNodeSpectraS3Response(self.net_client.get_response(request), request)
 
+  def put_ds3_target_failure_notification_registration_spectra_s3(self, request):
+    return PutDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
   def put_job_completed_notification_registration_spectra_s3(self, request):
     return PutJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
   def put_job_created_notification_registration_spectra_s3(self, request):
     return PutJobCreatedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
+  def put_job_creation_failed_notification_registration_spectra_s3(self, request):
+    return PutJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
   def put_object_cached_notification_registration_spectra_s3(self, request):
     return PutObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
@@ -6987,11 +8524,17 @@ class Client(object):
   def put_tape_partition_failure_notification_registration_spectra_s3(self, request):
     return PutTapePartitionFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
+  def delete_ds3_target_failure_notification_registration_spectra_s3(self, request):
+    return DeleteDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
   def delete_job_completed_notification_registration_spectra_s3(self, request):
     return DeleteJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
   def delete_job_created_notification_registration_spectra_s3(self, request):
     return DeleteJobCreatedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delete_job_creation_failed_notification_registration_spectra_s3(self, request):
+    return DeleteJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
   def delete_object_cached_notification_registration_spectra_s3(self, request):
     return DeleteObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
@@ -7017,6 +8560,12 @@ class Client(object):
   def delete_tape_partition_failure_notification_registration_spectra_s3(self, request):
     return DeleteTapePartitionFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_ds3_target_failure_notification_registration_spectra_s3(self, request):
+    return GetDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_failure_notification_registrations_spectra_s3(self, request):
+    return GetDs3TargetFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_job_completed_notification_registration_spectra_s3(self, request):
     return GetJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
 
@@ -7028,6 +8577,12 @@ class Client(object):
 
   def get_job_created_notification_registrations_spectra_s3(self, request):
     return GetJobCreatedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_job_creation_failed_notification_registration_spectra_s3(self, request):
+    return GetJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_job_creation_failed_notification_registrations_spectra_s3(self, request):
+    return GetJobCreationFailedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_object_cached_notification_registration_spectra_s3(self, request):
     return GetObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
@@ -7080,11 +8635,14 @@ class Client(object):
   def delete_folder_recursively_spectra_s3(self, request):
     return DeleteFolderRecursivelySpectraS3Response(self.net_client.get_response(request), request)
 
+  def get_blob_persistence_spectra_s3(self, request):
+    return GetBlobPersistenceSpectraS3Response(self.net_client.get_response(request), request)
+
   def get_object_details_spectra_s3(self, request):
     return GetObjectDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
-  def get_objects_spectra_s3(self, request):
-    return GetObjectsSpectraS3Response(self.net_client.get_response(request), request)
+  def get_objects_details_spectra_s3(self, request):
+    return GetObjectsDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_objects_with_full_details_spectra_s3(self, request):
     return GetObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
@@ -7176,6 +8734,9 @@ class Client(object):
   def verify_pool_spectra_s3(self, request):
     return VerifyPoolSpectraS3Response(self.net_client.get_response(request), request)
 
+  def convert_storage_domain_to_ds3_target_spectra_s3(self, request):
+    return ConvertStorageDomainToDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
   def put_pool_storage_domain_member_spectra_s3(self, request):
     return PutPoolStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
 
@@ -7221,6 +8782,9 @@ class Client(object):
   def get_system_information_spectra_s3(self, request):
     return GetSystemInformationSpectraS3Response(self.net_client.get_response(request), request)
 
+  def reset_instance_identifier_spectra_s3(self, request):
+    return ResetInstanceIdentifierSpectraS3Response(self.net_client.get_response(request), request)
+
   def verify_system_health_spectra_s3(self, request):
     return VerifySystemHealthSpectraS3Response(self.net_client.get_response(request), request)
 
@@ -7247,6 +8811,12 @@ class Client(object):
 
   def cancel_online_tape_spectra_s3(self, request):
     return CancelOnlineTapeSpectraS3Response(self.net_client.get_response(request), request)
+
+  def cancel_verify_on_all_tapes_spectra_s3(self, request):
+    return CancelVerifyOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def cancel_verify_tape_spectra_s3(self, request):
+    return CancelVerifyTapeSpectraS3Response(self.net_client.get_response(request), request)
 
   def clean_tape_drive_spectra_s3(self, request):
     return CleanTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
@@ -7335,14 +8905,8 @@ class Client(object):
   def get_tape_spectra_s3(self, request):
     return GetTapeSpectraS3Response(self.net_client.get_response(request), request)
 
-  def get_tape_with_full_details_spectra_s3(self, request):
-    return GetTapeWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
-
   def get_tapes_spectra_s3(self, request):
     return GetTapesSpectraS3Response(self.net_client.get_response(request), request)
-
-  def get_tapes_with_full_details_spectra_s3(self, request):
-    return GetTapesWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
 
   def import_all_tapes_spectra_s3(self, request):
     return ImportAllTapesSpectraS3Response(self.net_client.get_response(request), request)
@@ -7376,6 +8940,60 @@ class Client(object):
 
   def verify_tape_spectra_s3(self, request):
     return VerifyTapeSpectraS3Response(self.net_client.get_response(request), request)
+
+  def put_ds3_target_read_preference_spectra_s3(self, request):
+    return PutDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delete_ds3_target_failure_spectra_s3(self, request):
+    return DeleteDs3TargetFailureSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delete_ds3_target_read_preference_spectra_s3(self, request):
+    return DeleteDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delete_ds3_target_spectra_s3(self, request):
+    return DeleteDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def force_target_environment_refresh_spectra_s3(self, request):
+    return ForceTargetEnvironmentRefreshSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_data_policies_spectra_s3(self, request):
+    return GetDs3TargetDataPoliciesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_failures_spectra_s3(self, request):
+    return GetDs3TargetFailuresSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_read_preference_spectra_s3(self, request):
+    return GetDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_read_preferences_spectra_s3(self, request):
+    return GetDs3TargetReadPreferencesSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_target_spectra_s3(self, request):
+    return GetDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def get_ds3_targets_spectra_s3(self, request):
+    return GetDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def modify_all_ds3_targets_spectra_s3(self, request):
+    return ModifyAllDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
+
+  def modify_ds3_target_spectra_s3(self, request):
+    return ModifyDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def pair_back_registered_ds3_target_spectra_s3(self, request):
+    return PairBackRegisteredDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def register_ds3_target_spectra_s3(self, request):
+    return RegisterDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def verify_ds3_target_spectra_s3(self, request):
+    return VerifyDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delegate_create_user_spectra_s3(self, request):
+    return DelegateCreateUserSpectraS3Response(self.net_client.get_response(request), request)
+
+  def delegate_delete_user_spectra_s3(self, request):
+    return DelegateDeleteUserSpectraS3Response(self.net_client.get_response(request), request)
 
   def get_user_spectra_s3(self, request):
     return GetUserSpectraS3Response(self.net_client.get_response(request), request)
