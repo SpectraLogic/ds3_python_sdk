@@ -558,6 +558,18 @@ class ObjectTestCase(Ds3TestCase):
                 testObjects.append(obj)
         
         self.validateSearchObjects(testObjects, resources)
+        self.assertEqual(response.paging_truncated, None)
+        self.assertEqual(response.paging_total_result_count, None)
+        
+    def testGetObjectsWithPaging(self):
+        populateTestData(self.client, bucketName)
+        
+        response = self.client.get_objects_details_spectra_s3(GetObjectsDetailsSpectraS3Request(bucket_id = bucketName, page_offset = 0))
+        
+        self.validateSearchObjects(response.result['S3ObjectList'], resources)
+        
+        self.assertEqual(response.paging_truncated, 0)
+        self.assertEqual(response.paging_total_result_count, 4)
             
     def testGetObjectsBucketName(self):
         populateTestData(self.client, bucketName)

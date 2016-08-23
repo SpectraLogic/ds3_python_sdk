@@ -6406,61 +6406,80 @@ class AbstractResponse(object):
       ds3_error = XmlSerializer().to_ds3error(self.response.read(), self.response.status, self.response.reason)
       raise RequestFailed(err, ds3_error)
 
+  def parse_int_header(self, key, headers):
+    if not headers:
+      return None
+    for header in headers:
+      if header[0] == key:
+        return int(header[1])
+    return None
+
 class AbortMultiPartUploadResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CompleteMultiPartUploadResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CompleteMultipartUploadResult())
 
 class PutBucketResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     
 
 class PutMultiPartUploadPartResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     
 
 class PutObjectResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     
 
 class DeleteBucketResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteObjectResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteObjectsResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DeleteResult())
 
 class GetBucketResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ListBucketResult())
 
 class GetServiceResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ListAllMyBucketsResult())
 
 class GetObjectResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
     localFile = None
@@ -6475,6 +6494,7 @@ class GetObjectResponse(AbstractResponse):
 
 
 class HeadBucketResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200, 403, 404])
     self.status_code = self.response.status
@@ -6488,6 +6508,7 @@ class HeadBucketResponse(AbstractResponse):
       self.result = HeadRequestStatus.UNKNOWN
 
 class HeadObjectResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200, 403, 404])
     self.status_code = self.response.status
@@ -6501,1615 +6522,1908 @@ class HeadObjectResponse(AbstractResponse):
       self.result = HeadRequestStatus.UNKNOWN
 
 class InitiateMultiPartUploadResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), InitiateMultipartUploadResult())
 
 class ListMultiPartUploadPartsResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ListPartsResult())
 
 class ListMultiPartUploadsResponse(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ListMultiPartUploadsResult())
 
 class PutBucketAclForGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class PutBucketAclForUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class PutDataPolicyAclForGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class PutDataPolicyAclForUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class PutGlobalBucketAclForGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class PutGlobalBucketAclForUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class PutGlobalDataPolicyAclForGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class PutGlobalDataPolicyAclForUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class DeleteBucketAclSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDataPolicyAclSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetBucketAclSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class GetBucketAclsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAclList())
 
 class GetDataPolicyAclSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class GetDataPolicyAclsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAclList())
 
 class PutBucketSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), Bucket())
 
 class DeleteBucketSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetBucketSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Bucket())
 
 class GetBucketsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
 
 class ModifyBucketSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Bucket())
 
 class ForceFullCacheReclaimSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetCacheFilesystemSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CacheFilesystem())
 
 class GetCacheFilesystemsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CacheFilesystemList())
 
 class GetCacheStateSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CacheInformation())
 
 class ModifyCacheFilesystemSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CacheFilesystem())
 
 class GetBucketCapacitySummarySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CapacitySummaryContainer())
 
 class GetStorageDomainCapacitySummarySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CapacitySummaryContainer())
 
 class GetSystemCapacitySummarySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CapacitySummaryContainer())
 
 class GetDataPathBackendSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPathBackend())
 
 class GetDataPlannerBlobStoreTasksSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BlobStoreTasksInformation())
 
 class ModifyDataPathBackendSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPathBackend())
 
 class PutDataPersistenceRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRule())
 
 class PutDataPolicySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
 class PutDataReplicationRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
 
 class DeleteDataPersistenceRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDataPolicySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDataReplicationRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetDataPersistenceRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRule())
 
 class GetDataPersistenceRulesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRuleList())
 
 class GetDataPoliciesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyList())
 
 class GetDataPolicySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
 class GetDataReplicationRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
 
 class GetDataReplicationRulesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
 
 class ModifyDataPersistenceRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRule())
 
 class ModifyDataPolicySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicy())
 
 class ModifyDataReplicationRuleSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
 
 class ClearSuspectBlobPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ClearSuspectBlobTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ClearSuspectBlobTargetsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetDegradedBlobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DegradedBlobList())
 
 class GetDegradedBucketsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
 
 class GetDegradedDataPersistenceRulesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRuleList())
 
 class GetDegradedDataReplicationRulesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
 
 class GetSuspectBlobPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobPoolList())
 
 class GetSuspectBlobTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTapeList())
 
 class GetSuspectBlobTargetsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTargetList())
 
 class GetSuspectBucketsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
 
 class GetSuspectObjectsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PhysicalPlacement())
 
 class GetSuspectObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class MarkSuspectBlobPoolsAsDegradedSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class MarkSuspectBlobTapesAsDegradedSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class MarkSuspectBlobTargetsAsDegradedSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class PutGroupGroupMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMember())
 
 class PutGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), Group())
 
 class PutUserGroupMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMember())
 
 class DeleteGroupMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetGroupMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMember())
 
 class GetGroupMembersSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMemberList())
 
 class GetGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Group())
 
 class GetGroupsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupList())
 
 class ModifyGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Group())
 
 class VerifyUserIsMemberOfGroupSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200, 204])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Group())
 
 class AllocateJobChunkSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Objects())
 
 class CancelActiveJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CancelAllActiveJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CancelAllJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CancelJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ClearAllCanceledJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ClearAllCompletedJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetBulkJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class PutBulkJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class VerifyBulkJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class GetActiveJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ActiveJob())
 
 class GetActiveJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ActiveJobList())
 
 class GetCanceledJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CanceledJob())
 
 class GetCanceledJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CanceledJobList())
 
 class GetCompletedJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CompletedJob())
 
 class GetCompletedJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CompletedJobList())
 
 class GetJobChunkDaoSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobChunk())
 
 class GetJobChunkSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Objects())
 
 class GetJobChunksReadyForClientProcessingSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class GetJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class GetJobToReplicateSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), String())
 
 class GetJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobList())
 
 class ModifyActiveJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class ModifyJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class ReplicatePutJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200, 204])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 class TruncateActiveJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class TruncateAllActiveJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class TruncateAllJobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class TruncateJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class VerifySafeToCreatePutJobSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     
 
 class GetNodeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Node())
 
 class GetNodesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), NodeList())
 
 class ModifyNodeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Node())
 
 class PutDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistration())
 
 class PutJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCompletedNotificationRegistration())
 
 class PutJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistration())
 
 class PutJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistration())
 
 class PutObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectCachedNotificationRegistration())
 
 class PutObjectLostNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectLostNotificationRegistration())
 
 class PutObjectPersistedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectPersistedNotificationRegistration())
 
 class PutPoolFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureNotificationRegistration())
 
 class PutStorageDomainFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureNotificationRegistration())
 
 class PutSystemFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureNotificationRegistration())
 
 class PutTapeFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureNotificationRegistration())
 
 class PutTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistration())
 
 class DeleteDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteObjectLostNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteObjectPersistedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeletePoolFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteStorageDomainFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteSystemFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapeFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistration())
 
 class GetDs3TargetFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistrationList())
 
 class GetJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCompletedNotificationRegistration())
 
 class GetJobCompletedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCompletedNotificationRegistrationList())
 
 class GetJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistration())
 
 class GetJobCreatedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistrationList())
 
 class GetJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistration())
 
 class GetJobCreationFailedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistrationList())
 
 class GetObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectCachedNotificationRegistration())
 
 class GetObjectCachedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectCachedNotificationRegistrationList())
 
 class GetObjectLostNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectLostNotificationRegistration())
 
 class GetObjectLostNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectLostNotificationRegistrationList())
 
 class GetObjectPersistedNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectPersistedNotificationRegistration())
 
 class GetObjectPersistedNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectPersistedNotificationRegistrationList())
 
 class GetPoolFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureNotificationRegistration())
 
 class GetPoolFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureNotificationRegistrationList())
 
 class GetStorageDomainFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureNotificationRegistration())
 
 class GetStorageDomainFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureNotificationRegistrationList())
 
 class GetSystemFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureNotificationRegistration())
 
 class GetSystemFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureNotificationRegistrationList())
 
 class GetTapeFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureNotificationRegistration())
 
 class GetTapeFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureNotificationRegistrationList())
 
 class GetTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistration())
 
 class GetTapePartitionFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistrationList())
 
 class DeleteFolderRecursivelySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetBlobPersistenceSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), String())
 
 class GetObjectDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3Object())
 
 class GetObjectsDetailsSpectraS3Response(AbstractResponse):
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedS3ObjectList())
 
 class GetPhysicalPlacementForObjectsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PhysicalPlacement())
 
 class GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class VerifyPhysicalPlacementForObjectsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PhysicalPlacement())
 
 class VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class CancelImportOnAllPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CancelImportPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class CompactAllPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class CompactPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class PutPoolPartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartition())
 
 class DeallocatePoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeletePermanentlyLostPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeletePoolFailureSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeletePoolPartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ForcePoolEnvironmentRefreshSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class FormatAllForeignPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class FormatForeignPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class GetBlobsOnPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class GetPoolFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureList())
 
 class GetPoolPartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartition())
 
 class GetPoolPartitionsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartitionList())
 
 class GetPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class GetPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolList())
 
 class ImportAllPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ImportPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class ModifyAllPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ModifyPoolPartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartition())
 
 class ModifyPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class VerifyAllPoolsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class VerifyPoolSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class ConvertStorageDomainToDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class PutPoolStorageDomainMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMember())
 
 class PutStorageDomainSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomain())
 
 class PutTapeStorageDomainMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMember())
 
 class DeleteStorageDomainFailureSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteStorageDomainMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteStorageDomainSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetStorageDomainFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureList())
 
 class GetStorageDomainMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMember())
 
 class GetStorageDomainMembersSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMemberList())
 
 class GetStorageDomainSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomain())
 
 class GetStorageDomainsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainList())
 
 class ModifyStorageDomainMemberSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMember())
 
 class ModifyStorageDomainSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomain())
 
 class GetSystemFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureList())
 
 class GetSystemInformationSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemInformation())
 
 class ResetInstanceIdentifierSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPathBackend())
 
 class VerifySystemHealthSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), HealthVerificationResult())
 
 class CancelEjectOnAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelEjectTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class CancelFormatOnAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelFormatTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class CancelImportOnAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelImportTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class CancelOnlineOnAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelOnlineTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class CancelVerifyOnAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class CancelVerifyTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class CleanTapeDriveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDrive())
 
 class PutTapeDensityDirectiveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDensityDirective())
 
 class DeletePermanentlyLostTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapeDensityDirectiveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapeDriveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapeFailureSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapePartitionFailureSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteTapePartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class EjectAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class EjectStorageDomainBlobsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class EjectStorageDomainSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class EjectTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class ForceTapeEnvironmentRefreshSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class FormatAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class FormatTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class GetBlobsOnTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class GetTapeDensityDirectiveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDensityDirective())
 
 class GetTapeDensityDirectivesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDensityDirectiveList())
 
 class GetTapeDriveSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDrive())
 
 class GetTapeDrivesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDriveList())
 
 class GetTapeFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedTapeFailureList())
 
 class GetTapeLibrariesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeLibraryList())
 
 class GetTapeLibrarySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeLibrary())
 
 class GetTapePartitionFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureList())
 
 class GetTapePartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartition())
 
 class GetTapePartitionWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedTapePartition())
 
 class GetTapePartitionsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionList())
 
 class GetTapePartitionsWithFullDetailsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), NamedDetailedTapePartitionList())
 
 class GetTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class GetTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeList())
 
 class ImportAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ImportTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class InspectAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class InspectTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class ModifyAllTapePartitionsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ModifyTapePartitionSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartition())
 
 class ModifyTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class OnlineAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class OnlineTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class VerifyAllTapesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204, 207])
     if self.response.status == 207:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureList())
 
 class VerifyTapeSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class PutDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreference())
 
 class DeleteDs3TargetFailureSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class DeleteDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ForceTargetEnvironmentRefreshSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetDs3TargetDataPoliciesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyList())
 
 class GetDs3TargetFailuresSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureList())
 
 class GetDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreference())
 
 class GetDs3TargetReadPreferencesSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreferenceList())
 
 class GetDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
 
 class GetDs3TargetsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetList())
 
 class ModifyAllDs3TargetsSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class ModifyDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
 
 class PairBackRegisteredDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class RegisterDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
 
 class VerifyDs3TargetSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
 
 class DelegateCreateUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([201])
     if self.response.status == 201:
       self.result = parseModel(xmldom.fromstring(response.read()), SpectraUser())
 
 class DelegateDeleteUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([204])
     
 
 class GetUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SpectraUser())
 
 class GetUsersSpectraS3Response(AbstractResponse):
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SpectraUserList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyUserSpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SpectraUser())
 
 class RegenerateUserSecretKeySpectraS3Response(AbstractResponse):
+  
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
