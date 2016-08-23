@@ -6408,7 +6408,7 @@ class AbstractResponse(object):
 
   def parse_int_header(self, key, headers):
     if not headers:
-      return
+      return None
     for header in headers:
       if header[0] == key:
         return int(header[1])
