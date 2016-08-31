@@ -244,6 +244,7 @@ class DataPathBackend(object):
       'Id' : None,
       'InstanceId' : None,
       'LastHeartbeat' : None,
+      'PartiallyVerifyLastPercentOfTapes' : None,
       'UnavailableMediaPolicy' : None,
       'UnavailablePoolMaxJobRetryInMins' : None,
       'UnavailableTapePartitionMaxJobRetryInMins' : None
@@ -820,6 +821,7 @@ class Tape(object):
       'LastCheckpoint' : None,
       'LastModified' : None,
       'LastVerified' : None,
+      'PartiallyVerifiedEndOfTape' : None,
       'PartitionId' : None,
       'PreviousState' : None,
       'SerialNumber' : None,
@@ -2539,7 +2541,7 @@ class GetDataPlannerBlobStoreTasksSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
-  def __init__(self, activated=None, auto_activate_timeout_in_mins=None, auto_inspect=None, default_import_conflict_resolution_mode=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
+  def __init__(self, activated=None, auto_activate_timeout_in_mins=None, auto_inspect=None, default_import_conflict_resolution_mode=None, partially_verify_last_percent_of_tapes=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
     super(ModifyDataPathBackendSpectraS3Request, self).__init__()
 
 
@@ -2551,6 +2553,8 @@ class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
       self.query_params['auto_inspect'] = auto_inspect
     if default_import_conflict_resolution_mode is not None:
       self.query_params['default_import_conflict_resolution_mode'] = default_import_conflict_resolution_mode
+    if partially_verify_last_percent_of_tapes is not None:
+      self.query_params['partially_verify_last_percent_of_tapes'] = partially_verify_last_percent_of_tapes
     if unavailable_media_policy is not None:
       self.query_params['unavailable_media_policy'] = unavailable_media_policy
     if unavailable_pool_max_job_retry_in_mins is not None:
@@ -5799,7 +5803,7 @@ class GetTapeSpectraS3Request(AbstractRequest):
     self.http_verb = HttpVerb.GET
 
 class GetTapesSpectraS3Request(AbstractRequest):
-  def __init__(self, assigned_to_storage_domain=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, previous_state=None, serial_number=None, state=None, storage_domain_id=None, type=None, write_protected=None):
+  def __init__(self, assigned_to_storage_domain=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partially_verified_end_of_tape=None, partition_id=None, previous_state=None, serial_number=None, state=None, storage_domain_id=None, type=None, write_protected=None):
     super(GetTapesSpectraS3Request, self).__init__()
 
 
@@ -5823,6 +5827,8 @@ class GetTapesSpectraS3Request(AbstractRequest):
       self.query_params['page_offset'] = page_offset
     if page_start_marker is not None:
       self.query_params['page_start_marker'] = page_start_marker
+    if partially_verified_end_of_tape is not None:
+      self.query_params['partially_verified_end_of_tape'] = partially_verified_end_of_tape
     if partition_id is not None:
       self.query_params['partition_id'] = partition_id
     if previous_state is not None:
