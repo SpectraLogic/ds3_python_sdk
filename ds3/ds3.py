@@ -6624,11 +6624,17 @@ class GetBucketAclSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAcl())
 
 class GetBucketAclsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketAclList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDataPolicyAclSpectraS3Response(AbstractResponse):
   
@@ -6638,11 +6644,17 @@ class GetDataPolicyAclSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAcl())
 
 class GetDataPolicyAclsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyAclList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class PutBucketSpectraS3Response(AbstractResponse):
   
@@ -6665,11 +6677,17 @@ class GetBucketSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Bucket())
 
 class GetBucketsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyBucketSpectraS3Response(AbstractResponse):
   
@@ -6692,11 +6710,17 @@ class GetCacheFilesystemSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), CacheFilesystem())
 
 class GetCacheFilesystemsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CacheFilesystemList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetCacheStateSpectraS3Response(AbstractResponse):
   
@@ -6801,18 +6825,30 @@ class GetDataPersistenceRuleSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRule())
 
 class GetDataPersistenceRulesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRuleList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDataPoliciesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDataPolicySpectraS3Response(AbstractResponse):
   
@@ -6829,11 +6865,17 @@ class GetDataReplicationRuleSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRule())
 
 class GetDataReplicationRulesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyDataPersistenceRuleSpectraS3Response(AbstractResponse):
   
@@ -6875,60 +6917,108 @@ class ClearSuspectBlobTargetsSpectraS3Response(AbstractResponse):
     
 
 class GetDegradedBlobsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DegradedBlobList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDegradedBucketsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDegradedDataPersistenceRulesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataPersistenceRuleList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDegradedDataReplicationRulesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DataReplicationRuleList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSuspectBlobPoolsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobPoolList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSuspectBlobTapesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTapeList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSuspectBlobTargetsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SuspectBlobTargetList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSuspectBucketsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), BucketList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSuspectObjectsSpectraS3Response(AbstractResponse):
   
@@ -7003,11 +7093,17 @@ class GetGroupMemberSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMember())
 
 class GetGroupMembersSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupMemberList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetGroupSpectraS3Response(AbstractResponse):
   
@@ -7017,11 +7113,17 @@ class GetGroupSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Group())
 
 class GetGroupsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), GroupList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyGroupSpectraS3Response(AbstractResponse):
   
@@ -7109,11 +7211,17 @@ class GetActiveJobSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), ActiveJob())
 
 class GetActiveJobsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), ActiveJobList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetCanceledJobSpectraS3Response(AbstractResponse):
   
@@ -7123,11 +7231,17 @@ class GetCanceledJobSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), CanceledJob())
 
 class GetCanceledJobsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CanceledJobList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetCompletedJobSpectraS3Response(AbstractResponse):
   
@@ -7137,11 +7251,17 @@ class GetCompletedJobSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), CompletedJob())
 
 class GetCompletedJobsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), CompletedJobList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetJobChunkDaoSpectraS3Response(AbstractResponse):
   
@@ -7244,11 +7364,17 @@ class GetNodeSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Node())
 
 class GetNodesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), NodeList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyNodeSpectraS3Response(AbstractResponse):
   
@@ -7421,11 +7547,17 @@ class GetDs3TargetFailureNotificationRegistrationSpectraS3Response(AbstractRespo
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistration())
 
 class GetDs3TargetFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7435,11 +7567,17 @@ class GetJobCompletedNotificationRegistrationSpectraS3Response(AbstractResponse)
       self.result = parseModel(xmldom.fromstring(response.read()), JobCompletedNotificationRegistration())
 
 class GetJobCompletedNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCompletedNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7449,11 +7587,17 @@ class GetJobCreatedNotificationRegistrationSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistration())
 
 class GetJobCreatedNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreatedNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7463,11 +7607,17 @@ class GetJobCreationFailedNotificationRegistrationSpectraS3Response(AbstractResp
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistration())
 
 class GetJobCreationFailedNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), JobCreationFailedNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7477,11 +7627,17 @@ class GetObjectCachedNotificationRegistrationSpectraS3Response(AbstractResponse)
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectCachedNotificationRegistration())
 
 class GetObjectCachedNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectCachedNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetObjectLostNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7491,11 +7647,17 @@ class GetObjectLostNotificationRegistrationSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectLostNotificationRegistration())
 
 class GetObjectLostNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectLostNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetObjectPersistedNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7505,11 +7667,17 @@ class GetObjectPersistedNotificationRegistrationSpectraS3Response(AbstractRespon
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectPersistedNotificationRegistration())
 
 class GetObjectPersistedNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), S3ObjectPersistedNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetPoolFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7519,11 +7687,17 @@ class GetPoolFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureNotificationRegistration())
 
 class GetPoolFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetStorageDomainFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7533,11 +7707,17 @@ class GetStorageDomainFailureNotificationRegistrationSpectraS3Response(AbstractR
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureNotificationRegistration())
 
 class GetStorageDomainFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSystemFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7547,11 +7727,17 @@ class GetSystemFailureNotificationRegistrationSpectraS3Response(AbstractResponse
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureNotificationRegistration())
 
 class GetSystemFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7561,11 +7747,17 @@ class GetTapeFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureNotificationRegistration())
 
 class GetTapeFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractResponse):
   
@@ -7575,11 +7767,17 @@ class GetTapePartitionFailureNotificationRegistrationSpectraS3Response(AbstractR
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistration())
 
 class GetTapePartitionFailureNotificationRegistrationsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureNotificationRegistrationList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class DeleteFolderRecursivelySpectraS3Response(AbstractResponse):
   
@@ -7615,11 +7813,17 @@ class GetObjectsDetailsSpectraS3Response(AbstractResponse):
       self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetObjectsWithFullDetailsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedS3ObjectList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetPhysicalPlacementForObjectsSpectraS3Response(AbstractResponse):
   
@@ -7733,11 +7937,17 @@ class GetBlobsOnPoolSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 class GetPoolFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetPoolPartitionSpectraS3Response(AbstractResponse):
   
@@ -7747,11 +7957,17 @@ class GetPoolPartitionSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartition())
 
 class GetPoolPartitionsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolPartitionList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetPoolSpectraS3Response(AbstractResponse):
   
@@ -7761,11 +7977,17 @@ class GetPoolSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Pool())
 
 class GetPoolsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), PoolList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ImportAllPoolsSpectraS3Response(AbstractResponse):
   
@@ -7859,11 +8081,17 @@ class DeleteStorageDomainSpectraS3Response(AbstractResponse):
     
 
 class GetStorageDomainFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetStorageDomainMemberSpectraS3Response(AbstractResponse):
   
@@ -7873,11 +8101,17 @@ class GetStorageDomainMemberSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMember())
 
 class GetStorageDomainMembersSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainMemberList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetStorageDomainSpectraS3Response(AbstractResponse):
   
@@ -7887,11 +8121,17 @@ class GetStorageDomainSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomain())
 
 class GetStorageDomainsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomainList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyStorageDomainMemberSpectraS3Response(AbstractResponse):
   
@@ -7908,11 +8148,17 @@ class ModifyStorageDomainSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), StorageDomain())
 
 class GetSystemFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), SystemFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetSystemInformationSpectraS3Response(AbstractResponse):
   
@@ -8117,11 +8363,17 @@ class GetTapeDensityDirectiveSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDensityDirective())
 
 class GetTapeDensityDirectivesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDensityDirectiveList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeDriveSpectraS3Response(AbstractResponse):
   
@@ -8131,25 +8383,43 @@ class GetTapeDriveSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDrive())
 
 class GetTapeDrivesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeDriveList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedTapeFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeLibrariesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeLibraryList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeLibrarySpectraS3Response(AbstractResponse):
   
@@ -8159,11 +8429,17 @@ class GetTapeLibrarySpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), TapeLibrary())
 
 class GetTapePartitionFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapePartitionSpectraS3Response(AbstractResponse):
   
@@ -8180,18 +8456,30 @@ class GetTapePartitionWithFullDetailsSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), DetailedTapePartition())
 
 class GetTapePartitionsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapePartitionList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapePartitionsWithFullDetailsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), NamedDetailedTapePartitionList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetTapeSpectraS3Response(AbstractResponse):
   
@@ -8201,11 +8489,17 @@ class GetTapeSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Tape())
 
 class GetTapesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), TapeList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ImportAllTapesSpectraS3Response(AbstractResponse):
   
@@ -8321,11 +8615,17 @@ class GetDs3TargetDataPoliciesSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), DataPolicyList())
 
 class GetDs3TargetFailuresSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetFailureList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
   
@@ -8335,11 +8635,17 @@ class GetDs3TargetReadPreferenceSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreference())
 
 class GetDs3TargetReadPreferencesSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetReadPreferenceList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class GetDs3TargetSpectraS3Response(AbstractResponse):
   
@@ -8349,11 +8655,17 @@ class GetDs3TargetSpectraS3Response(AbstractResponse):
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3Target())
 
 class GetDs3TargetsSpectraS3Response(AbstractResponse):
-  
+  def __init__(self, response, request):
+    self.paging_truncated = None
+    self.paging_total_result_count = None
+    super(self.__class__, self).__init__(response, request)
+
   def process_response(self, response):
     self.__check_status_codes__([200])
     if self.response.status == 200:
       self.result = parseModel(xmldom.fromstring(response.read()), Ds3TargetList())
+      self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+      self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 class ModifyAllDs3TargetsSpectraS3Response(AbstractResponse):
   
