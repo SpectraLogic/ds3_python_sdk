@@ -39,7 +39,7 @@ r1.x:
 `client.putObject(bucketName, objectName, objectOffset, objectLength, jobId, realFileName=realFileName, metadata=metadata)`
 
 r3.x:
-`put_object(PutObjectRequest(bucketName, objectName, headers=metadata, job=jobId, offset=offset, real_file_name=realFileName, stream=dataSourceStream))`
+`client.put_object(PutObjectRequest(bucketName, objectName, headers=metadata, job=jobId, offset=offset, real_file_name=realFileName, stream=dataSourceStream))`
 
 EXAMPLE 4: Get Object Command
 ==============================
@@ -73,8 +73,8 @@ TABLE 1: API Client Commands
 | getAvailableChunks | NA | get_job_chunks_ready_for_client_processing_spectra_s3 |
 | getJob | NA | get_job_spectra_s3 |
 | getJobs | NA | get_jobs_spectra_s3 |
-| putJob | | |
-| deleteJob | | |
+| putJob | NA | modify_job_spectra_s3 |
+| deleteJob | NA | cancel_job_spectra_s3 |
 | getPhysicalPlacement | NA | get_physical_placement_for_objects_spectra_s3 and get_physical_placement_for_objects_with_full_details_spectra_s3 |
 
 TABLE 2: Commands With Parameter: Full Details
