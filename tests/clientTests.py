@@ -552,8 +552,8 @@ class ObjectTestCase(Ds3TestCase):
         """tests deleteFolder"""
         self.createBucket(bucketName)
         folder = "folder"
-        badBuckets = {DeleteFolderRecursivelySpectraS3Request("", folder): statusCodeList(500), #expets 404
-                      DeleteFolderRecursivelySpectraS3Request("fakeBucket", folder): statusCodeList(404), #expects 400
+        badBuckets = {DeleteFolderRecursivelySpectraS3Request("", folder): statusCodeList(500),
+                      DeleteFolderRecursivelySpectraS3Request("fakeBucket", folder): statusCodeList(404),
                       DeleteFolderRecursivelySpectraS3Request(bucketName, folder): statusCodeList(404)}
         self.checkBadInputs(self.client.delete_folder_recursively_spectra_s3, badBuckets)
 
