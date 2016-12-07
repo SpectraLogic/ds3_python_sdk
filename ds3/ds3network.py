@@ -42,6 +42,26 @@ def typeCheck(input_arg, type_to_check):
   else:
     raise TypeError("expected instance of type " + type_to_check.__name__ + ", got instance of type " + type(input_arg).__name__)
 
+class StreamWithLength(object):
+  def __init__(self, stream, length):
+    self.stream = stream
+    self.length = length
+    self.total_read = 0
+    
+  def read(self, size=None):
+    size_to_read = size
+    # if already read to max length, do not read any more
+    if self.total_read >= self.length:
+      size_to_read = 0
+    
+    # if no size is specified or specified size is greater than length restriction
+    # then read up to the length restriction
+    elif size is None or size + self.total_read > self.length:
+      size_to_read = self.length - self.total_read
+    
+    self.total_read = self.total_read + size_to_read
+    return self.stream.read(size_to_read)
+
 class Ds3Error(object):
   def __init__(self, code, http_error_code, message):
     self.code = code
@@ -180,7 +200,10 @@ class NetworkClient(object):
     # add additonal header information if specficied in the request. This might be a byte range for example
     amz_headers = {}
     for key, value in request.headers.iteritems():
-      if not key.startswith('x-amz-meta-'):
+      if key == 'Content-Length':
+        # Add to headers,  but not to amz-headers
+        headers[key] = value
+      elif not key.startswith('x-amz-meta-'):
         amz_headers['x-amz-meta-' + key] = self.canonicalize_header_value(value)
       else:
         amz_headers[key] = self.canonicalize_header_value(value)
@@ -196,8 +219,6 @@ class NetworkClient(object):
                                                            canonicalized_amz_header=canonicalized_amz_header,
                                                            resource=canonicalized_resource)
       connection.request(request.http_verb, path, body=request.body, headers=headers)
-      if isinstance(request.body, file):
-        request.body.close()
     else:
       headers['Authorization'] = self.build_authorization(verb=request.http_verb, date=date, resource=canonicalized_resource)
       connection.request(request.http_verb, path, headers=headers)
