@@ -1963,8 +1963,6 @@ class PutObjectRequest(AbstractRequest):
     self.headers['Content-Length'] = length
     self.object_name = typeCheckString(object_name)
     object_data = StreamWithLength(stream, length)
-    if offset:
-      object_data.seek(offset, 0)
     self.body = object_data
 
 
@@ -6768,8 +6766,10 @@ class GetObjectResponse(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
     stream = self.request.stream
-    if self.request.offset:
-      stream.seek(self.request.offset, 0)
+    bytes_read = response.read()
+    while bytes_read:
+      stream.write(bytes_read)
+      bytes_read = response.read()
     stream.write(response.read())
     stream.close()
 

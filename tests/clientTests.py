@@ -19,6 +19,7 @@ from ds3.ds3 import *
 
 bucketName = "python_test_bucket"
 resources = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
+bigFile = "lesmis.txt";
 unicodeResources = [unicode(filename) for filename in resources]
 
 def pathForResource(resourceName):
@@ -1288,3 +1289,28 @@ class MetadataTestCase(Ds3TestCase):
         self.assertEqual(expected_metadata, request.headers)
         
         os.close(fd)
+        
+class GetBigObjectTestCase(Ds3TestCase):
+    def testGetBigFile(self):
+        self.createBucket(bucketName)
+        
+        localFileStream = open(pathForResource(bigFile), "rb")
+        fileSize = os.stat(pathForResource(bigFile)).st_size
+        
+        self.client.put_object(PutObjectRequest(bucketName, bigFile, fileSize, localFileStream))
+        localFileStream.close()
+        
+        fd, tempname = tempfile.mkstemp()
+        f = open(tempname, "wb")
+        
+        getObjectResult = self.client.get_object(GetObjectRequest(bucketName, bigFile, f))
+        self.assertEqual(getObjectResult.response.status, 200)
+        self.assertEqual(os.stat(tempname).st_size, fileSize)
+        for key, val in getObjectResult.response.getheaders():
+            if key == 'content-length':
+                self.assertEqual(long(val), fileSize)
+        
+        f.close()
+        os.close(fd)
+        os.remove(tempname)
+        
