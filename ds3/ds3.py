@@ -6766,12 +6766,14 @@ class GetObjectResponse(AbstractResponse):
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
     stream = self.request.stream
-    bytes_read = response.read()
-    while bytes_read:
-      stream.write(bytes_read)
+    try:
       bytes_read = response.read()
-    stream.write(response.read())
-    stream.close()
+      while bytes_read:
+        stream.write(bytes_read)
+        bytes_read = response.read()
+    finally:
+      stream.close()
+      response.close()
 
 
 class HeadBucketResponse(AbstractResponse):
