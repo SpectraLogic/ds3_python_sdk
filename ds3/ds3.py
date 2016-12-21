@@ -1951,7 +1951,7 @@ class PutMultiPartUploadPartRequest(AbstractRequest):
 
 class PutObjectRequest(AbstractRequest):
   
-  def __init__(self, bucket_name, object_name, headers=None, job=None, offset=None, real_file_name=None, stream=None):
+  def __init__(self, bucket_name, object_name, length, stream, headers=None, job=None, offset=None):
     super(PutObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
@@ -1960,17 +1960,9 @@ class PutObjectRequest(AbstractRequest):
       for key, val in headers.iteritems():
         if val:
           self.headers[key] = val
+    self.headers['Content-Length'] = length
     self.object_name = typeCheckString(object_name)
-    object_data = None
-    if stream:
-      object_data = stream
-    else:
-      effectiveFileName = self.object_name
-      if real_file_name:
-        effectiveFileName = typeCheckString(real_file_name)
-      object_data = open(effectiveFileName, "rb")
-    if offset:
-      object_data.seek(offset, 0)
+    object_data = StreamWithLength(stream, length)
     self.body = object_data
 
 
@@ -2061,17 +2053,13 @@ class GetServiceRequest(AbstractRequest):
 
 class GetObjectRequest(AbstractRequest):
   
-  def __init__(self, bucket_name, object_name, job=None, offset=None, real_file_name=None, stream=None):
+  def __init__(self, bucket_name, object_name, stream, job=None, offset=None):
     super(GetObjectRequest, self).__init__()
     self.bucket_name = bucket_name
     self.object_name = object_name
 
     self.offset = offset
     self.stream = stream
-    if real_file_name:
-      self.effective_file_name = typeCheckString(real_file_name)
-    else:
-      self.effective_file_name = typeCheckString(object_name)
 
 
     if job is not None:
@@ -6777,15 +6765,15 @@ class GetObjectResponse(AbstractResponse):
   
   def process_response(self, response):
     self.__check_status_codes__([200, 206])
-    localFile = None
-    if self.request.stream:
-      localFile = self.request.stream
-    else:
-      localFile = open(self.request.effective_file_name, "wb")
-    if self.request.offset:
-      localFile.seek(self.request.offset, 0)
-    localFile.write(response.read())
-    localFile.close()
+    stream = self.request.stream
+    try:
+      bytes_read = response.read()
+      while bytes_read:
+        stream.write(bytes_read)
+        bytes_read = response.read()
+    finally:
+      stream.close()
+      response.close()
 
 
 class HeadBucketResponse(AbstractResponse):
