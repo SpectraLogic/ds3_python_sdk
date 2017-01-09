@@ -41,11 +41,13 @@ bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucke
 for chunk in bulkResult.result['ObjectsList']:
     allocateChunk = client.allocate_job_chunk_spectra_s3(ds3.AllocateJobChunkSpectraS3Request(chunk['ChunkId']))
     for obj in allocateChunk.result['ObjectList']:
+        objectDataStream = open(fileMap[obj['Name']], "rb")
         client.put_object(ds3.PutObjectRequest(bucketName, 
                                                obj['Name'], 
+                                               obj['Length'],
+                                               objectDataStream,
                                                offset=int(obj['Offset']), 
-                                               job=bulkResult.result['JobId'], 
-                                               real_file_name=fileMap[obj['Name']]))
+                                               job=bulkResult.result['JobId']))
 
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.get_bucket(ds3.GetBucketRequest(bucketName))
