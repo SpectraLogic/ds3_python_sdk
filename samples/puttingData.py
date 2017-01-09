@@ -67,12 +67,14 @@ while len(chunkIds) > 0:
             # some objects will already be in cache.  Check to make sure that they are not, and then
             # send the object to Spectra S3
             if obj['InCache'] == 'false':
-                realFileName = "resources/" + obj['Name']
+                localFileName = "resources/" + obj['Name']
+                objectDataStream = open(localFileName, "rb")
                 client.put_object(ds3.PutObjectRequest(bucketName, 
                                                        obj['Name'], 
+                                                       obj['Length'],
+                                                       objectDataStream,
                                                        offset=int(obj['Offset']),
-                                                       job=bulkResult.result['JobId'],
-                                                       real_file_name=realFileName))
+                                                       job=bulkResult.result['JobId']))
 
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.get_bucket(ds3.GetBucketRequest(bucketName))

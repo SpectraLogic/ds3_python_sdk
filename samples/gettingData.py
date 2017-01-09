@@ -57,12 +57,14 @@ while len(chunkIds) > 0:
             # if we haven't create a temporary file for this object yet, create one
             if obj['Name'] not in tempFiles.keys():
                 tempFiles[obj['Name']]=tempfile.mkstemp()
-	    # get the object
-	    client.get_object(ds3.GetObjectRequest(bucketName, 
-                                               obj['Name'], 
+    
+        # get the object
+        objectStream = open(tempFiles[obj['Name']][1], "wb")
+        client.get_object(ds3.GetObjectRequest(bucketName, 
+                                               obj['Name'],
+                                               objectStream,                                               
                                                offset = int(obj['Offset']), 
-                                               job = bulkGetResult.result['JobId'], 
-                                               real_file_name=tempFiles[obj['Name']][1]))
+                                               job = bulkGetResult.result['JobId']))
 
 # iterate over the temporary files, printing out their names, then closing and and removing them
 for objName in tempFiles.keys():
