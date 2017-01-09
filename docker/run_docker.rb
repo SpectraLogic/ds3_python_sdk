@@ -16,7 +16,7 @@ connection = Faraday.new(:url =>  "https://#{ENV["DS3_ENDPOINT"]}-mgmt.eng.sldom
 end
 
 # List all users
-response = connection.get("/users")
+response = connection.get("/api/users")
 # All GET responses are under a root "data"
 users = JSON.parse(response.body)["data"]
 
@@ -25,11 +25,11 @@ users.each do | user_entry |
   spectra_user = user_entry if user_entry["name"].eql?("Spectra")
 end
 
-# None of the "/users" responses include the S3 keys.  For that, you have to
-# make a separate "/ds3/keys" request which is setup to return an array
+# None of the "/api/users" responses include the S3 keys.  For that, you have to
+# make a separate "/api/ds3/keys" request which is setup to return an array
 # of DS3 authid/secretkey pairs in case we ever allow more than one pair per
 # user.
-response = connection.get("/ds3/keys?user_id=#{spectra_user["id"]}")
+response = connection.get("/api/ds3/keys?user_id=#{spectra_user["id"]}")
 spectra_user_keys = JSON.parse(response.body)["data"][0]
 abort("Spectra User Keys not found.") if spectra_user.keys.nil?
 
@@ -45,7 +45,7 @@ ENV["GIT_BRANCH"] = ENV["GIT_BRANCH"] || "master"
 puts "GIT_REPO #{ENV["GIT_REPO"] || "default"}"
 puts "GIT_BRANCH #{ENV["GIT_BRANCH"]}"
 
-ENV["DOCKER_REPO"] =  ENV["DOCKER_REPO"] || "denverm80/ds3_python_sdk_test:latest"
+ENV["DOCKER_REPO"] =  ENV["DOCKER_REPO"] || "spectralogic/ds3_python_sdk_test:latest"
 puts "DOCKER_REPO #{ENV["DOCKER_REPO"]}"
  
 # Close the git repo
