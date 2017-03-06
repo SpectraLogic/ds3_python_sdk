@@ -24,7 +24,7 @@ Generating documentation
 To (re)generate the documentation, navigate to the directory the documentation is in,
 "repository"/sphinx/"version you want to generate" (currently v1.0-0), and run
 
-    $ make html
+    $ sphinx-build -b html source/ .
 
 
 Adding a new version or release
@@ -34,4 +34,4 @@ To add a new version of the documentation, navigate to the sphinx directory and 
 a new directory corresponding to the version and release you want. In the new directory, edit the variables 'source' and
 'release' in the file <new directory>/source/conf.py to match the new version and release numbers. Run
 
-    $ make html
+    $ sphinx-build -b html source/ .
