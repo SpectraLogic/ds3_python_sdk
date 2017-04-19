@@ -390,6 +390,7 @@ class ActiveJob(object):
       'ChunkClientProcessingOrderGuarantee' : None,
       'CompletedSizeInBytes' : None,
       'CreatedAt' : None,
+      'DeadJobCleanupAllowed' : None,
       'ErrorMessage' : None,
       'Id' : None,
       'ImplicitJobIdResolution' : None,
@@ -942,10 +943,12 @@ class TapeDrive(object):
   def __init__(self):
     self.attributes = []
     self.elements = {
+      'CleaningRequired' : None,
       'ErrorMessage' : None,
       'ForceTapeRemoval' : None,
       'Id' : None,
       'LastCleaned' : None,
+      'MfgSerialNumber' : None,
       'PartitionId' : None,
       'SerialNumber' : None,
       'State' : None,
@@ -7098,12 +7101,14 @@ class OnlineTapeSpectraS3Request(AbstractRequest):
 
 class RawImportAllTapesSpectraS3Request(AbstractRequest):
   
-  def __init__(self, bucket_id, task_priority=None):
+  def __init__(self, bucket_id, storage_domain_id=None, task_priority=None):
     super(RawImportAllTapesSpectraS3Request, self).__init__()
     self.query_params['operation'] = 'import'
     self.query_params['bucket_id'] = bucket_id
 
 
+    if storage_domain_id is not None:
+      self.query_params['storage_domain_id'] = storage_domain_id
     if task_priority is not None:
       self.query_params['task_priority'] = task_priority
 
@@ -7112,13 +7117,15 @@ class RawImportAllTapesSpectraS3Request(AbstractRequest):
 
 class RawImportTapeSpectraS3Request(AbstractRequest):
   
-  def __init__(self, bucket_id, tape_id, task_priority=None):
+  def __init__(self, bucket_id, tape_id, storage_domain_id=None, task_priority=None):
     super(RawImportTapeSpectraS3Request, self).__init__()
     self.tape_id = tape_id
     self.query_params['operation'] = 'import'
     self.query_params['bucket_id'] = bucket_id
 
 
+    if storage_domain_id is not None:
+      self.query_params['storage_domain_id'] = storage_domain_id
     if task_priority is not None:
       self.query_params['task_priority'] = task_priority
 
