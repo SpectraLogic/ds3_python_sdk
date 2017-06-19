@@ -1313,4 +1313,21 @@ class GetBigObjectTestCase(Ds3TestCase):
         f.close()
         os.close(fd)
         os.remove(tempname)
-        
+
+
+class Ds3NetworkTestCase(Ds3TestCase):
+    def testEncodingQueryParamsWithSymbols(self):
+        expected = "/test/path?key=value%3Bwith%20symbols"
+        query_params = {"key": "value;with symbols"}
+
+        result = self.client.net_client.build_path("/test/path", query_params)
+
+        self.assertEqual(result, expected)
+
+    def testEncodingPathWithObjectNameWithPlus(self):
+        expected = "/test/path/name%2Bwith%2Bplus"
+        obj_name = "name+with+plus"
+
+        result = self.client.net_client.build_path("/test/path/" + obj_name)
+
+        self.assertEqual(result, expected)
