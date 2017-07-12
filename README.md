@@ -78,10 +78,10 @@ To put data to a Spectra S3 appliance you have to do it inside of the context of
 * For each chunk that can be processed, sent the object (this step can be done in parallel)
 * Repeat getting the list of available chunks until all chunks have been processed
 
-[An example of the above using the Python SDK for putting data] (samples/puttingData.py)
+[An example of the above using the Python SDK for putting data](samples/puttingData.py)
 
-[An example of getting data with the Python SDK] (samples/gettingData.py)
+[An example of getting data with the Python SDK](samples/gettingData.py)
 
-[An example of using getService and getBucket to list all accessible buckets and objects] (samples/listAll.py)
+[An example of using getService and getBucket to list all accessible buckets and objects](samples/listAll.py)
 
-[An example of how give objects on the server a different name than what is on the filesystem, and how to delete objects by folder] (samples/renaming.py)
+[An example of how give objects on the server a different name than what is on the filesystem, and how to delete objects by folder](samples/renaming.py)
