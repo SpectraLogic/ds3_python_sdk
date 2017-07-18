@@ -950,6 +950,7 @@ class TapeDrive(object):
       'LastCleaned' : None,
       'MfgSerialNumber' : None,
       'PartitionId' : None,
+      'Quiesced' : None,
       'SerialNumber' : None,
       'State' : None,
       'TapeId' : None,
@@ -992,6 +993,7 @@ class TapePartition(object):
       'LibraryId' : None,
       'Name' : None,
       'Quiesced' : None,
+      'SerialId' : None,
       'SerialNumber' : None,
       'State' : None
     }
@@ -1373,6 +1375,7 @@ class DetailedTapePartition(object):
       'LibraryId' : None,
       'Name' : None,
       'Quiesced' : None,
+      'SerialId' : None,
       'SerialNumber' : None,
       'State' : None
     }
@@ -1627,6 +1630,7 @@ class NamedDetailedTapePartition(object):
       'LibraryId' : None,
       'Name' : None,
       'Quiesced' : None,
+      'SerialId' : None,
       'SerialNumber' : None,
       'State' : None
     }
@@ -4096,6 +4100,18 @@ class ClearAllCompletedJobsSpectraS3Request(AbstractRequest):
     self.path = '/_rest_/completed_job'
     self.http_verb = HttpVerb.DELETE
 
+class CloseAggregatingJobSpectraS3Request(AbstractRequest):
+  
+  def __init__(self, job_id):
+    super(CloseAggregatingJobSpectraS3Request, self).__init__()
+    self.job_id = job_id
+    self.query_params['close_aggregating_job'] = None
+
+
+
+    self.path = '/_rest_/job/' + job_id
+    self.http_verb = HttpVerb.PUT
+
 class GetBulkJobSpectraS3Request(AbstractRequest):
   
   def __init__(self, bucket_name, object_list, aggregating=None, chunk_client_processing_order_guarantee=None, implicit_job_id_resolution=None, name=None, priority=None):
@@ -5424,14 +5440,12 @@ class GetObjectDetailsSpectraS3Request(AbstractRequest):
 
 class GetObjectsDetailsSpectraS3Request(AbstractRequest):
   
-  def __init__(self, bucket_id=None, folder=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
+  def __init__(self, bucket_id=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
     super(GetObjectsDetailsSpectraS3Request, self).__init__()
 
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
-    if folder is not None:
-      self.query_params['folder'] = folder
     if last_page is not None:
       self.query_params['last_page'] = last_page
     if latest is not None:
@@ -5454,15 +5468,13 @@ class GetObjectsDetailsSpectraS3Request(AbstractRequest):
 
 class GetObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
   
-  def __init__(self, bucket_id=None, folder=None, include_physical_placement=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
+  def __init__(self, bucket_id=None, include_physical_placement=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
     super(GetObjectsWithFullDetailsSpectraS3Request, self).__init__()
     self.query_params['full_details'] = None
 
 
     if bucket_id is not None:
       self.query_params['bucket_id'] = bucket_id
-    if folder is not None:
-      self.query_params['folder'] = folder
     if include_physical_placement is not None:
       self.query_params['include_physical_placement'] = include_physical_placement
     if last_page is not None:
@@ -6907,7 +6919,7 @@ class GetTapeSpectraS3Request(AbstractRequest):
 
 class GetTapesSpectraS3Request(AbstractRequest):
   
-  def __init__(self, assigned_to_storage_domain=None, available_raw_capacity=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, last_verified=None, page_length=None, page_offset=None, page_start_marker=None, partially_verified_end_of_tape=None, partition_id=None, previous_state=None, serial_number=None, state=None, storage_domain_id=None, type=None, verify_pending=None, write_protected=None):
+  def __init__(self, assigned_to_storage_domain=None, available_raw_capacity=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, last_verified=None, page_length=None, page_offset=None, page_start_marker=None, partially_verified_end_of_tape=None, partition_id=None, previous_state=None, serial_number=None, sort_by=None, state=None, storage_domain_id=None, type=None, verify_pending=None, write_protected=None):
     super(GetTapesSpectraS3Request, self).__init__()
 
 
@@ -6943,6 +6955,8 @@ class GetTapesSpectraS3Request(AbstractRequest):
       self.query_params['previous_state'] = previous_state
     if serial_number is not None:
       self.query_params['serial_number'] = serial_number
+    if sort_by is not None:
+      self.query_params['sort_by'] = sort_by
     if state is not None:
       self.query_params['state'] = state
     if storage_domain_id is not None:
@@ -7044,6 +7058,19 @@ class ModifyAllTapePartitionsSpectraS3Request(AbstractRequest):
 
 
     self.path = '/_rest_/tape_partition'
+    self.http_verb = HttpVerb.PUT
+
+class ModifyTapeDriveSpectraS3Request(AbstractRequest):
+  
+  def __init__(self, tape_drive_id, quiesced=None):
+    super(ModifyTapeDriveSpectraS3Request, self).__init__()
+    self.tape_drive_id = tape_drive_id
+
+
+    if quiesced is not None:
+      self.query_params['quiesced'] = quiesced
+
+    self.path = '/_rest_/tape_drive/' + tape_drive_id
     self.http_verb = HttpVerb.PUT
 
 class ModifyTapePartitionSpectraS3Request(AbstractRequest):
@@ -9207,6 +9234,13 @@ class ClearAllCompletedJobsSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([204])
     
 
+class CloseAggregatingJobSpectraS3Response(AbstractResponse):
+  
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
+
 class GetBulkJobSpectraS3Response(AbstractResponse):
   
   def process_response(self, response):
@@ -10657,6 +10691,13 @@ class ModifyAllTapePartitionsSpectraS3Response(AbstractResponse):
     self.__check_status_codes__([204])
     
 
+class ModifyTapeDriveSpectraS3Response(AbstractResponse):
+  
+  def process_response(self, response):
+    self.__check_status_codes__([200])
+    if self.response.status == 200:
+      self.result = parseModel(xmldom.fromstring(response.read()), TapeDrive())
+
 class ModifyTapePartitionSpectraS3Response(AbstractResponse):
   
   def process_response(self, response):
@@ -11641,6 +11682,10 @@ class Client(object):
     return ClearAllCompletedJobsSpectraS3Response(self.net_client.get_response(request), request)
 
   
+  def close_aggregating_job_spectra_s3(self, request):
+    return CloseAggregatingJobSpectraS3Response(self.net_client.get_response(request), request)
+
+  
   def get_bulk_job_spectra_s3(self, request):
     return GetBulkJobSpectraS3Response(self.net_client.get_response(request), request)
 
@@ -12371,6 +12416,10 @@ class Client(object):
   
   def modify_all_tape_partitions_spectra_s3(self, request):
     return ModifyAllTapePartitionsSpectraS3Response(self.net_client.get_response(request), request)
+
+  
+  def modify_tape_drive_spectra_s3(self, request):
+    return ModifyTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
 
   
   def modify_tape_partition_spectra_s3(self, request):
