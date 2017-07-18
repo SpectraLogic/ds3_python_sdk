@@ -572,8 +572,8 @@ class ObjectTestCase(Ds3TestCase):
                 testObjects.append(obj)
         
         self.validateSearchObjects(testObjects, resources)
-        self.assertEqual(response.paging_truncated, None)
-        self.assertEqual(response.paging_total_result_count, None)
+        self.assertEqual(response.paging_truncated, 0)
+        self.assertEqual(response.paging_total_result_count, 4)
         
     def testGetObjectsWithPaging(self):
         populateTestData(self.client, bucketName, self.getDataPolicyId())
