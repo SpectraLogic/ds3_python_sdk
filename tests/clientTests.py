@@ -746,6 +746,10 @@ class BasicClientTestCase(Ds3TestCase):
         result = self.client.verify_system_health_spectra_s3(VerifySystemHealthSpectraS3Request())
         self.assertTrue(result.result['MsRequiredToVerifyDataPlannerHealth'] >= 0)
 
+    def testMismatchedRequest(self):
+        self.assertRaises(TypeError, self.client.abort_multi_part_upload, GetSystemInformationSpectraS3Request())
+        self.assertRaises(TypeError, self.client.put_bucket, PutBucketSpectraS3Request("PythonTestBucket"))
+
 
 class ParserTestCase(unittest.TestCase):
     def testGetServiceParsing(self):

@@ -11054,1096 +11054,1826 @@ class Client(object):
 
     
     def abort_multi_part_upload(self, request):
+        if not isinstance(request, AbortMultiPartUploadRequest):
+            raise TypeError('request for abort_multi_part_upload should be of type AbortMultiPartUploadRequest but was ' + request.__class__.__name__)
         return AbortMultiPartUploadResponse(self.net_client.get_response(request), request)
     
     def complete_multi_part_upload(self, request):
+        if not isinstance(request, CompleteMultiPartUploadRequest):
+            raise TypeError('request for complete_multi_part_upload should be of type CompleteMultiPartUploadRequest but was ' + request.__class__.__name__)
         return CompleteMultiPartUploadResponse(self.net_client.get_response(request), request)
     
     def put_bucket(self, request):
+        if not isinstance(request, PutBucketRequest):
+            raise TypeError('request for put_bucket should be of type PutBucketRequest but was ' + request.__class__.__name__)
         return PutBucketResponse(self.net_client.get_response(request), request)
     
     def put_multi_part_upload_part(self, request):
+        if not isinstance(request, PutMultiPartUploadPartRequest):
+            raise TypeError('request for put_multi_part_upload_part should be of type PutMultiPartUploadPartRequest but was ' + request.__class__.__name__)
         return PutMultiPartUploadPartResponse(self.net_client.get_response(request), request)
     
     def put_object(self, request):
+        if not isinstance(request, PutObjectRequest):
+            raise TypeError('request for put_object should be of type PutObjectRequest but was ' + request.__class__.__name__)
         return PutObjectResponse(self.net_client.get_response(request), request)
     
     def delete_bucket(self, request):
+        if not isinstance(request, DeleteBucketRequest):
+            raise TypeError('request for delete_bucket should be of type DeleteBucketRequest but was ' + request.__class__.__name__)
         return DeleteBucketResponse(self.net_client.get_response(request), request)
     
     def delete_object(self, request):
+        if not isinstance(request, DeleteObjectRequest):
+            raise TypeError('request for delete_object should be of type DeleteObjectRequest but was ' + request.__class__.__name__)
         return DeleteObjectResponse(self.net_client.get_response(request), request)
     
     def delete_objects(self, request):
+        if not isinstance(request, DeleteObjectsRequest):
+            raise TypeError('request for delete_objects should be of type DeleteObjectsRequest but was ' + request.__class__.__name__)
         return DeleteObjectsResponse(self.net_client.get_response(request), request)
     
     def get_bucket(self, request):
+        if not isinstance(request, GetBucketRequest):
+            raise TypeError('request for get_bucket should be of type GetBucketRequest but was ' + request.__class__.__name__)
         return GetBucketResponse(self.net_client.get_response(request), request)
     
     def get_service(self, request):
+        if not isinstance(request, GetServiceRequest):
+            raise TypeError('request for get_service should be of type GetServiceRequest but was ' + request.__class__.__name__)
         return GetServiceResponse(self.net_client.get_response(request), request)
     
     def get_object(self, request):
+        if not isinstance(request, GetObjectRequest):
+            raise TypeError('request for get_object should be of type GetObjectRequest but was ' + request.__class__.__name__)
         return GetObjectResponse(self.net_client.get_response(request), request)
     
     def head_bucket(self, request):
+        if not isinstance(request, HeadBucketRequest):
+            raise TypeError('request for head_bucket should be of type HeadBucketRequest but was ' + request.__class__.__name__)
         return HeadBucketResponse(self.net_client.get_response(request), request)
     
     def head_object(self, request):
+        if not isinstance(request, HeadObjectRequest):
+            raise TypeError('request for head_object should be of type HeadObjectRequest but was ' + request.__class__.__name__)
         return HeadObjectResponse(self.net_client.get_response(request), request)
     
     def initiate_multi_part_upload(self, request):
+        if not isinstance(request, InitiateMultiPartUploadRequest):
+            raise TypeError('request for initiate_multi_part_upload should be of type InitiateMultiPartUploadRequest but was ' + request.__class__.__name__)
         return InitiateMultiPartUploadResponse(self.net_client.get_response(request), request)
     
     def list_multi_part_upload_parts(self, request):
+        if not isinstance(request, ListMultiPartUploadPartsRequest):
+            raise TypeError('request for list_multi_part_upload_parts should be of type ListMultiPartUploadPartsRequest but was ' + request.__class__.__name__)
         return ListMultiPartUploadPartsResponse(self.net_client.get_response(request), request)
     
     def list_multi_part_uploads(self, request):
+        if not isinstance(request, ListMultiPartUploadsRequest):
+            raise TypeError('request for list_multi_part_uploads should be of type ListMultiPartUploadsRequest but was ' + request.__class__.__name__)
         return ListMultiPartUploadsResponse(self.net_client.get_response(request), request)
     
     def put_bucket_acl_for_group_spectra_s3(self, request):
+        if not isinstance(request, PutBucketAclForGroupSpectraS3Request):
+            raise TypeError('request for put_bucket_acl_for_group_spectra_s3 should be of type PutBucketAclForGroupSpectraS3Request but was ' + request.__class__.__name__)
         return PutBucketAclForGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_bucket_acl_for_user_spectra_s3(self, request):
+        if not isinstance(request, PutBucketAclForUserSpectraS3Request):
+            raise TypeError('request for put_bucket_acl_for_user_spectra_s3 should be of type PutBucketAclForUserSpectraS3Request but was ' + request.__class__.__name__)
         return PutBucketAclForUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_data_policy_acl_for_group_spectra_s3(self, request):
+        if not isinstance(request, PutDataPolicyAclForGroupSpectraS3Request):
+            raise TypeError('request for put_data_policy_acl_for_group_spectra_s3 should be of type PutDataPolicyAclForGroupSpectraS3Request but was ' + request.__class__.__name__)
         return PutDataPolicyAclForGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_data_policy_acl_for_user_spectra_s3(self, request):
+        if not isinstance(request, PutDataPolicyAclForUserSpectraS3Request):
+            raise TypeError('request for put_data_policy_acl_for_user_spectra_s3 should be of type PutDataPolicyAclForUserSpectraS3Request but was ' + request.__class__.__name__)
         return PutDataPolicyAclForUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_global_bucket_acl_for_group_spectra_s3(self, request):
+        if not isinstance(request, PutGlobalBucketAclForGroupSpectraS3Request):
+            raise TypeError('request for put_global_bucket_acl_for_group_spectra_s3 should be of type PutGlobalBucketAclForGroupSpectraS3Request but was ' + request.__class__.__name__)
         return PutGlobalBucketAclForGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_global_bucket_acl_for_user_spectra_s3(self, request):
+        if not isinstance(request, PutGlobalBucketAclForUserSpectraS3Request):
+            raise TypeError('request for put_global_bucket_acl_for_user_spectra_s3 should be of type PutGlobalBucketAclForUserSpectraS3Request but was ' + request.__class__.__name__)
         return PutGlobalBucketAclForUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_global_data_policy_acl_for_group_spectra_s3(self, request):
+        if not isinstance(request, PutGlobalDataPolicyAclForGroupSpectraS3Request):
+            raise TypeError('request for put_global_data_policy_acl_for_group_spectra_s3 should be of type PutGlobalDataPolicyAclForGroupSpectraS3Request but was ' + request.__class__.__name__)
         return PutGlobalDataPolicyAclForGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_global_data_policy_acl_for_user_spectra_s3(self, request):
+        if not isinstance(request, PutGlobalDataPolicyAclForUserSpectraS3Request):
+            raise TypeError('request for put_global_data_policy_acl_for_user_spectra_s3 should be of type PutGlobalDataPolicyAclForUserSpectraS3Request but was ' + request.__class__.__name__)
         return PutGlobalDataPolicyAclForUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_bucket_acl_spectra_s3(self, request):
+        if not isinstance(request, DeleteBucketAclSpectraS3Request):
+            raise TypeError('request for delete_bucket_acl_spectra_s3 should be of type DeleteBucketAclSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteBucketAclSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_data_policy_acl_spectra_s3(self, request):
+        if not isinstance(request, DeleteDataPolicyAclSpectraS3Request):
+            raise TypeError('request for delete_data_policy_acl_spectra_s3 should be of type DeleteDataPolicyAclSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDataPolicyAclSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_bucket_acl_spectra_s3(self, request):
+        if not isinstance(request, GetBucketAclSpectraS3Request):
+            raise TypeError('request for get_bucket_acl_spectra_s3 should be of type GetBucketAclSpectraS3Request but was ' + request.__class__.__name__)
         return GetBucketAclSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_bucket_acls_spectra_s3(self, request):
+        if not isinstance(request, GetBucketAclsSpectraS3Request):
+            raise TypeError('request for get_bucket_acls_spectra_s3 should be of type GetBucketAclsSpectraS3Request but was ' + request.__class__.__name__)
         return GetBucketAclsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_policy_acl_spectra_s3(self, request):
+        if not isinstance(request, GetDataPolicyAclSpectraS3Request):
+            raise TypeError('request for get_data_policy_acl_spectra_s3 should be of type GetDataPolicyAclSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPolicyAclSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_policy_acls_spectra_s3(self, request):
+        if not isinstance(request, GetDataPolicyAclsSpectraS3Request):
+            raise TypeError('request for get_data_policy_acls_spectra_s3 should be of type GetDataPolicyAclsSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPolicyAclsSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_bucket_spectra_s3(self, request):
+        if not isinstance(request, PutBucketSpectraS3Request):
+            raise TypeError('request for put_bucket_spectra_s3 should be of type PutBucketSpectraS3Request but was ' + request.__class__.__name__)
         return PutBucketSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_bucket_spectra_s3(self, request):
+        if not isinstance(request, DeleteBucketSpectraS3Request):
+            raise TypeError('request for delete_bucket_spectra_s3 should be of type DeleteBucketSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteBucketSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_bucket_spectra_s3(self, request):
+        if not isinstance(request, GetBucketSpectraS3Request):
+            raise TypeError('request for get_bucket_spectra_s3 should be of type GetBucketSpectraS3Request but was ' + request.__class__.__name__)
         return GetBucketSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_buckets_spectra_s3(self, request):
+        if not isinstance(request, GetBucketsSpectraS3Request):
+            raise TypeError('request for get_buckets_spectra_s3 should be of type GetBucketsSpectraS3Request but was ' + request.__class__.__name__)
         return GetBucketsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_bucket_spectra_s3(self, request):
+        if not isinstance(request, ModifyBucketSpectraS3Request):
+            raise TypeError('request for modify_bucket_spectra_s3 should be of type ModifyBucketSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyBucketSpectraS3Response(self.net_client.get_response(request), request)
     
     def force_full_cache_reclaim_spectra_s3(self, request):
+        if not isinstance(request, ForceFullCacheReclaimSpectraS3Request):
+            raise TypeError('request for force_full_cache_reclaim_spectra_s3 should be of type ForceFullCacheReclaimSpectraS3Request but was ' + request.__class__.__name__)
         return ForceFullCacheReclaimSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_cache_filesystem_spectra_s3(self, request):
+        if not isinstance(request, GetCacheFilesystemSpectraS3Request):
+            raise TypeError('request for get_cache_filesystem_spectra_s3 should be of type GetCacheFilesystemSpectraS3Request but was ' + request.__class__.__name__)
         return GetCacheFilesystemSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_cache_filesystems_spectra_s3(self, request):
+        if not isinstance(request, GetCacheFilesystemsSpectraS3Request):
+            raise TypeError('request for get_cache_filesystems_spectra_s3 should be of type GetCacheFilesystemsSpectraS3Request but was ' + request.__class__.__name__)
         return GetCacheFilesystemsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_cache_state_spectra_s3(self, request):
+        if not isinstance(request, GetCacheStateSpectraS3Request):
+            raise TypeError('request for get_cache_state_spectra_s3 should be of type GetCacheStateSpectraS3Request but was ' + request.__class__.__name__)
         return GetCacheStateSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_cache_filesystem_spectra_s3(self, request):
+        if not isinstance(request, ModifyCacheFilesystemSpectraS3Request):
+            raise TypeError('request for modify_cache_filesystem_spectra_s3 should be of type ModifyCacheFilesystemSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyCacheFilesystemSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_bucket_capacity_summary_spectra_s3(self, request):
+        if not isinstance(request, GetBucketCapacitySummarySpectraS3Request):
+            raise TypeError('request for get_bucket_capacity_summary_spectra_s3 should be of type GetBucketCapacitySummarySpectraS3Request but was ' + request.__class__.__name__)
         return GetBucketCapacitySummarySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_capacity_summary_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainCapacitySummarySpectraS3Request):
+            raise TypeError('request for get_storage_domain_capacity_summary_spectra_s3 should be of type GetStorageDomainCapacitySummarySpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainCapacitySummarySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_system_capacity_summary_spectra_s3(self, request):
+        if not isinstance(request, GetSystemCapacitySummarySpectraS3Request):
+            raise TypeError('request for get_system_capacity_summary_spectra_s3 should be of type GetSystemCapacitySummarySpectraS3Request but was ' + request.__class__.__name__)
         return GetSystemCapacitySummarySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_path_backend_spectra_s3(self, request):
+        if not isinstance(request, GetDataPathBackendSpectraS3Request):
+            raise TypeError('request for get_data_path_backend_spectra_s3 should be of type GetDataPathBackendSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPathBackendSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_planner_blob_store_tasks_spectra_s3(self, request):
+        if not isinstance(request, GetDataPlannerBlobStoreTasksSpectraS3Request):
+            raise TypeError('request for get_data_planner_blob_store_tasks_spectra_s3 should be of type GetDataPlannerBlobStoreTasksSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPlannerBlobStoreTasksSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_data_path_backend_spectra_s3(self, request):
+        if not isinstance(request, ModifyDataPathBackendSpectraS3Request):
+            raise TypeError('request for modify_data_path_backend_spectra_s3 should be of type ModifyDataPathBackendSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyDataPathBackendSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_azure_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, PutAzureDataReplicationRuleSpectraS3Request):
+            raise TypeError('request for put_azure_data_replication_rule_spectra_s3 should be of type PutAzureDataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return PutAzureDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_data_persistence_rule_spectra_s3(self, request):
+        if not isinstance(request, PutDataPersistenceRuleSpectraS3Request):
+            raise TypeError('request for put_data_persistence_rule_spectra_s3 should be of type PutDataPersistenceRuleSpectraS3Request but was ' + request.__class__.__name__)
         return PutDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_data_policy_spectra_s3(self, request):
+        if not isinstance(request, PutDataPolicySpectraS3Request):
+            raise TypeError('request for put_data_policy_spectra_s3 should be of type PutDataPolicySpectraS3Request but was ' + request.__class__.__name__)
         return PutDataPolicySpectraS3Response(self.net_client.get_response(request), request)
     
     def put_ds3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, PutDs3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for put_ds3_data_replication_rule_spectra_s3 should be of type PutDs3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return PutDs3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_s3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, PutS3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for put_s3_data_replication_rule_spectra_s3 should be of type PutS3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return PutS3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureDataReplicationRuleSpectraS3Request):
+            raise TypeError('request for delete_azure_data_replication_rule_spectra_s3 should be of type DeleteAzureDataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_data_persistence_rule_spectra_s3(self, request):
+        if not isinstance(request, DeleteDataPersistenceRuleSpectraS3Request):
+            raise TypeError('request for delete_data_persistence_rule_spectra_s3 should be of type DeleteDataPersistenceRuleSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_data_policy_spectra_s3(self, request):
+        if not isinstance(request, DeleteDataPolicySpectraS3Request):
+            raise TypeError('request for delete_data_policy_spectra_s3 should be of type DeleteDataPolicySpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDataPolicySpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_ds3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, DeleteDs3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for delete_ds3_data_replication_rule_spectra_s3 should be of type DeleteDs3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDs3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for delete_s3_data_replication_rule_spectra_s3 should be of type DeleteS3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, GetAzureDataReplicationRuleSpectraS3Request):
+            raise TypeError('request for get_azure_data_replication_rule_spectra_s3 should be of type GetAzureDataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetAzureDataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_azure_data_replication_rules_spectra_s3 should be of type GetAzureDataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureDataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_persistence_rule_spectra_s3(self, request):
+        if not isinstance(request, GetDataPersistenceRuleSpectraS3Request):
+            raise TypeError('request for get_data_persistence_rule_spectra_s3 should be of type GetDataPersistenceRuleSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_persistence_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDataPersistenceRulesSpectraS3Request):
+            raise TypeError('request for get_data_persistence_rules_spectra_s3 should be of type GetDataPersistenceRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPersistenceRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_policies_spectra_s3(self, request):
+        if not isinstance(request, GetDataPoliciesSpectraS3Request):
+            raise TypeError('request for get_data_policies_spectra_s3 should be of type GetDataPoliciesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPoliciesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_data_policy_spectra_s3(self, request):
+        if not isinstance(request, GetDataPolicySpectraS3Request):
+            raise TypeError('request for get_data_policy_spectra_s3 should be of type GetDataPolicySpectraS3Request but was ' + request.__class__.__name__)
         return GetDataPolicySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, GetDs3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for get_ds3_data_replication_rule_spectra_s3 should be of type GetDs3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDs3DataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_ds3_data_replication_rules_spectra_s3 should be of type GetDs3DataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3DataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, GetS3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for get_s3_data_replication_rule_spectra_s3 should be of type GetS3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetS3DataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_s3_data_replication_rules_spectra_s3 should be of type GetS3DataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3DataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_azure_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, ModifyAzureDataReplicationRuleSpectraS3Request):
+            raise TypeError('request for modify_azure_data_replication_rule_spectra_s3 should be of type ModifyAzureDataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAzureDataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_data_persistence_rule_spectra_s3(self, request):
+        if not isinstance(request, ModifyDataPersistenceRuleSpectraS3Request):
+            raise TypeError('request for modify_data_persistence_rule_spectra_s3 should be of type ModifyDataPersistenceRuleSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyDataPersistenceRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_data_policy_spectra_s3(self, request):
+        if not isinstance(request, ModifyDataPolicySpectraS3Request):
+            raise TypeError('request for modify_data_policy_spectra_s3 should be of type ModifyDataPolicySpectraS3Request but was ' + request.__class__.__name__)
         return ModifyDataPolicySpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_ds3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, ModifyDs3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for modify_ds3_data_replication_rule_spectra_s3 should be of type ModifyDs3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyDs3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_s3_data_replication_rule_spectra_s3(self, request):
+        if not isinstance(request, ModifyS3DataReplicationRuleSpectraS3Request):
+            raise TypeError('request for modify_s3_data_replication_rule_spectra_s3 should be of type ModifyS3DataReplicationRuleSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyS3DataReplicationRuleSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_suspect_blob_azure_targets_spectra_s3(self, request):
+        if not isinstance(request, ClearSuspectBlobAzureTargetsSpectraS3Request):
+            raise TypeError('request for clear_suspect_blob_azure_targets_spectra_s3 should be of type ClearSuspectBlobAzureTargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearSuspectBlobAzureTargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_suspect_blob_ds3_targets_spectra_s3(self, request):
+        if not isinstance(request, ClearSuspectBlobDs3TargetsSpectraS3Request):
+            raise TypeError('request for clear_suspect_blob_ds3_targets_spectra_s3 should be of type ClearSuspectBlobDs3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearSuspectBlobDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_suspect_blob_pools_spectra_s3(self, request):
+        if not isinstance(request, ClearSuspectBlobPoolsSpectraS3Request):
+            raise TypeError('request for clear_suspect_blob_pools_spectra_s3 should be of type ClearSuspectBlobPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearSuspectBlobPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_suspect_blob_s3_targets_spectra_s3(self, request):
+        if not isinstance(request, ClearSuspectBlobS3TargetsSpectraS3Request):
+            raise TypeError('request for clear_suspect_blob_s3_targets_spectra_s3 should be of type ClearSuspectBlobS3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearSuspectBlobS3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_suspect_blob_tapes_spectra_s3(self, request):
+        if not isinstance(request, ClearSuspectBlobTapesSpectraS3Request):
+            raise TypeError('request for clear_suspect_blob_tapes_spectra_s3 should be of type ClearSuspectBlobTapesSpectraS3Request but was ' + request.__class__.__name__)
         return ClearSuspectBlobTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_azure_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedAzureDataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_degraded_azure_data_replication_rules_spectra_s3 should be of type GetDegradedAzureDataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedAzureDataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_blobs_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedBlobsSpectraS3Request):
+            raise TypeError('request for get_degraded_blobs_spectra_s3 should be of type GetDegradedBlobsSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedBlobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_buckets_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedBucketsSpectraS3Request):
+            raise TypeError('request for get_degraded_buckets_spectra_s3 should be of type GetDegradedBucketsSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedBucketsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_data_persistence_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedDataPersistenceRulesSpectraS3Request):
+            raise TypeError('request for get_degraded_data_persistence_rules_spectra_s3 should be of type GetDegradedDataPersistenceRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedDataPersistenceRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_ds3_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedDs3DataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_degraded_ds3_data_replication_rules_spectra_s3 should be of type GetDegradedDs3DataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedDs3DataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_degraded_s3_data_replication_rules_spectra_s3(self, request):
+        if not isinstance(request, GetDegradedS3DataReplicationRulesSpectraS3Request):
+            raise TypeError('request for get_degraded_s3_data_replication_rules_spectra_s3 should be of type GetDegradedS3DataReplicationRulesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDegradedS3DataReplicationRulesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_blob_azure_targets_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBlobAzureTargetsSpectraS3Request):
+            raise TypeError('request for get_suspect_blob_azure_targets_spectra_s3 should be of type GetSuspectBlobAzureTargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBlobAzureTargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_blob_ds3_targets_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBlobDs3TargetsSpectraS3Request):
+            raise TypeError('request for get_suspect_blob_ds3_targets_spectra_s3 should be of type GetSuspectBlobDs3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBlobDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_blob_pools_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBlobPoolsSpectraS3Request):
+            raise TypeError('request for get_suspect_blob_pools_spectra_s3 should be of type GetSuspectBlobPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBlobPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_blob_s3_targets_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBlobS3TargetsSpectraS3Request):
+            raise TypeError('request for get_suspect_blob_s3_targets_spectra_s3 should be of type GetSuspectBlobS3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBlobS3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_blob_tapes_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBlobTapesSpectraS3Request):
+            raise TypeError('request for get_suspect_blob_tapes_spectra_s3 should be of type GetSuspectBlobTapesSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBlobTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_buckets_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectBucketsSpectraS3Request):
+            raise TypeError('request for get_suspect_buckets_spectra_s3 should be of type GetSuspectBucketsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectBucketsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_objects_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectObjectsSpectraS3Request):
+            raise TypeError('request for get_suspect_objects_spectra_s3 should be of type GetSuspectObjectsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectObjectsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_suspect_objects_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, GetSuspectObjectsWithFullDetailsSpectraS3Request):
+            raise TypeError('request for get_suspect_objects_with_full_details_spectra_s3 should be of type GetSuspectObjectsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSuspectObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def mark_suspect_blob_azure_targets_as_degraded_spectra_s3(self, request):
+        if not isinstance(request, MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request):
+            raise TypeError('request for mark_suspect_blob_azure_targets_as_degraded_spectra_s3 should be of type MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request but was ' + request.__class__.__name__)
         return MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
     
     def mark_suspect_blob_ds3_targets_as_degraded_spectra_s3(self, request):
+        if not isinstance(request, MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request):
+            raise TypeError('request for mark_suspect_blob_ds3_targets_as_degraded_spectra_s3 should be of type MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request but was ' + request.__class__.__name__)
         return MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
     
     def mark_suspect_blob_pools_as_degraded_spectra_s3(self, request):
+        if not isinstance(request, MarkSuspectBlobPoolsAsDegradedSpectraS3Request):
+            raise TypeError('request for mark_suspect_blob_pools_as_degraded_spectra_s3 should be of type MarkSuspectBlobPoolsAsDegradedSpectraS3Request but was ' + request.__class__.__name__)
         return MarkSuspectBlobPoolsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
     
     def mark_suspect_blob_s3_targets_as_degraded_spectra_s3(self, request):
+        if not isinstance(request, MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request):
+            raise TypeError('request for mark_suspect_blob_s3_targets_as_degraded_spectra_s3 should be of type MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request but was ' + request.__class__.__name__)
         return MarkSuspectBlobS3TargetsAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
     
     def mark_suspect_blob_tapes_as_degraded_spectra_s3(self, request):
+        if not isinstance(request, MarkSuspectBlobTapesAsDegradedSpectraS3Request):
+            raise TypeError('request for mark_suspect_blob_tapes_as_degraded_spectra_s3 should be of type MarkSuspectBlobTapesAsDegradedSpectraS3Request but was ' + request.__class__.__name__)
         return MarkSuspectBlobTapesAsDegradedSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_group_group_member_spectra_s3(self, request):
+        if not isinstance(request, PutGroupGroupMemberSpectraS3Request):
+            raise TypeError('request for put_group_group_member_spectra_s3 should be of type PutGroupGroupMemberSpectraS3Request but was ' + request.__class__.__name__)
         return PutGroupGroupMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_group_spectra_s3(self, request):
+        if not isinstance(request, PutGroupSpectraS3Request):
+            raise TypeError('request for put_group_spectra_s3 should be of type PutGroupSpectraS3Request but was ' + request.__class__.__name__)
         return PutGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_user_group_member_spectra_s3(self, request):
+        if not isinstance(request, PutUserGroupMemberSpectraS3Request):
+            raise TypeError('request for put_user_group_member_spectra_s3 should be of type PutUserGroupMemberSpectraS3Request but was ' + request.__class__.__name__)
         return PutUserGroupMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_group_member_spectra_s3(self, request):
+        if not isinstance(request, DeleteGroupMemberSpectraS3Request):
+            raise TypeError('request for delete_group_member_spectra_s3 should be of type DeleteGroupMemberSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteGroupMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_group_spectra_s3(self, request):
+        if not isinstance(request, DeleteGroupSpectraS3Request):
+            raise TypeError('request for delete_group_spectra_s3 should be of type DeleteGroupSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_group_member_spectra_s3(self, request):
+        if not isinstance(request, GetGroupMemberSpectraS3Request):
+            raise TypeError('request for get_group_member_spectra_s3 should be of type GetGroupMemberSpectraS3Request but was ' + request.__class__.__name__)
         return GetGroupMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_group_members_spectra_s3(self, request):
+        if not isinstance(request, GetGroupMembersSpectraS3Request):
+            raise TypeError('request for get_group_members_spectra_s3 should be of type GetGroupMembersSpectraS3Request but was ' + request.__class__.__name__)
         return GetGroupMembersSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_group_spectra_s3(self, request):
+        if not isinstance(request, GetGroupSpectraS3Request):
+            raise TypeError('request for get_group_spectra_s3 should be of type GetGroupSpectraS3Request but was ' + request.__class__.__name__)
         return GetGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_groups_spectra_s3(self, request):
+        if not isinstance(request, GetGroupsSpectraS3Request):
+            raise TypeError('request for get_groups_spectra_s3 should be of type GetGroupsSpectraS3Request but was ' + request.__class__.__name__)
         return GetGroupsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_group_spectra_s3(self, request):
+        if not isinstance(request, ModifyGroupSpectraS3Request):
+            raise TypeError('request for modify_group_spectra_s3 should be of type ModifyGroupSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_user_is_member_of_group_spectra_s3(self, request):
+        if not isinstance(request, VerifyUserIsMemberOfGroupSpectraS3Request):
+            raise TypeError('request for verify_user_is_member_of_group_spectra_s3 should be of type VerifyUserIsMemberOfGroupSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyUserIsMemberOfGroupSpectraS3Response(self.net_client.get_response(request), request)
     
     def allocate_job_chunk_spectra_s3(self, request):
+        if not isinstance(request, AllocateJobChunkSpectraS3Request):
+            raise TypeError('request for allocate_job_chunk_spectra_s3 should be of type AllocateJobChunkSpectraS3Request but was ' + request.__class__.__name__)
         return AllocateJobChunkSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_active_job_spectra_s3(self, request):
+        if not isinstance(request, CancelActiveJobSpectraS3Request):
+            raise TypeError('request for cancel_active_job_spectra_s3 should be of type CancelActiveJobSpectraS3Request but was ' + request.__class__.__name__)
         return CancelActiveJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_all_active_jobs_spectra_s3(self, request):
+        if not isinstance(request, CancelAllActiveJobsSpectraS3Request):
+            raise TypeError('request for cancel_all_active_jobs_spectra_s3 should be of type CancelAllActiveJobsSpectraS3Request but was ' + request.__class__.__name__)
         return CancelAllActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_all_jobs_spectra_s3(self, request):
+        if not isinstance(request, CancelAllJobsSpectraS3Request):
+            raise TypeError('request for cancel_all_jobs_spectra_s3 should be of type CancelAllJobsSpectraS3Request but was ' + request.__class__.__name__)
         return CancelAllJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_job_spectra_s3(self, request):
+        if not isinstance(request, CancelJobSpectraS3Request):
+            raise TypeError('request for cancel_job_spectra_s3 should be of type CancelJobSpectraS3Request but was ' + request.__class__.__name__)
         return CancelJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_all_canceled_jobs_spectra_s3(self, request):
+        if not isinstance(request, ClearAllCanceledJobsSpectraS3Request):
+            raise TypeError('request for clear_all_canceled_jobs_spectra_s3 should be of type ClearAllCanceledJobsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearAllCanceledJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def clear_all_completed_jobs_spectra_s3(self, request):
+        if not isinstance(request, ClearAllCompletedJobsSpectraS3Request):
+            raise TypeError('request for clear_all_completed_jobs_spectra_s3 should be of type ClearAllCompletedJobsSpectraS3Request but was ' + request.__class__.__name__)
         return ClearAllCompletedJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def close_aggregating_job_spectra_s3(self, request):
+        if not isinstance(request, CloseAggregatingJobSpectraS3Request):
+            raise TypeError('request for close_aggregating_job_spectra_s3 should be of type CloseAggregatingJobSpectraS3Request but was ' + request.__class__.__name__)
         return CloseAggregatingJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_bulk_job_spectra_s3(self, request):
+        if not isinstance(request, GetBulkJobSpectraS3Request):
+            raise TypeError('request for get_bulk_job_spectra_s3 should be of type GetBulkJobSpectraS3Request but was ' + request.__class__.__name__)
         return GetBulkJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_bulk_job_spectra_s3(self, request):
+        if not isinstance(request, PutBulkJobSpectraS3Request):
+            raise TypeError('request for put_bulk_job_spectra_s3 should be of type PutBulkJobSpectraS3Request but was ' + request.__class__.__name__)
         return PutBulkJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_bulk_job_spectra_s3(self, request):
+        if not isinstance(request, VerifyBulkJobSpectraS3Request):
+            raise TypeError('request for verify_bulk_job_spectra_s3 should be of type VerifyBulkJobSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyBulkJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_active_job_spectra_s3(self, request):
+        if not isinstance(request, GetActiveJobSpectraS3Request):
+            raise TypeError('request for get_active_job_spectra_s3 should be of type GetActiveJobSpectraS3Request but was ' + request.__class__.__name__)
         return GetActiveJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_active_jobs_spectra_s3(self, request):
+        if not isinstance(request, GetActiveJobsSpectraS3Request):
+            raise TypeError('request for get_active_jobs_spectra_s3 should be of type GetActiveJobsSpectraS3Request but was ' + request.__class__.__name__)
         return GetActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_canceled_job_spectra_s3(self, request):
+        if not isinstance(request, GetCanceledJobSpectraS3Request):
+            raise TypeError('request for get_canceled_job_spectra_s3 should be of type GetCanceledJobSpectraS3Request but was ' + request.__class__.__name__)
         return GetCanceledJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_canceled_jobs_spectra_s3(self, request):
+        if not isinstance(request, GetCanceledJobsSpectraS3Request):
+            raise TypeError('request for get_canceled_jobs_spectra_s3 should be of type GetCanceledJobsSpectraS3Request but was ' + request.__class__.__name__)
         return GetCanceledJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_completed_job_spectra_s3(self, request):
+        if not isinstance(request, GetCompletedJobSpectraS3Request):
+            raise TypeError('request for get_completed_job_spectra_s3 should be of type GetCompletedJobSpectraS3Request but was ' + request.__class__.__name__)
         return GetCompletedJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_completed_jobs_spectra_s3(self, request):
+        if not isinstance(request, GetCompletedJobsSpectraS3Request):
+            raise TypeError('request for get_completed_jobs_spectra_s3 should be of type GetCompletedJobsSpectraS3Request but was ' + request.__class__.__name__)
         return GetCompletedJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_chunk_dao_spectra_s3(self, request):
+        if not isinstance(request, GetJobChunkDaoSpectraS3Request):
+            raise TypeError('request for get_job_chunk_dao_spectra_s3 should be of type GetJobChunkDaoSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobChunkDaoSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_chunk_spectra_s3(self, request):
+        if not isinstance(request, GetJobChunkSpectraS3Request):
+            raise TypeError('request for get_job_chunk_spectra_s3 should be of type GetJobChunkSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobChunkSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_chunks_ready_for_client_processing_spectra_s3(self, request):
+        if not isinstance(request, GetJobChunksReadyForClientProcessingSpectraS3Request):
+            raise TypeError('request for get_job_chunks_ready_for_client_processing_spectra_s3 should be of type GetJobChunksReadyForClientProcessingSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobChunksReadyForClientProcessingSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_spectra_s3(self, request):
+        if not isinstance(request, GetJobSpectraS3Request):
+            raise TypeError('request for get_job_spectra_s3 should be of type GetJobSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_to_replicate_spectra_s3(self, request):
+        if not isinstance(request, GetJobToReplicateSpectraS3Request):
+            raise TypeError('request for get_job_to_replicate_spectra_s3 should be of type GetJobToReplicateSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobToReplicateSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_jobs_spectra_s3(self, request):
+        if not isinstance(request, GetJobsSpectraS3Request):
+            raise TypeError('request for get_jobs_spectra_s3 should be of type GetJobsSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_active_job_spectra_s3(self, request):
+        if not isinstance(request, ModifyActiveJobSpectraS3Request):
+            raise TypeError('request for modify_active_job_spectra_s3 should be of type ModifyActiveJobSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyActiveJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_job_spectra_s3(self, request):
+        if not isinstance(request, ModifyJobSpectraS3Request):
+            raise TypeError('request for modify_job_spectra_s3 should be of type ModifyJobSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def replicate_put_job_spectra_s3(self, request):
+        if not isinstance(request, ReplicatePutJobSpectraS3Request):
+            raise TypeError('request for replicate_put_job_spectra_s3 should be of type ReplicatePutJobSpectraS3Request but was ' + request.__class__.__name__)
         return ReplicatePutJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def truncate_active_job_spectra_s3(self, request):
+        if not isinstance(request, TruncateActiveJobSpectraS3Request):
+            raise TypeError('request for truncate_active_job_spectra_s3 should be of type TruncateActiveJobSpectraS3Request but was ' + request.__class__.__name__)
         return TruncateActiveJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def truncate_all_active_jobs_spectra_s3(self, request):
+        if not isinstance(request, TruncateAllActiveJobsSpectraS3Request):
+            raise TypeError('request for truncate_all_active_jobs_spectra_s3 should be of type TruncateAllActiveJobsSpectraS3Request but was ' + request.__class__.__name__)
         return TruncateAllActiveJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def truncate_all_jobs_spectra_s3(self, request):
+        if not isinstance(request, TruncateAllJobsSpectraS3Request):
+            raise TypeError('request for truncate_all_jobs_spectra_s3 should be of type TruncateAllJobsSpectraS3Request but was ' + request.__class__.__name__)
         return TruncateAllJobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def truncate_job_spectra_s3(self, request):
+        if not isinstance(request, TruncateJobSpectraS3Request):
+            raise TypeError('request for truncate_job_spectra_s3 should be of type TruncateJobSpectraS3Request but was ' + request.__class__.__name__)
         return TruncateJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_safe_to_create_put_job_spectra_s3(self, request):
+        if not isinstance(request, VerifySafeToCreatePutJobSpectraS3Request):
+            raise TypeError('request for verify_safe_to_create_put_job_spectra_s3 should be of type VerifySafeToCreatePutJobSpectraS3Request but was ' + request.__class__.__name__)
         return VerifySafeToCreatePutJobSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_node_spectra_s3(self, request):
+        if not isinstance(request, GetNodeSpectraS3Request):
+            raise TypeError('request for get_node_spectra_s3 should be of type GetNodeSpectraS3Request but was ' + request.__class__.__name__)
         return GetNodeSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_nodes_spectra_s3(self, request):
+        if not isinstance(request, GetNodesSpectraS3Request):
+            raise TypeError('request for get_nodes_spectra_s3 should be of type GetNodesSpectraS3Request but was ' + request.__class__.__name__)
         return GetNodesSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_node_spectra_s3(self, request):
+        if not isinstance(request, ModifyNodeSpectraS3Request):
+            raise TypeError('request for modify_node_spectra_s3 should be of type ModifyNodeSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyNodeSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_azure_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutAzureTargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_azure_target_failure_notification_registration_spectra_s3 should be of type PutAzureTargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutAzureTargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_ds3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutDs3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_ds3_target_failure_notification_registration_spectra_s3 should be of type PutDs3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_job_completed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutJobCompletedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_job_completed_notification_registration_spectra_s3 should be of type PutJobCompletedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_job_created_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutJobCreatedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_job_created_notification_registration_spectra_s3 should be of type PutJobCreatedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutJobCreatedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_job_creation_failed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutJobCreationFailedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_job_creation_failed_notification_registration_spectra_s3 should be of type PutJobCreationFailedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_object_cached_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutObjectCachedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_object_cached_notification_registration_spectra_s3 should be of type PutObjectCachedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_object_lost_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutObjectLostNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_object_lost_notification_registration_spectra_s3 should be of type PutObjectLostNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutObjectLostNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_object_persisted_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutObjectPersistedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_object_persisted_notification_registration_spectra_s3 should be of type PutObjectPersistedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutObjectPersistedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_pool_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutPoolFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_pool_failure_notification_registration_spectra_s3 should be of type PutPoolFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutPoolFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_s3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutS3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_s3_target_failure_notification_registration_spectra_s3 should be of type PutS3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutS3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_storage_domain_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutStorageDomainFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_storage_domain_failure_notification_registration_spectra_s3 should be of type PutStorageDomainFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutStorageDomainFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_system_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutSystemFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_system_failure_notification_registration_spectra_s3 should be of type PutSystemFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutSystemFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_tape_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutTapeFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_tape_failure_notification_registration_spectra_s3 should be of type PutTapeFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutTapeFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_tape_partition_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, PutTapePartitionFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for put_tape_partition_failure_notification_registration_spectra_s3 should be of type PutTapePartitionFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return PutTapePartitionFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureTargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_azure_target_failure_notification_registration_spectra_s3 should be of type DeleteAzureTargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureTargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_ds3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteDs3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_ds3_target_failure_notification_registration_spectra_s3 should be of type DeleteDs3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_job_completed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteJobCompletedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_job_completed_notification_registration_spectra_s3 should be of type DeleteJobCompletedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_job_created_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteJobCreatedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_job_created_notification_registration_spectra_s3 should be of type DeleteJobCreatedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteJobCreatedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_job_creation_failed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteJobCreationFailedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_job_creation_failed_notification_registration_spectra_s3 should be of type DeleteJobCreationFailedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_object_cached_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteObjectCachedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_object_cached_notification_registration_spectra_s3 should be of type DeleteObjectCachedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_object_lost_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteObjectLostNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_object_lost_notification_registration_spectra_s3 should be of type DeleteObjectLostNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteObjectLostNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_object_persisted_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteObjectPersistedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_object_persisted_notification_registration_spectra_s3 should be of type DeleteObjectPersistedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteObjectPersistedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_pool_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeletePoolFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_pool_failure_notification_registration_spectra_s3 should be of type DeletePoolFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeletePoolFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_s3_target_failure_notification_registration_spectra_s3 should be of type DeleteS3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_storage_domain_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteStorageDomainFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_storage_domain_failure_notification_registration_spectra_s3 should be of type DeleteStorageDomainFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteStorageDomainFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_system_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteSystemFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_system_failure_notification_registration_spectra_s3 should be of type DeleteSystemFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteSystemFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapeFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_tape_failure_notification_registration_spectra_s3 should be of type DeleteTapeFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapeFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_partition_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapePartitionFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for delete_tape_partition_failure_notification_registration_spectra_s3 should be of type DeleteTapePartitionFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapePartitionFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_azure_target_failure_notification_registration_spectra_s3 should be of type GetAzureTargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_azure_target_failure_notification_registrations_spectra_s3 should be of type GetAzureTargetFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_ds3_target_failure_notification_registration_spectra_s3 should be of type GetDs3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_ds3_target_failure_notification_registrations_spectra_s3 should be of type GetDs3TargetFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_completed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetJobCompletedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_job_completed_notification_registration_spectra_s3 should be of type GetJobCompletedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCompletedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_completed_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetJobCompletedNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_job_completed_notification_registrations_spectra_s3 should be of type GetJobCompletedNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCompletedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_created_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetJobCreatedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_job_created_notification_registration_spectra_s3 should be of type GetJobCreatedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCreatedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_created_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetJobCreatedNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_job_created_notification_registrations_spectra_s3 should be of type GetJobCreatedNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCreatedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_creation_failed_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetJobCreationFailedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_job_creation_failed_notification_registration_spectra_s3 should be of type GetJobCreationFailedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCreationFailedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_job_creation_failed_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetJobCreationFailedNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_job_creation_failed_notification_registrations_spectra_s3 should be of type GetJobCreationFailedNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetJobCreationFailedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_cached_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetObjectCachedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_object_cached_notification_registration_spectra_s3 should be of type GetObjectCachedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectCachedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_cached_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetObjectCachedNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_object_cached_notification_registrations_spectra_s3 should be of type GetObjectCachedNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectCachedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_lost_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetObjectLostNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_object_lost_notification_registration_spectra_s3 should be of type GetObjectLostNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectLostNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_lost_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetObjectLostNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_object_lost_notification_registrations_spectra_s3 should be of type GetObjectLostNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectLostNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_persisted_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetObjectPersistedNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_object_persisted_notification_registration_spectra_s3 should be of type GetObjectPersistedNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectPersistedNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_persisted_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetObjectPersistedNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_object_persisted_notification_registrations_spectra_s3 should be of type GetObjectPersistedNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectPersistedNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetPoolFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_pool_failure_notification_registration_spectra_s3 should be of type GetPoolFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetPoolFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_pool_failure_notification_registrations_spectra_s3 should be of type GetPoolFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_s3_target_failure_notification_registration_spectra_s3 should be of type GetS3TargetFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_s3_target_failure_notification_registrations_spectra_s3 should be of type GetS3TargetFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_storage_domain_failure_notification_registration_spectra_s3 should be of type GetStorageDomainFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_storage_domain_failure_notification_registrations_spectra_s3 should be of type GetStorageDomainFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_system_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetSystemFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_system_failure_notification_registration_spectra_s3 should be of type GetSystemFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetSystemFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_system_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetSystemFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_system_failure_notification_registrations_spectra_s3 should be of type GetSystemFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetSystemFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetTapeFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_tape_failure_notification_registration_spectra_s3 should be of type GetTapeFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetTapeFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_tape_failure_notification_registrations_spectra_s3 should be of type GetTapeFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partition_failure_notification_registration_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionFailureNotificationRegistrationSpectraS3Request):
+            raise TypeError('request for get_tape_partition_failure_notification_registration_spectra_s3 should be of type GetTapePartitionFailureNotificationRegistrationSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionFailureNotificationRegistrationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partition_failure_notification_registrations_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionFailureNotificationRegistrationsSpectraS3Request):
+            raise TypeError('request for get_tape_partition_failure_notification_registrations_spectra_s3 should be of type GetTapePartitionFailureNotificationRegistrationsSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionFailureNotificationRegistrationsSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_folder_recursively_spectra_s3(self, request):
+        if not isinstance(request, DeleteFolderRecursivelySpectraS3Request):
+            raise TypeError('request for delete_folder_recursively_spectra_s3 should be of type DeleteFolderRecursivelySpectraS3Request but was ' + request.__class__.__name__)
         return DeleteFolderRecursivelySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blob_persistence_spectra_s3(self, request):
+        if not isinstance(request, GetBlobPersistenceSpectraS3Request):
+            raise TypeError('request for get_blob_persistence_spectra_s3 should be of type GetBlobPersistenceSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobPersistenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_object_details_spectra_s3(self, request):
+        if not isinstance(request, GetObjectDetailsSpectraS3Request):
+            raise TypeError('request for get_object_details_spectra_s3 should be of type GetObjectDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_objects_details_spectra_s3(self, request):
+        if not isinstance(request, GetObjectsDetailsSpectraS3Request):
+            raise TypeError('request for get_objects_details_spectra_s3 should be of type GetObjectsDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectsDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_objects_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, GetObjectsWithFullDetailsSpectraS3Request):
+            raise TypeError('request for get_objects_with_full_details_spectra_s3 should be of type GetObjectsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_physical_placement_for_objects_spectra_s3(self, request):
+        if not isinstance(request, GetPhysicalPlacementForObjectsSpectraS3Request):
+            raise TypeError('request for get_physical_placement_for_objects_spectra_s3 should be of type GetPhysicalPlacementForObjectsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPhysicalPlacementForObjectsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_physical_placement_for_objects_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request):
+            raise TypeError('request for get_physical_placement_for_objects_with_full_details_spectra_s3 should be of type GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_physical_placement_for_objects_spectra_s3(self, request):
+        if not isinstance(request, VerifyPhysicalPlacementForObjectsSpectraS3Request):
+            raise TypeError('request for verify_physical_placement_for_objects_spectra_s3 should be of type VerifyPhysicalPlacementForObjectsSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyPhysicalPlacementForObjectsSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_physical_placement_for_objects_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request):
+            raise TypeError('request for verify_physical_placement_for_objects_with_full_details_spectra_s3 should be of type VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_import_on_all_pools_spectra_s3(self, request):
+        if not isinstance(request, CancelImportOnAllPoolsSpectraS3Request):
+            raise TypeError('request for cancel_import_on_all_pools_spectra_s3 should be of type CancelImportOnAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return CancelImportOnAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_import_pool_spectra_s3(self, request):
+        if not isinstance(request, CancelImportPoolSpectraS3Request):
+            raise TypeError('request for cancel_import_pool_spectra_s3 should be of type CancelImportPoolSpectraS3Request but was ' + request.__class__.__name__)
         return CancelImportPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_verify_on_all_pools_spectra_s3(self, request):
+        if not isinstance(request, CancelVerifyOnAllPoolsSpectraS3Request):
+            raise TypeError('request for cancel_verify_on_all_pools_spectra_s3 should be of type CancelVerifyOnAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return CancelVerifyOnAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_verify_pool_spectra_s3(self, request):
+        if not isinstance(request, CancelVerifyPoolSpectraS3Request):
+            raise TypeError('request for cancel_verify_pool_spectra_s3 should be of type CancelVerifyPoolSpectraS3Request but was ' + request.__class__.__name__)
         return CancelVerifyPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def compact_all_pools_spectra_s3(self, request):
+        if not isinstance(request, CompactAllPoolsSpectraS3Request):
+            raise TypeError('request for compact_all_pools_spectra_s3 should be of type CompactAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return CompactAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def compact_pool_spectra_s3(self, request):
+        if not isinstance(request, CompactPoolSpectraS3Request):
+            raise TypeError('request for compact_pool_spectra_s3 should be of type CompactPoolSpectraS3Request but was ' + request.__class__.__name__)
         return CompactPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_pool_partition_spectra_s3(self, request):
+        if not isinstance(request, PutPoolPartitionSpectraS3Request):
+            raise TypeError('request for put_pool_partition_spectra_s3 should be of type PutPoolPartitionSpectraS3Request but was ' + request.__class__.__name__)
         return PutPoolPartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def deallocate_pool_spectra_s3(self, request):
+        if not isinstance(request, DeallocatePoolSpectraS3Request):
+            raise TypeError('request for deallocate_pool_spectra_s3 should be of type DeallocatePoolSpectraS3Request but was ' + request.__class__.__name__)
         return DeallocatePoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_permanently_lost_pool_spectra_s3(self, request):
+        if not isinstance(request, DeletePermanentlyLostPoolSpectraS3Request):
+            raise TypeError('request for delete_permanently_lost_pool_spectra_s3 should be of type DeletePermanentlyLostPoolSpectraS3Request but was ' + request.__class__.__name__)
         return DeletePermanentlyLostPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_pool_failure_spectra_s3(self, request):
+        if not isinstance(request, DeletePoolFailureSpectraS3Request):
+            raise TypeError('request for delete_pool_failure_spectra_s3 should be of type DeletePoolFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeletePoolFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_pool_partition_spectra_s3(self, request):
+        if not isinstance(request, DeletePoolPartitionSpectraS3Request):
+            raise TypeError('request for delete_pool_partition_spectra_s3 should be of type DeletePoolPartitionSpectraS3Request but was ' + request.__class__.__name__)
         return DeletePoolPartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def force_pool_environment_refresh_spectra_s3(self, request):
+        if not isinstance(request, ForcePoolEnvironmentRefreshSpectraS3Request):
+            raise TypeError('request for force_pool_environment_refresh_spectra_s3 should be of type ForcePoolEnvironmentRefreshSpectraS3Request but was ' + request.__class__.__name__)
         return ForcePoolEnvironmentRefreshSpectraS3Response(self.net_client.get_response(request), request)
     
     def format_all_foreign_pools_spectra_s3(self, request):
+        if not isinstance(request, FormatAllForeignPoolsSpectraS3Request):
+            raise TypeError('request for format_all_foreign_pools_spectra_s3 should be of type FormatAllForeignPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return FormatAllForeignPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def format_foreign_pool_spectra_s3(self, request):
+        if not isinstance(request, FormatForeignPoolSpectraS3Request):
+            raise TypeError('request for format_foreign_pool_spectra_s3 should be of type FormatForeignPoolSpectraS3Request but was ' + request.__class__.__name__)
         return FormatForeignPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blobs_on_pool_spectra_s3(self, request):
+        if not isinstance(request, GetBlobsOnPoolSpectraS3Request):
+            raise TypeError('request for get_blobs_on_pool_spectra_s3 should be of type GetBlobsOnPoolSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobsOnPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_failures_spectra_s3(self, request):
+        if not isinstance(request, GetPoolFailuresSpectraS3Request):
+            raise TypeError('request for get_pool_failures_spectra_s3 should be of type GetPoolFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_partition_spectra_s3(self, request):
+        if not isinstance(request, GetPoolPartitionSpectraS3Request):
+            raise TypeError('request for get_pool_partition_spectra_s3 should be of type GetPoolPartitionSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolPartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_partitions_spectra_s3(self, request):
+        if not isinstance(request, GetPoolPartitionsSpectraS3Request):
+            raise TypeError('request for get_pool_partitions_spectra_s3 should be of type GetPoolPartitionsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolPartitionsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pool_spectra_s3(self, request):
+        if not isinstance(request, GetPoolSpectraS3Request):
+            raise TypeError('request for get_pool_spectra_s3 should be of type GetPoolSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_pools_spectra_s3(self, request):
+        if not isinstance(request, GetPoolsSpectraS3Request):
+            raise TypeError('request for get_pools_spectra_s3 should be of type GetPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_all_pools_spectra_s3(self, request):
+        if not isinstance(request, ImportAllPoolsSpectraS3Request):
+            raise TypeError('request for import_all_pools_spectra_s3 should be of type ImportAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return ImportAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_pool_spectra_s3(self, request):
+        if not isinstance(request, ImportPoolSpectraS3Request):
+            raise TypeError('request for import_pool_spectra_s3 should be of type ImportPoolSpectraS3Request but was ' + request.__class__.__name__)
         return ImportPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_all_pools_spectra_s3(self, request):
+        if not isinstance(request, ModifyAllPoolsSpectraS3Request):
+            raise TypeError('request for modify_all_pools_spectra_s3 should be of type ModifyAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_pool_partition_spectra_s3(self, request):
+        if not isinstance(request, ModifyPoolPartitionSpectraS3Request):
+            raise TypeError('request for modify_pool_partition_spectra_s3 should be of type ModifyPoolPartitionSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyPoolPartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_pool_spectra_s3(self, request):
+        if not isinstance(request, ModifyPoolSpectraS3Request):
+            raise TypeError('request for modify_pool_spectra_s3 should be of type ModifyPoolSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_all_pools_spectra_s3(self, request):
+        if not isinstance(request, VerifyAllPoolsSpectraS3Request):
+            raise TypeError('request for verify_all_pools_spectra_s3 should be of type VerifyAllPoolsSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyAllPoolsSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_pool_spectra_s3(self, request):
+        if not isinstance(request, VerifyPoolSpectraS3Request):
+            raise TypeError('request for verify_pool_spectra_s3 should be of type VerifyPoolSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyPoolSpectraS3Response(self.net_client.get_response(request), request)
     
     def convert_storage_domain_to_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, ConvertStorageDomainToDs3TargetSpectraS3Request):
+            raise TypeError('request for convert_storage_domain_to_ds3_target_spectra_s3 should be of type ConvertStorageDomainToDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return ConvertStorageDomainToDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_pool_storage_domain_member_spectra_s3(self, request):
+        if not isinstance(request, PutPoolStorageDomainMemberSpectraS3Request):
+            raise TypeError('request for put_pool_storage_domain_member_spectra_s3 should be of type PutPoolStorageDomainMemberSpectraS3Request but was ' + request.__class__.__name__)
         return PutPoolStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_storage_domain_spectra_s3(self, request):
+        if not isinstance(request, PutStorageDomainSpectraS3Request):
+            raise TypeError('request for put_storage_domain_spectra_s3 should be of type PutStorageDomainSpectraS3Request but was ' + request.__class__.__name__)
         return PutStorageDomainSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_tape_storage_domain_member_spectra_s3(self, request):
+        if not isinstance(request, PutTapeStorageDomainMemberSpectraS3Request):
+            raise TypeError('request for put_tape_storage_domain_member_spectra_s3 should be of type PutTapeStorageDomainMemberSpectraS3Request but was ' + request.__class__.__name__)
         return PutTapeStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_storage_domain_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteStorageDomainFailureSpectraS3Request):
+            raise TypeError('request for delete_storage_domain_failure_spectra_s3 should be of type DeleteStorageDomainFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteStorageDomainFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_storage_domain_member_spectra_s3(self, request):
+        if not isinstance(request, DeleteStorageDomainMemberSpectraS3Request):
+            raise TypeError('request for delete_storage_domain_member_spectra_s3 should be of type DeleteStorageDomainMemberSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_storage_domain_spectra_s3(self, request):
+        if not isinstance(request, DeleteStorageDomainSpectraS3Request):
+            raise TypeError('request for delete_storage_domain_spectra_s3 should be of type DeleteStorageDomainSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteStorageDomainSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_failures_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainFailuresSpectraS3Request):
+            raise TypeError('request for get_storage_domain_failures_spectra_s3 should be of type GetStorageDomainFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_member_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainMemberSpectraS3Request):
+            raise TypeError('request for get_storage_domain_member_spectra_s3 should be of type GetStorageDomainMemberSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_members_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainMembersSpectraS3Request):
+            raise TypeError('request for get_storage_domain_members_spectra_s3 should be of type GetStorageDomainMembersSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainMembersSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domain_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainSpectraS3Request):
+            raise TypeError('request for get_storage_domain_spectra_s3 should be of type GetStorageDomainSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_storage_domains_spectra_s3(self, request):
+        if not isinstance(request, GetStorageDomainsSpectraS3Request):
+            raise TypeError('request for get_storage_domains_spectra_s3 should be of type GetStorageDomainsSpectraS3Request but was ' + request.__class__.__name__)
         return GetStorageDomainsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_storage_domain_member_spectra_s3(self, request):
+        if not isinstance(request, ModifyStorageDomainMemberSpectraS3Request):
+            raise TypeError('request for modify_storage_domain_member_spectra_s3 should be of type ModifyStorageDomainMemberSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyStorageDomainMemberSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_storage_domain_spectra_s3(self, request):
+        if not isinstance(request, ModifyStorageDomainSpectraS3Request):
+            raise TypeError('request for modify_storage_domain_spectra_s3 should be of type ModifyStorageDomainSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyStorageDomainSpectraS3Response(self.net_client.get_response(request), request)
     
     def force_feature_key_validation_spectra_s3(self, request):
+        if not isinstance(request, ForceFeatureKeyValidationSpectraS3Request):
+            raise TypeError('request for force_feature_key_validation_spectra_s3 should be of type ForceFeatureKeyValidationSpectraS3Request but was ' + request.__class__.__name__)
         return ForceFeatureKeyValidationSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_feature_keys_spectra_s3(self, request):
+        if not isinstance(request, GetFeatureKeysSpectraS3Request):
+            raise TypeError('request for get_feature_keys_spectra_s3 should be of type GetFeatureKeysSpectraS3Request but was ' + request.__class__.__name__)
         return GetFeatureKeysSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_system_failures_spectra_s3(self, request):
+        if not isinstance(request, GetSystemFailuresSpectraS3Request):
+            raise TypeError('request for get_system_failures_spectra_s3 should be of type GetSystemFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetSystemFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_system_information_spectra_s3(self, request):
+        if not isinstance(request, GetSystemInformationSpectraS3Request):
+            raise TypeError('request for get_system_information_spectra_s3 should be of type GetSystemInformationSpectraS3Request but was ' + request.__class__.__name__)
         return GetSystemInformationSpectraS3Response(self.net_client.get_response(request), request)
     
     def reset_instance_identifier_spectra_s3(self, request):
+        if not isinstance(request, ResetInstanceIdentifierSpectraS3Request):
+            raise TypeError('request for reset_instance_identifier_spectra_s3 should be of type ResetInstanceIdentifierSpectraS3Request but was ' + request.__class__.__name__)
         return ResetInstanceIdentifierSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_system_health_spectra_s3(self, request):
+        if not isinstance(request, VerifySystemHealthSpectraS3Request):
+            raise TypeError('request for verify_system_health_spectra_s3 should be of type VerifySystemHealthSpectraS3Request but was ' + request.__class__.__name__)
         return VerifySystemHealthSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_eject_on_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, CancelEjectOnAllTapesSpectraS3Request):
+            raise TypeError('request for cancel_eject_on_all_tapes_spectra_s3 should be of type CancelEjectOnAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return CancelEjectOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_eject_tape_spectra_s3(self, request):
+        if not isinstance(request, CancelEjectTapeSpectraS3Request):
+            raise TypeError('request for cancel_eject_tape_spectra_s3 should be of type CancelEjectTapeSpectraS3Request but was ' + request.__class__.__name__)
         return CancelEjectTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_format_on_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, CancelFormatOnAllTapesSpectraS3Request):
+            raise TypeError('request for cancel_format_on_all_tapes_spectra_s3 should be of type CancelFormatOnAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return CancelFormatOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_format_tape_spectra_s3(self, request):
+        if not isinstance(request, CancelFormatTapeSpectraS3Request):
+            raise TypeError('request for cancel_format_tape_spectra_s3 should be of type CancelFormatTapeSpectraS3Request but was ' + request.__class__.__name__)
         return CancelFormatTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_import_on_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, CancelImportOnAllTapesSpectraS3Request):
+            raise TypeError('request for cancel_import_on_all_tapes_spectra_s3 should be of type CancelImportOnAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return CancelImportOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_import_tape_spectra_s3(self, request):
+        if not isinstance(request, CancelImportTapeSpectraS3Request):
+            raise TypeError('request for cancel_import_tape_spectra_s3 should be of type CancelImportTapeSpectraS3Request but was ' + request.__class__.__name__)
         return CancelImportTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_online_on_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, CancelOnlineOnAllTapesSpectraS3Request):
+            raise TypeError('request for cancel_online_on_all_tapes_spectra_s3 should be of type CancelOnlineOnAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return CancelOnlineOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_online_tape_spectra_s3(self, request):
+        if not isinstance(request, CancelOnlineTapeSpectraS3Request):
+            raise TypeError('request for cancel_online_tape_spectra_s3 should be of type CancelOnlineTapeSpectraS3Request but was ' + request.__class__.__name__)
         return CancelOnlineTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_verify_on_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, CancelVerifyOnAllTapesSpectraS3Request):
+            raise TypeError('request for cancel_verify_on_all_tapes_spectra_s3 should be of type CancelVerifyOnAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return CancelVerifyOnAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def cancel_verify_tape_spectra_s3(self, request):
+        if not isinstance(request, CancelVerifyTapeSpectraS3Request):
+            raise TypeError('request for cancel_verify_tape_spectra_s3 should be of type CancelVerifyTapeSpectraS3Request but was ' + request.__class__.__name__)
         return CancelVerifyTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def clean_tape_drive_spectra_s3(self, request):
+        if not isinstance(request, CleanTapeDriveSpectraS3Request):
+            raise TypeError('request for clean_tape_drive_spectra_s3 should be of type CleanTapeDriveSpectraS3Request but was ' + request.__class__.__name__)
         return CleanTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_tape_density_directive_spectra_s3(self, request):
+        if not isinstance(request, PutTapeDensityDirectiveSpectraS3Request):
+            raise TypeError('request for put_tape_density_directive_spectra_s3 should be of type PutTapeDensityDirectiveSpectraS3Request but was ' + request.__class__.__name__)
         return PutTapeDensityDirectiveSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_permanently_lost_tape_spectra_s3(self, request):
+        if not isinstance(request, DeletePermanentlyLostTapeSpectraS3Request):
+            raise TypeError('request for delete_permanently_lost_tape_spectra_s3 should be of type DeletePermanentlyLostTapeSpectraS3Request but was ' + request.__class__.__name__)
         return DeletePermanentlyLostTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_density_directive_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapeDensityDirectiveSpectraS3Request):
+            raise TypeError('request for delete_tape_density_directive_spectra_s3 should be of type DeleteTapeDensityDirectiveSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapeDensityDirectiveSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_drive_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapeDriveSpectraS3Request):
+            raise TypeError('request for delete_tape_drive_spectra_s3 should be of type DeleteTapeDriveSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapeFailureSpectraS3Request):
+            raise TypeError('request for delete_tape_failure_spectra_s3 should be of type DeleteTapeFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapeFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_partition_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapePartitionFailureSpectraS3Request):
+            raise TypeError('request for delete_tape_partition_failure_spectra_s3 should be of type DeleteTapePartitionFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapePartitionFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_tape_partition_spectra_s3(self, request):
+        if not isinstance(request, DeleteTapePartitionSpectraS3Request):
+            raise TypeError('request for delete_tape_partition_spectra_s3 should be of type DeleteTapePartitionSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteTapePartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def eject_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, EjectAllTapesSpectraS3Request):
+            raise TypeError('request for eject_all_tapes_spectra_s3 should be of type EjectAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return EjectAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def eject_storage_domain_blobs_spectra_s3(self, request):
+        if not isinstance(request, EjectStorageDomainBlobsSpectraS3Request):
+            raise TypeError('request for eject_storage_domain_blobs_spectra_s3 should be of type EjectStorageDomainBlobsSpectraS3Request but was ' + request.__class__.__name__)
         return EjectStorageDomainBlobsSpectraS3Response(self.net_client.get_response(request), request)
     
     def eject_storage_domain_spectra_s3(self, request):
+        if not isinstance(request, EjectStorageDomainSpectraS3Request):
+            raise TypeError('request for eject_storage_domain_spectra_s3 should be of type EjectStorageDomainSpectraS3Request but was ' + request.__class__.__name__)
         return EjectStorageDomainSpectraS3Response(self.net_client.get_response(request), request)
     
     def eject_tape_spectra_s3(self, request):
+        if not isinstance(request, EjectTapeSpectraS3Request):
+            raise TypeError('request for eject_tape_spectra_s3 should be of type EjectTapeSpectraS3Request but was ' + request.__class__.__name__)
         return EjectTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def force_tape_environment_refresh_spectra_s3(self, request):
+        if not isinstance(request, ForceTapeEnvironmentRefreshSpectraS3Request):
+            raise TypeError('request for force_tape_environment_refresh_spectra_s3 should be of type ForceTapeEnvironmentRefreshSpectraS3Request but was ' + request.__class__.__name__)
         return ForceTapeEnvironmentRefreshSpectraS3Response(self.net_client.get_response(request), request)
     
     def format_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, FormatAllTapesSpectraS3Request):
+            raise TypeError('request for format_all_tapes_spectra_s3 should be of type FormatAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return FormatAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def format_tape_spectra_s3(self, request):
+        if not isinstance(request, FormatTapeSpectraS3Request):
+            raise TypeError('request for format_tape_spectra_s3 should be of type FormatTapeSpectraS3Request but was ' + request.__class__.__name__)
         return FormatTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blobs_on_tape_spectra_s3(self, request):
+        if not isinstance(request, GetBlobsOnTapeSpectraS3Request):
+            raise TypeError('request for get_blobs_on_tape_spectra_s3 should be of type GetBlobsOnTapeSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobsOnTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_density_directive_spectra_s3(self, request):
+        if not isinstance(request, GetTapeDensityDirectiveSpectraS3Request):
+            raise TypeError('request for get_tape_density_directive_spectra_s3 should be of type GetTapeDensityDirectiveSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeDensityDirectiveSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_density_directives_spectra_s3(self, request):
+        if not isinstance(request, GetTapeDensityDirectivesSpectraS3Request):
+            raise TypeError('request for get_tape_density_directives_spectra_s3 should be of type GetTapeDensityDirectivesSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeDensityDirectivesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_drive_spectra_s3(self, request):
+        if not isinstance(request, GetTapeDriveSpectraS3Request):
+            raise TypeError('request for get_tape_drive_spectra_s3 should be of type GetTapeDriveSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_drives_spectra_s3(self, request):
+        if not isinstance(request, GetTapeDrivesSpectraS3Request):
+            raise TypeError('request for get_tape_drives_spectra_s3 should be of type GetTapeDrivesSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeDrivesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_failures_spectra_s3(self, request):
+        if not isinstance(request, GetTapeFailuresSpectraS3Request):
+            raise TypeError('request for get_tape_failures_spectra_s3 should be of type GetTapeFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_libraries_spectra_s3(self, request):
+        if not isinstance(request, GetTapeLibrariesSpectraS3Request):
+            raise TypeError('request for get_tape_libraries_spectra_s3 should be of type GetTapeLibrariesSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeLibrariesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_library_spectra_s3(self, request):
+        if not isinstance(request, GetTapeLibrarySpectraS3Request):
+            raise TypeError('request for get_tape_library_spectra_s3 should be of type GetTapeLibrarySpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeLibrarySpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partition_failures_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionFailuresSpectraS3Request):
+            raise TypeError('request for get_tape_partition_failures_spectra_s3 should be of type GetTapePartitionFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partition_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionSpectraS3Request):
+            raise TypeError('request for get_tape_partition_spectra_s3 should be of type GetTapePartitionSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partition_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionWithFullDetailsSpectraS3Request):
+            raise TypeError('request for get_tape_partition_with_full_details_spectra_s3 should be of type GetTapePartitionWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partitions_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionsSpectraS3Request):
+            raise TypeError('request for get_tape_partitions_spectra_s3 should be of type GetTapePartitionsSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_partitions_with_full_details_spectra_s3(self, request):
+        if not isinstance(request, GetTapePartitionsWithFullDetailsSpectraS3Request):
+            raise TypeError('request for get_tape_partitions_with_full_details_spectra_s3 should be of type GetTapePartitionsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapePartitionsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tape_spectra_s3(self, request):
+        if not isinstance(request, GetTapeSpectraS3Request):
+            raise TypeError('request for get_tape_spectra_s3 should be of type GetTapeSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_tapes_spectra_s3(self, request):
+        if not isinstance(request, GetTapesSpectraS3Request):
+            raise TypeError('request for get_tapes_spectra_s3 should be of type GetTapesSpectraS3Request but was ' + request.__class__.__name__)
         return GetTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, ImportAllTapesSpectraS3Request):
+            raise TypeError('request for import_all_tapes_spectra_s3 should be of type ImportAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return ImportAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_tape_spectra_s3(self, request):
+        if not isinstance(request, ImportTapeSpectraS3Request):
+            raise TypeError('request for import_tape_spectra_s3 should be of type ImportTapeSpectraS3Request but was ' + request.__class__.__name__)
         return ImportTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def inspect_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, InspectAllTapesSpectraS3Request):
+            raise TypeError('request for inspect_all_tapes_spectra_s3 should be of type InspectAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return InspectAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def inspect_tape_spectra_s3(self, request):
+        if not isinstance(request, InspectTapeSpectraS3Request):
+            raise TypeError('request for inspect_tape_spectra_s3 should be of type InspectTapeSpectraS3Request but was ' + request.__class__.__name__)
         return InspectTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_all_tape_partitions_spectra_s3(self, request):
+        if not isinstance(request, ModifyAllTapePartitionsSpectraS3Request):
+            raise TypeError('request for modify_all_tape_partitions_spectra_s3 should be of type ModifyAllTapePartitionsSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAllTapePartitionsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_tape_drive_spectra_s3(self, request):
+        if not isinstance(request, ModifyTapeDriveSpectraS3Request):
+            raise TypeError('request for modify_tape_drive_spectra_s3 should be of type ModifyTapeDriveSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyTapeDriveSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_tape_partition_spectra_s3(self, request):
+        if not isinstance(request, ModifyTapePartitionSpectraS3Request):
+            raise TypeError('request for modify_tape_partition_spectra_s3 should be of type ModifyTapePartitionSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyTapePartitionSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_tape_spectra_s3(self, request):
+        if not isinstance(request, ModifyTapeSpectraS3Request):
+            raise TypeError('request for modify_tape_spectra_s3 should be of type ModifyTapeSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def online_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, OnlineAllTapesSpectraS3Request):
+            raise TypeError('request for online_all_tapes_spectra_s3 should be of type OnlineAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return OnlineAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def online_tape_spectra_s3(self, request):
+        if not isinstance(request, OnlineTapeSpectraS3Request):
+            raise TypeError('request for online_tape_spectra_s3 should be of type OnlineTapeSpectraS3Request but was ' + request.__class__.__name__)
         return OnlineTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def raw_import_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, RawImportAllTapesSpectraS3Request):
+            raise TypeError('request for raw_import_all_tapes_spectra_s3 should be of type RawImportAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return RawImportAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def raw_import_tape_spectra_s3(self, request):
+        if not isinstance(request, RawImportTapeSpectraS3Request):
+            raise TypeError('request for raw_import_tape_spectra_s3 should be of type RawImportTapeSpectraS3Request but was ' + request.__class__.__name__)
         return RawImportTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_all_tapes_spectra_s3(self, request):
+        if not isinstance(request, VerifyAllTapesSpectraS3Request):
+            raise TypeError('request for verify_all_tapes_spectra_s3 should be of type VerifyAllTapesSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyAllTapesSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_tape_spectra_s3(self, request):
+        if not isinstance(request, VerifyTapeSpectraS3Request):
+            raise TypeError('request for verify_tape_spectra_s3 should be of type VerifyTapeSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyTapeSpectraS3Response(self.net_client.get_response(request), request)
     
     def force_target_environment_refresh_spectra_s3(self, request):
+        if not isinstance(request, ForceTargetEnvironmentRefreshSpectraS3Request):
+            raise TypeError('request for force_target_environment_refresh_spectra_s3 should be of type ForceTargetEnvironmentRefreshSpectraS3Request but was ' + request.__class__.__name__)
         return ForceTargetEnvironmentRefreshSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_azure_target_bucket_name_spectra_s3(self, request):
+        if not isinstance(request, PutAzureTargetBucketNameSpectraS3Request):
+            raise TypeError('request for put_azure_target_bucket_name_spectra_s3 should be of type PutAzureTargetBucketNameSpectraS3Request but was ' + request.__class__.__name__)
         return PutAzureTargetBucketNameSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_azure_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, PutAzureTargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for put_azure_target_read_preference_spectra_s3 should be of type PutAzureTargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return PutAzureTargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_target_bucket_name_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureTargetBucketNameSpectraS3Request):
+            raise TypeError('request for delete_azure_target_bucket_name_spectra_s3 should be of type DeleteAzureTargetBucketNameSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureTargetBucketNameSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_target_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureTargetFailureSpectraS3Request):
+            raise TypeError('request for delete_azure_target_failure_spectra_s3 should be of type DeleteAzureTargetFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureTargetFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureTargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for delete_azure_target_read_preference_spectra_s3 should be of type DeleteAzureTargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureTargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_azure_target_spectra_s3(self, request):
+        if not isinstance(request, DeleteAzureTargetSpectraS3Request):
+            raise TypeError('request for delete_azure_target_spectra_s3 should be of type DeleteAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_bucket_names_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetBucketNamesSpectraS3Request):
+            raise TypeError('request for get_azure_target_bucket_names_spectra_s3 should be of type GetAzureTargetBucketNamesSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetBucketNamesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_failures_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetFailuresSpectraS3Request):
+            raise TypeError('request for get_azure_target_failures_spectra_s3 should be of type GetAzureTargetFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for get_azure_target_read_preference_spectra_s3 should be of type GetAzureTargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_read_preferences_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetReadPreferencesSpectraS3Request):
+            raise TypeError('request for get_azure_target_read_preferences_spectra_s3 should be of type GetAzureTargetReadPreferencesSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetReadPreferencesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_target_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetSpectraS3Request):
+            raise TypeError('request for get_azure_target_spectra_s3 should be of type GetAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_azure_targets_spectra_s3(self, request):
+        if not isinstance(request, GetAzureTargetsSpectraS3Request):
+            raise TypeError('request for get_azure_targets_spectra_s3 should be of type GetAzureTargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetAzureTargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blobs_on_azure_target_spectra_s3(self, request):
+        if not isinstance(request, GetBlobsOnAzureTargetSpectraS3Request):
+            raise TypeError('request for get_blobs_on_azure_target_spectra_s3 should be of type GetBlobsOnAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobsOnAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_azure_target_spectra_s3(self, request):
+        if not isinstance(request, ImportAzureTargetSpectraS3Request):
+            raise TypeError('request for import_azure_target_spectra_s3 should be of type ImportAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return ImportAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_all_azure_targets_spectra_s3(self, request):
+        if not isinstance(request, ModifyAllAzureTargetsSpectraS3Request):
+            raise TypeError('request for modify_all_azure_targets_spectra_s3 should be of type ModifyAllAzureTargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAllAzureTargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_azure_target_spectra_s3(self, request):
+        if not isinstance(request, ModifyAzureTargetSpectraS3Request):
+            raise TypeError('request for modify_azure_target_spectra_s3 should be of type ModifyAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def register_azure_target_spectra_s3(self, request):
+        if not isinstance(request, RegisterAzureTargetSpectraS3Request):
+            raise TypeError('request for register_azure_target_spectra_s3 should be of type RegisterAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return RegisterAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_azure_target_spectra_s3(self, request):
+        if not isinstance(request, VerifyAzureTargetSpectraS3Request):
+            raise TypeError('request for verify_azure_target_spectra_s3 should be of type VerifyAzureTargetSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyAzureTargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_ds3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, PutDs3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for put_ds3_target_read_preference_spectra_s3 should be of type PutDs3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return PutDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_ds3_target_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteDs3TargetFailureSpectraS3Request):
+            raise TypeError('request for delete_ds3_target_failure_spectra_s3 should be of type DeleteDs3TargetFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDs3TargetFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_ds3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, DeleteDs3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for delete_ds3_target_read_preference_spectra_s3 should be of type DeleteDs3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, DeleteDs3TargetSpectraS3Request):
+            raise TypeError('request for delete_ds3_target_spectra_s3 should be of type DeleteDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blobs_on_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, GetBlobsOnDs3TargetSpectraS3Request):
+            raise TypeError('request for get_blobs_on_ds3_target_spectra_s3 should be of type GetBlobsOnDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobsOnDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_data_policies_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetDataPoliciesSpectraS3Request):
+            raise TypeError('request for get_ds3_target_data_policies_spectra_s3 should be of type GetDs3TargetDataPoliciesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetDataPoliciesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_failures_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetFailuresSpectraS3Request):
+            raise TypeError('request for get_ds3_target_failures_spectra_s3 should be of type GetDs3TargetFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for get_ds3_target_read_preference_spectra_s3 should be of type GetDs3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_read_preferences_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetReadPreferencesSpectraS3Request):
+            raise TypeError('request for get_ds3_target_read_preferences_spectra_s3 should be of type GetDs3TargetReadPreferencesSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetReadPreferencesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetSpectraS3Request):
+            raise TypeError('request for get_ds3_target_spectra_s3 should be of type GetDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_ds3_targets_spectra_s3(self, request):
+        if not isinstance(request, GetDs3TargetsSpectraS3Request):
+            raise TypeError('request for get_ds3_targets_spectra_s3 should be of type GetDs3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_all_ds3_targets_spectra_s3(self, request):
+        if not isinstance(request, ModifyAllDs3TargetsSpectraS3Request):
+            raise TypeError('request for modify_all_ds3_targets_spectra_s3 should be of type ModifyAllDs3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAllDs3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, ModifyDs3TargetSpectraS3Request):
+            raise TypeError('request for modify_ds3_target_spectra_s3 should be of type ModifyDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def pair_back_registered_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, PairBackRegisteredDs3TargetSpectraS3Request):
+            raise TypeError('request for pair_back_registered_ds3_target_spectra_s3 should be of type PairBackRegisteredDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return PairBackRegisteredDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def register_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, RegisterDs3TargetSpectraS3Request):
+            raise TypeError('request for register_ds3_target_spectra_s3 should be of type RegisterDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return RegisterDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_ds3_target_spectra_s3(self, request):
+        if not isinstance(request, VerifyDs3TargetSpectraS3Request):
+            raise TypeError('request for verify_ds3_target_spectra_s3 should be of type VerifyDs3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyDs3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_s3_target_bucket_name_spectra_s3(self, request):
+        if not isinstance(request, PutS3TargetBucketNameSpectraS3Request):
+            raise TypeError('request for put_s3_target_bucket_name_spectra_s3 should be of type PutS3TargetBucketNameSpectraS3Request but was ' + request.__class__.__name__)
         return PutS3TargetBucketNameSpectraS3Response(self.net_client.get_response(request), request)
     
     def put_s3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, PutS3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for put_s3_target_read_preference_spectra_s3 should be of type PutS3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return PutS3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_target_bucket_name_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3TargetBucketNameSpectraS3Request):
+            raise TypeError('request for delete_s3_target_bucket_name_spectra_s3 should be of type DeleteS3TargetBucketNameSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3TargetBucketNameSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_target_failure_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3TargetFailureSpectraS3Request):
+            raise TypeError('request for delete_s3_target_failure_spectra_s3 should be of type DeleteS3TargetFailureSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3TargetFailureSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for delete_s3_target_read_preference_spectra_s3 should be of type DeleteS3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def delete_s3_target_spectra_s3(self, request):
+        if not isinstance(request, DeleteS3TargetSpectraS3Request):
+            raise TypeError('request for delete_s3_target_spectra_s3 should be of type DeleteS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return DeleteS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_blobs_on_s3_target_spectra_s3(self, request):
+        if not isinstance(request, GetBlobsOnS3TargetSpectraS3Request):
+            raise TypeError('request for get_blobs_on_s3_target_spectra_s3 should be of type GetBlobsOnS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetBlobsOnS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_bucket_names_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetBucketNamesSpectraS3Request):
+            raise TypeError('request for get_s3_target_bucket_names_spectra_s3 should be of type GetS3TargetBucketNamesSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetBucketNamesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_failures_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetFailuresSpectraS3Request):
+            raise TypeError('request for get_s3_target_failures_spectra_s3 should be of type GetS3TargetFailuresSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetFailuresSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_read_preference_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetReadPreferenceSpectraS3Request):
+            raise TypeError('request for get_s3_target_read_preference_spectra_s3 should be of type GetS3TargetReadPreferenceSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetReadPreferenceSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_read_preferences_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetReadPreferencesSpectraS3Request):
+            raise TypeError('request for get_s3_target_read_preferences_spectra_s3 should be of type GetS3TargetReadPreferencesSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetReadPreferencesSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_target_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetSpectraS3Request):
+            raise TypeError('request for get_s3_target_spectra_s3 should be of type GetS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_s3_targets_spectra_s3(self, request):
+        if not isinstance(request, GetS3TargetsSpectraS3Request):
+            raise TypeError('request for get_s3_targets_spectra_s3 should be of type GetS3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return GetS3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def import_s3_target_spectra_s3(self, request):
+        if not isinstance(request, ImportS3TargetSpectraS3Request):
+            raise TypeError('request for import_s3_target_spectra_s3 should be of type ImportS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return ImportS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_all_s3_targets_spectra_s3(self, request):
+        if not isinstance(request, ModifyAllS3TargetsSpectraS3Request):
+            raise TypeError('request for modify_all_s3_targets_spectra_s3 should be of type ModifyAllS3TargetsSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyAllS3TargetsSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_s3_target_spectra_s3(self, request):
+        if not isinstance(request, ModifyS3TargetSpectraS3Request):
+            raise TypeError('request for modify_s3_target_spectra_s3 should be of type ModifyS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def register_s3_target_spectra_s3(self, request):
+        if not isinstance(request, RegisterS3TargetSpectraS3Request):
+            raise TypeError('request for register_s3_target_spectra_s3 should be of type RegisterS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return RegisterS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_s3_target_spectra_s3(self, request):
+        if not isinstance(request, VerifyS3TargetSpectraS3Request):
+            raise TypeError('request for verify_s3_target_spectra_s3 should be of type VerifyS3TargetSpectraS3Request but was ' + request.__class__.__name__)
         return VerifyS3TargetSpectraS3Response(self.net_client.get_response(request), request)
     
     def delegate_create_user_spectra_s3(self, request):
+        if not isinstance(request, DelegateCreateUserSpectraS3Request):
+            raise TypeError('request for delegate_create_user_spectra_s3 should be of type DelegateCreateUserSpectraS3Request but was ' + request.__class__.__name__)
         return DelegateCreateUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def delegate_delete_user_spectra_s3(self, request):
+        if not isinstance(request, DelegateDeleteUserSpectraS3Request):
+            raise TypeError('request for delegate_delete_user_spectra_s3 should be of type DelegateDeleteUserSpectraS3Request but was ' + request.__class__.__name__)
         return DelegateDeleteUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_user_spectra_s3(self, request):
+        if not isinstance(request, GetUserSpectraS3Request):
+            raise TypeError('request for get_user_spectra_s3 should be of type GetUserSpectraS3Request but was ' + request.__class__.__name__)
         return GetUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def get_users_spectra_s3(self, request):
+        if not isinstance(request, GetUsersSpectraS3Request):
+            raise TypeError('request for get_users_spectra_s3 should be of type GetUsersSpectraS3Request but was ' + request.__class__.__name__)
         return GetUsersSpectraS3Response(self.net_client.get_response(request), request)
     
     def modify_user_spectra_s3(self, request):
+        if not isinstance(request, ModifyUserSpectraS3Request):
+            raise TypeError('request for modify_user_spectra_s3 should be of type ModifyUserSpectraS3Request but was ' + request.__class__.__name__)
         return ModifyUserSpectraS3Response(self.net_client.get_response(request), request)
     
     def regenerate_user_secret_key_spectra_s3(self, request):
+        if not isinstance(request, RegenerateUserSecretKeySpectraS3Request):
+            raise TypeError('request for regenerate_user_secret_key_spectra_s3 should be of type RegenerateUserSecretKeySpectraS3Request but was ' + request.__class__.__name__)
         return RegenerateUserSecretKeySpectraS3Response(self.net_client.get_response(request), request)
