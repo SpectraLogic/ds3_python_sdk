@@ -664,7 +664,20 @@ class ObjectTestCase(Ds3TestCase):
         response = self.client.get_objects_with_full_details_spectra_s3(request)
         
         self.assertEqual(len(response.result['ObjectList']), 4)
-    
+
+    def testVerifyPhysicalPlacement(self):
+        populateTestData(self.client, bucketName, self.getDataPolicyId())
+
+        object_list = FileObjectList([FileObject(name="beowulf.txt")])
+
+        request = VerifyPhysicalPlacementForObjectsSpectraS3Request(bucket_name=bucketName, object_list=object_list)
+
+        try:
+            self.client.verify_physical_placement_for_objects_spectra_s3(request)
+        except RequestFailed as err:
+            self.assertEqual(err.http_error_code, 404)
+
+
 class ObjectMetadataTestCase(Ds3TestCase):
     def testHeadObject(self):
         """tests headObject"""
@@ -1331,3 +1344,13 @@ class Ds3NetworkTestCase(Ds3TestCase):
         result = self.client.net_client.build_path("/test/path/" + obj_name)
 
         self.assertEqual(result, expected)
+
+
+class UnitTestCase(unittest.TestCase):
+    def testVerifyPhysicalPlacementRequestPayload(self):
+        obj1 = FileObject(name="obj1")
+        obj2 = FileObject(name="obj2")
+        l = FileObjectList([obj1, obj2])
+
+        request = VerifyPhysicalPlacementForObjectsSpectraS3Request(bucket_name="bucketName", object_list=l)
+        self.assertEqual(request.body, '<Objects><Object Name="obj1" /><Object Name="obj2" /></Objects>')
