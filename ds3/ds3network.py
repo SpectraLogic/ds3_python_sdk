@@ -213,7 +213,7 @@ class NetworkClient(object):
 
         headers.update(amz_headers)
 
-        if request.http_verb == HttpVerb.PUT or request.http_verb == HttpVerb.POST:
+        if request.body is not None and request.body is not "":
             canonicalized_amz_header = self.canonicalized_amz_headers(amz_headers)
             headers['Content-Type'] = 'application/octet-stream'
             headers['Authorization'] = self.build_authorization(verb=request.http_verb,
