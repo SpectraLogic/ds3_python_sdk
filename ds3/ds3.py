@@ -7916,10 +7916,10 @@ class HeadObjectResponse(AbstractResponse):
         :param headers: list of tuples containing the Http response headers
         """
         checksum_type_header = [item for item in headers if item[0] == 'ds3-blob-checksum-type']
-        if checksum_type_header.__len__() == 0:
+        if len(checksum_type_header) == 0:
             return
-        if checksum_type_header.__len__() > 1:
-            raise ValueError("Expected only one header with key 'ds3-blob-checksum-type' but got: " + checksum_type_header.__str__())
+        if len(checksum_type_header) > 1:
+            raise ValueError("Expected only one header with key 'ds3-blob-checksum-type' but got: " + str(checksum_type_header))
         self.blob_checksum_type = checksum_type_header[0][1]
 
     def __process_blob_checksums(self, headers):
