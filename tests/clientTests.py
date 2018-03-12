@@ -1448,6 +1448,10 @@ class ResponseParsingTestCase(unittest.TestCase):
         request = MarkSuspectBlobPoolsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
         self.assertEqual(request.body, self.__get_marshaled_ids())
 
+    def testMarkSuspectBlobDs3TargetsAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
     def testMarkSuspectBlobS3TargetsAsDegradedRequestPayload(self):
         request = MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
         self.assertEqual(request.body, self.__get_marshaled_ids())
