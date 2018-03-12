@@ -137,6 +137,22 @@ class PartList(object):
         return xml_part_list
 
 
+class IdsList(object):
+    def __init__(self, id_list):
+        for cur_id in id_list:
+            if not isinstance(cur_id, basestring):
+                raise TypeError("Ids should only contain strings")
+        self.id_list = id_list
+
+    def to_xml(self):
+        xml_id_list = xmldom.Element('Ids')
+        for cur_id in self.id_list:
+            xml_cur_id = xmldom.Element('Id')
+            xml_cur_id.text = cur_id
+            xml_id_list.append(xml_cur_id)
+        return xml_id_list
+
+
 # Type Descriptors
 
 
@@ -3463,8 +3479,15 @@ class ModifyS3DataReplicationRuleSpectraS3Request(AbstractRequest):
 
 class ClearSuspectBlobAzureTargetsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(ClearSuspectBlobAzureTargetsSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'ClearSuspectBlobAzureTargetsSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_azure_target'
@@ -3473,8 +3496,15 @@ class ClearSuspectBlobAzureTargetsSpectraS3Request(AbstractRequest):
 
 class ClearSuspectBlobDs3TargetsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(ClearSuspectBlobDs3TargetsSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'ClearSuspectBlobDs3TargetsSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_ds3_target'
@@ -3483,8 +3513,15 @@ class ClearSuspectBlobDs3TargetsSpectraS3Request(AbstractRequest):
 
 class ClearSuspectBlobPoolsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(ClearSuspectBlobPoolsSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'ClearSuspectBlobPoolsSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_pool'
@@ -3493,8 +3530,15 @@ class ClearSuspectBlobPoolsSpectraS3Request(AbstractRequest):
 
 class ClearSuspectBlobS3TargetsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(ClearSuspectBlobS3TargetsSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'ClearSuspectBlobS3TargetsSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_s3_target'
@@ -3503,8 +3547,15 @@ class ClearSuspectBlobS3TargetsSpectraS3Request(AbstractRequest):
 
 class ClearSuspectBlobTapesSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(ClearSuspectBlobTapesSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'ClearSuspectBlobTapesSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_tape'
@@ -3810,8 +3861,15 @@ class GetSuspectObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
 
 class MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_azure_target'
@@ -3820,8 +3878,15 @@ class MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request(AbstractRequest):
 
 class MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_ds3_target'
@@ -3830,8 +3895,15 @@ class MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request(AbstractRequest):
 
 class MarkSuspectBlobPoolsAsDegradedSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(MarkSuspectBlobPoolsAsDegradedSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'MarkSuspectBlobPoolsAsDegradedSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_pool'
@@ -3840,8 +3912,15 @@ class MarkSuspectBlobPoolsAsDegradedSpectraS3Request(AbstractRequest):
 
 class MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_s3_target'
@@ -3850,8 +3929,15 @@ class MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request(AbstractRequest):
 
 class MarkSuspectBlobTapesAsDegradedSpectraS3Request(AbstractRequest):
     
-    def __init__(self, force=None):
+    def __init__(self, id_list, force=None):
         super(MarkSuspectBlobTapesAsDegradedSpectraS3Request, self).__init__()
+        if id_list is not None:
+            if not (isinstance(cur_id, basestring) for cur_id in id_list):
+                raise TypeError(
+                    'MarkSuspectBlobTapesAsDegradedSpectraS3Request should have request payload of type: list of strings')
+            xml_id_list = IdsList(id_list)
+            self.body = xmldom.tostring(xml_id_list.to_xml())
+
         if force is not None:
             self.query_params['force'] = force
         self.path = '/_rest_/suspect_blob_tape'
