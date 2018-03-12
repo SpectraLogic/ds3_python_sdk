@@ -291,8 +291,10 @@ class DataPathBackend(object):
         self.attributes = []
         self.elements = {
             'Activated': None,
+            'AllowNewJobRequests': None,
             'AutoActivateTimeoutInMins': None,
             'AutoInspect': None,
+            'CacheAvailableRetryAfterInSeconds': None,
             'DefaultImportConflictResolutionMode': None,
             'DefaultVerifyDataAfterImport': None,
             'DefaultVerifyDataPriorToImport': None,
@@ -1030,6 +1032,7 @@ class TapeDrive(object):
             'MfgSerialNumber': None,
             'PartitionId': None,
             'Quiesced': None,
+            'ReservedTaskType': None,
             'SerialNumber': None,
             'State': None,
             'TapeId': None,
@@ -1073,6 +1076,8 @@ class TapePartition(object):
             'Id': None,
             'ImportExportConfiguration': None,
             'LibraryId': None,
+            'MinimumReadReservedDrives': None,
+            'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
             'SerialId': None,
@@ -1485,6 +1490,8 @@ class DetailedTapePartition(object):
             'Id': None,
             'ImportExportConfiguration': None,
             'LibraryId': None,
+            'MinimumReadReservedDrives': None,
+            'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
             'SerialId': None,
@@ -1758,6 +1765,8 @@ class NamedDetailedTapePartition(object):
             'Id': None,
             'ImportExportConfiguration': None,
             'LibraryId': None,
+            'MinimumReadReservedDrives': None,
+            'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
             'SerialId': None,
@@ -3038,14 +3047,18 @@ class GetDataPlannerBlobStoreTasksSpectraS3Request(AbstractRequest):
 
 class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
     
-    def __init__(self, activated=None, auto_activate_timeout_in_mins=None, auto_inspect=None, default_import_conflict_resolution_mode=None, default_verify_data_after_import=None, default_verify_data_prior_to_import=None, partially_verify_last_percent_of_tapes=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
+    def __init__(self, activated=None, allow_new_job_requests=None, auto_activate_timeout_in_mins=None, auto_inspect=None, cache_available_retry_after_in_seconds=None, default_import_conflict_resolution_mode=None, default_verify_data_after_import=None, default_verify_data_prior_to_import=None, partially_verify_last_percent_of_tapes=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
         super(ModifyDataPathBackendSpectraS3Request, self).__init__()
         if activated is not None:
             self.query_params['activated'] = activated
+        if allow_new_job_requests is not None:
+            self.query_params['allow_new_job_requests'] = allow_new_job_requests
         if auto_activate_timeout_in_mins is not None:
             self.query_params['auto_activate_timeout_in_mins'] = auto_activate_timeout_in_mins
         if auto_inspect is not None:
             self.query_params['auto_inspect'] = auto_inspect
+        if cache_available_retry_after_in_seconds is not None:
+            self.query_params['cache_available_retry_after_in_seconds'] = cache_available_retry_after_in_seconds
         if default_import_conflict_resolution_mode is not None:
             self.query_params['default_import_conflict_resolution_mode'] = default_import_conflict_resolution_mode
         if default_verify_data_after_import is not None:
@@ -6425,7 +6438,7 @@ class GetTapeDriveSpectraS3Request(AbstractRequest):
 
 class GetTapeDrivesSpectraS3Request(AbstractRequest):
     
-    def __init__(self, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, serial_number=None, state=None, type=None):
+    def __init__(self, last_page=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, reserved_task_type=None, serial_number=None, state=None, type=None):
         super(GetTapeDrivesSpectraS3Request, self).__init__()
         if last_page is not None:
             self.query_params['last_page'] = last_page
@@ -6437,6 +6450,8 @@ class GetTapeDrivesSpectraS3Request(AbstractRequest):
             self.query_params['page_start_marker'] = page_start_marker
         if partition_id is not None:
             self.query_params['partition_id'] = partition_id
+        if reserved_task_type is not None:
+            self.query_params['reserved_task_type'] = reserved_task_type
         if serial_number is not None:
             self.query_params['serial_number'] = serial_number
         if state is not None:
@@ -6742,20 +6757,26 @@ class ModifyAllTapePartitionsSpectraS3Request(AbstractRequest):
 
 class ModifyTapeDriveSpectraS3Request(AbstractRequest):
     
-    def __init__(self, tape_drive_id, quiesced=None):
+    def __init__(self, tape_drive_id, quiesced=None, reserved_task_type=None):
         super(ModifyTapeDriveSpectraS3Request, self).__init__()
         self.tape_drive_id = tape_drive_id
         if quiesced is not None:
             self.query_params['quiesced'] = quiesced
+        if reserved_task_type is not None:
+            self.query_params['reserved_task_type'] = reserved_task_type
         self.path = '/_rest_/tape_drive/' + tape_drive_id
         self.http_verb = HttpVerb.PUT
 
 
 class ModifyTapePartitionSpectraS3Request(AbstractRequest):
     
-    def __init__(self, tape_partition, quiesced=None):
+    def __init__(self, tape_partition, minimum_read_reserved_drives=None, minimum_write_reserved_drives=None, quiesced=None):
         super(ModifyTapePartitionSpectraS3Request, self).__init__()
         self.tape_partition = tape_partition
+        if minimum_read_reserved_drives is not None:
+            self.query_params['minimum_read_reserved_drives'] = minimum_read_reserved_drives
+        if minimum_write_reserved_drives is not None:
+            self.query_params['minimum_write_reserved_drives'] = minimum_write_reserved_drives
         if quiesced is not None:
             self.query_params['quiesced'] = quiesced
         self.path = '/_rest_/tape_partition/' + tape_partition
@@ -7961,11 +7982,47 @@ class HeadBucketResponse(AbstractResponse):
 
 
 class HeadObjectResponse(AbstractResponse):
-    
+    def __init__(self, response, request):
+        self.blob_checksums = {}
+        self.blob_checksum_type = 'NONE'
+        super(HeadObjectResponse, self).__init__(response, request)
+
+    def __process_checksum_headers(self, headers):
+        """
+        Processes the blob checksum headers.
+        :param headers: list of tuples containing the Http response headers
+        """
+        self.__process_checksum_type(headers)
+        self.__process_blob_checksums(headers)
+
+    def __process_checksum_type(self, headers):
+        """
+        Parses the blob checksum type header. If there is no header, the default is NONE.
+        If there are multiple headers, then an error is raised
+        :param headers: list of tuples containing the Http response headers
+        """
+        checksum_type_header = [item for item in headers if item[0] == 'ds3-blob-checksum-type']
+        if len(checksum_type_header) == 0:
+            return
+        if len(checksum_type_header) > 1:
+            raise ValueError("Expected only one header with key 'ds3-blob-checksum-type' but got: " + str(checksum_type_header))
+        self.blob_checksum_type = checksum_type_header[0][1]
+
+    def __process_blob_checksums(self, headers):
+        """
+        Parses the blob checksum headers and adds them to a dictionary which maps
+        blob offset to blob checksum.
+        :param headers: list of tuples containing the Http response headers
+        """
+        # Retrieves all the headers that start with 'ds3-blob-checksum-offset-'
+        # and converts the offset at the end of the header key into an integer.
+        checksum_list = [(int(key[25:]), val) for key, val in headers if key.startswith('ds3-blob-checksum-offset-')]
+        self.blob_checksums = dict(checksum_list)
+
     def process_response(self, response):
         self.__check_status_codes__([200, 403, 404])
-        self.status_code = self.response.status
         if self.response.status == 200:
+            self.__process_checksum_headers(response.getheaders())
             self.result = HeadRequestStatus.EXISTS
         elif self.response.status == 403:
             self.result = HeadRequestStatus.NOTAUTHORIZED
