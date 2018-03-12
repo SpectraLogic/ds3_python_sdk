@@ -1384,6 +1384,14 @@ class MockedHttpResponse:
 
 
 class ResponseParsingTestCase(unittest.TestCase):
+    @staticmethod
+    def __get_test_ids():
+        return ['obj1', 'obj2', 'obj3']
+
+    @staticmethod
+    def __get_marshaled_ids():
+        return '<Ids><Id>obj1</Id><Id>obj2</Id><Id>obj3</Id></Ids>'
+
     def testGetJobToReplicate(self):
         content = "some content to test response parsing"
 
@@ -1411,3 +1419,43 @@ class ResponseParsingTestCase(unittest.TestCase):
 
         request = VerifyPhysicalPlacementForObjectsSpectraS3Request(bucket_name="bucketName", object_list=l)
         self.assertEqual(request.body, '<Objects><Object Name="obj1" /><Object Name="obj2" /></Objects>')
+
+    def testClearSuspectBlobAzureTargetsRequestPayload(self):
+        request = ClearSuspectBlobAzureTargetsSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testClearSuspectBlobDs3TargetsRequestPayload(self):
+        request = ClearSuspectBlobDs3TargetsSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testClearSuspectBlobPoolsRequestPayload(self):
+        request = ClearSuspectBlobPoolsSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testClearSuspectBlobS3TargetsRequestPayload(self):
+        request = ClearSuspectBlobS3TargetsSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testClearSuspectBlobTapesRequestPayload(self):
+        request = ClearSuspectBlobTapesSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testMarkSuspectBlobAzureTargetsAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobAzureTargetsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testMarkSuspectBlobPoolsAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobPoolsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testMarkSuspectBlobDs3TargetsAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobDs3TargetsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testMarkSuspectBlobS3TargetsAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobS3TargetsAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testMarkSuspectBlobTapesAsDegradedRequestPayload(self):
+        request = MarkSuspectBlobTapesAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
+        self.assertEqual(request.body, self.__get_marshaled_ids())
