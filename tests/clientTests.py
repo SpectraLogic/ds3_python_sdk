@@ -466,11 +466,8 @@ class ObjectTestCase(Ds3TestCase):
         """tests deleteObject: bad input to function"""
         self.createBucket(bucketName)
         
-        noNameBucket = ""
         notHereBucket = "not-here"
-        badBuckets = {DeleteObjectRequest(noNameBucket, ""):statusCodeList(400),
-                      DeleteObjectRequest(noNameBucket, "badFile"):statusCodeList(404),
-                      DeleteObjectRequest(notHereBucket, ""): statusCodeList(404),
+        badBuckets = {DeleteObjectRequest(notHereBucket, ""): statusCodeList(404),
                       DeleteObjectRequest(notHereBucket, "badFile"): statusCodeList(404),
                       DeleteObjectRequest(bucketName, ""): statusCodeList(400),
                       DeleteObjectRequest(bucketName, "badFile"): statusCodeList(404)}
@@ -1459,3 +1456,26 @@ class ResponseParsingTestCase(unittest.TestCase):
     def testMarkSuspectBlobTapesAsDegradedRequestPayload(self):
         request = MarkSuspectBlobTapesAsDegradedSpectraS3Request(id_list=self.__get_test_ids())
         self.assertEqual(request.body, self.__get_marshaled_ids())
+
+    def testHeadObject(self):
+        bucket_name = "test-bucket"
+        object_name = "test-object"
+        request = HeadObjectRequest(bucket_name=bucket_name, object_name=object_name)
+
+        response_headers = [
+            ('x-amz-meta-key', 'value'),
+            ('ds3-blob-checksum-type', 'MD5'),
+            ('ds3-blob-checksum-offset-0', '4nQGNX4nyz0pi8Hvap79PQ=='),
+            ('ds3-blob-checksum-offset-10485760', '965Aa0/n8DlO1IwXYFh4bg=='),
+            ('ds3-blob-checksum-offset-20971520', 'iV2OqJaXJ/jmqgRSb1HmFA==')
+        ]
+
+        mocked_response = MockedHttpResponse(200, headers=response_headers)
+
+        response = HeadObjectResponse(mocked_response, request)
+
+        self.assertEqual(response.blob_checksum_type, 'MD5')
+        self.assertEqual(response.blob_checksums, {
+            0: '4nQGNX4nyz0pi8Hvap79PQ==',
+            10485760: '965Aa0/n8DlO1IwXYFh4bg==',
+            20971520: 'iV2OqJaXJ/jmqgRSb1HmFA=='})
