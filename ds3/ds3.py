@@ -51,6 +51,66 @@ class HeadRequestStatus(object):
     UNKNOWN = 'UNKNOWN'
 
 
+# TODO added
+class Ds3PutObject(object):
+    def __init__(self, name, size):
+        self.name = name
+        self.size = size
+
+    def to_xml(self):
+        xml_object = xmldom.Element('Object')
+        xml_object.set('Name', posixpath.normpath(self.name))
+        xml_object.set('Size', str(self.size))
+        return xml_object
+
+
+# TODO added
+class Ds3GetObject(object):
+    def __init__(self, name, length=None, offset=None):
+        self.name = name
+        self.length = length
+        self.offset = offset
+
+    def to_xml(self):
+        xml_object = xmldom.Element('Object')
+        xml_object.set('Name', posixpath.normpath(self.name))
+        if self.length is not None:
+            xml_object.set('Length', str(self.length))
+        if self.offset is not None:
+            xml_object.set('Offset', str(self.offset))
+        return xml_object
+
+
+# TODO added
+class Ds3GetObjectList(object):
+    def __init__(self, object_list):
+        for obj in object_list:
+            if not isinstance(obj, Ds3GetObject):
+                raise TypeError("Ds3GetObjectList should only contain type: Ds3GetObject")
+        self.object_list = object_list
+
+    def to_xml(self):
+        xml_object_list = xmldom.Element('Objects')
+        for obj in self.object_list:
+            xml_object_list.append(obj.to_xml())
+        return xml_object_list
+
+
+# TODO added
+class Ds3PutObjectList(object):
+    def __init__(self, object_list):
+        for obj in object_list:
+            if not isinstance(obj, Ds3PutObject):
+                raise TypeError("Ds3PutObjectList should only contain type: Ds3PutObject")
+        self.object_list = object_list
+
+    def to_xml(self):
+        xml_object_list = xmldom.Element('Objects')
+        for obj in self.object_list:
+            xml_object_list.append(obj.to_xml())
+        return xml_object_list
+
+''' TODO remove
 class FileObject(object):
     def __init__(self, name, size=None):
         self.name = name
@@ -76,6 +136,7 @@ class FileObjectList(object):
         for obj in self.object_list:
             xml_object_list.append(obj.to_xml())
         return xml_object_list
+'''
 
 
 class DeleteObject(object):
@@ -295,11 +356,11 @@ class DataPathBackend(object):
             'AutoActivateTimeoutInMins': None,
             'AutoInspect': None,
             'CacheAvailableRetryAfterInSeconds': None,
-            'DefaultImportConflictResolutionMode': None,
             'DefaultVerifyDataAfterImport': None,
             'DefaultVerifyDataPriorToImport': None,
             'Id': None,
             'InstanceId': None,
+            'IomEnabled': None,
             'LastHeartbeat': None,
             'PartiallyVerifyLastPercentOfTapes': None,
             'UnavailableMediaPolicy': None,
@@ -330,7 +391,6 @@ class DataPolicy(object):
         self.elements = {
             'AlwaysForcePutJobCreation': None,
             'AlwaysMinimizeSpanningAcrossMedia': None,
-            'AlwaysReplicateDeletes': None,
             'BlobbingEnabled': None,
             'ChecksumType': None,
             'CreationDate': None,
@@ -341,7 +401,7 @@ class DataPolicy(object):
             'DefaultVerifyJobPriority': None,
             'EndToEndCrcRequired': None,
             'Id': None,
-            'LtfsObjectNamingAllowed': None,
+            'MaxVersionsToKeep': None,
             'Name': None,
             'RebuildPriority': None,
             'Versioning': None
@@ -450,6 +510,7 @@ class ActiveJob(object):
             'Rechunked': None,
             'Replicating': None,
             'RequestType': None,
+            'Restore': None,
             'Truncated': None,
             'TruncatedDueToTimeout': None,
             'UserId': None,
@@ -519,8 +580,7 @@ class S3Object(object):
             'Id': None,
             'Latest': None,
             'Name': None,
-            'Type': None,
-            'Version': None
+            'Type': None
         }
         self.element_lists = {}
 
@@ -575,6 +635,7 @@ class StorageDomainMember(object):
     def __init__(self):
         self.attributes = []
         self.elements = {
+            'AutoCompactionThreshold': None,
             'Id': None,
             'PoolPartitionId': None,
             'State': None,
@@ -605,6 +666,7 @@ class SpectraUser(object):
             'AuthId': None,
             'DefaultDataPolicyId': None,
             'Id': None,
+            'MaxBuckets': None,
             'Name': None,
             'SecretKey': None
         }
@@ -916,7 +978,7 @@ class Pool(object):
             'Quiesced': None,
             'ReservedCapacity': None,
             'State': None,
-            'StorageDomainId': None,
+            'StorageDomainMemberId': None,
             'TotalCapacity': None,
             'Type': None,
             'UsedCapacity': None
@@ -957,6 +1019,7 @@ class SuspectBlobPool(object):
             'DateWritten': None,
             'Id': None,
             'LastAccessed': None,
+            'ObsoletionId': None,
             'PoolId': None
         }
         self.element_lists = {}
@@ -968,6 +1031,7 @@ class SuspectBlobTape(object):
         self.elements = {
             'BlobId': None,
             'Id': None,
+            'ObsoletionId': None,
             'OrderIndex': None,
             'TapeId': None
         }
@@ -998,7 +1062,7 @@ class Tape(object):
             'PreviousState': None,
             'SerialNumber': None,
             'State': None,
-            'StorageDomainId': None,
+            'StorageDomainMemberId': None,
             'TakeOwnershipPending': None,
             'TotalRawCapacity': None,
             'Type': None,
@@ -1071,6 +1135,7 @@ class TapePartition(object):
     def __init__(self):
         self.attributes = []
         self.elements = {
+            'AutoCompactionEnabled': None,
             'DriveType': None,
             'ErrorMessage': None,
             'Id': None,
@@ -1316,7 +1381,7 @@ class BulkObject(object):
             'Length',
             'Name',
             'Offset',
-            'Version'
+            'VersionId'
         ]
         self.elements = {
             'PhysicalPlacement': PhysicalPlacement()
@@ -1433,7 +1498,8 @@ class ListBucketResult(object):
         }
         self.element_lists = {
             ('CommonPrefixes', None, CommonPrefixes()),
-            ('Contents', None, Contents())
+            ('Contents', None, Contents()),
+            ('Version', None, Contents())
         }
 
 
@@ -1485,6 +1551,7 @@ class DetailedTapePartition(object):
     def __init__(self):
         self.attributes = []
         self.elements = {
+            'AutoCompactionEnabled': None,
             'DriveType': None,
             'ErrorMessage': None,
             'Id': None,
@@ -1681,11 +1748,13 @@ class Contents(object):
         self.attributes = []
         self.elements = {
             'ETag': None,
+            'IsLatest': None,
             'Key': None,
             'LastModified': None,
             'Owner': User(),
             'Size': None,
-            'StorageClass': None
+            'StorageClass': None,
+            'VersionId': None
         }
         self.element_lists = {}
 
@@ -1726,8 +1795,7 @@ class DetailedS3Object(object):
             'Name': None,
             'Owner': None,
             'Size': None,
-            'Type': None,
-            'Version': None
+            'Type': None
         }
         self.element_lists = {}
 
@@ -1760,6 +1828,7 @@ class NamedDetailedTapePartition(object):
     def __init__(self):
         self.attributes = []
         self.elements = {
+            'AutoCompactionEnabled': None,
             'DriveType': None,
             'ErrorMessage': None,
             'Id': None,
@@ -2543,36 +2612,35 @@ class DeleteBucketRequest(AbstractRequest):
 
 class DeleteObjectRequest(AbstractRequest):
     
-    def __init__(self, bucket_name, object_name, roll_back=None):
+    def __init__(self, bucket_name, object_name, version_id=None):
         super(DeleteObjectRequest, self).__init__()
         self.bucket_name = bucket_name
         self.object_name = object_name
-        if roll_back is not None:
-            self.query_params['roll_back'] = roll_back
+        if version_id is not None:
+            self.query_params['version_id'] = version_id
         self.path = '/' + bucket_name + '/' + object_name
         self.http_verb = HttpVerb.DELETE
 
 
 class DeleteObjectsRequest(AbstractRequest):
     
-    def __init__(self, bucket_name, object_list, roll_back=None):
+    def __init__(self, bucket_name, object_list):
         super(DeleteObjectsRequest, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['delete'] = None
         if object_list is not None:
-            if not isinstance(object_list, DeleteObjectList):
-                raise TypeError('DeleteObjectsRequest should have request payload of type: DeleteObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, DeleteObject) for cur_obj in object_list):
+                raise TypeError('DeleteObjectsRequest should have request payload of type: list of DeleteObject')
+            xml_object_list = DeleteObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
-        if roll_back is not None:
-            self.query_params['roll_back'] = roll_back
         self.path = '/' + bucket_name
         self.http_verb = HttpVerb.POST
 
 
 class GetBucketRequest(AbstractRequest):
     
-    def __init__(self, bucket_name, delimiter=None, marker=None, max_keys=None, prefix=None):
+    def __init__(self, bucket_name, delimiter=None, marker=None, max_keys=None, prefix=None, versions=None):
         super(GetBucketRequest, self).__init__()
         self.bucket_name = bucket_name
         if delimiter is not None:
@@ -2583,6 +2651,8 @@ class GetBucketRequest(AbstractRequest):
             self.query_params['max_keys'] = max_keys
         if prefix is not None:
             self.query_params['prefix'] = prefix
+        if versions is not None:
+            self.query_params['versions'] = versions
         self.path = '/' + bucket_name
         self.http_verb = HttpVerb.GET
 
@@ -2597,7 +2667,7 @@ class GetServiceRequest(AbstractRequest):
 
 class GetObjectRequest(AbstractRequest):
     
-    def __init__(self, bucket_name, object_name, stream, job=None, offset=None):
+    def __init__(self, bucket_name, object_name, stream, job=None, offset=None, version_id=None):
         super(GetObjectRequest, self).__init__()
         self.bucket_name = bucket_name
         self.object_name = object_name
@@ -2608,6 +2678,8 @@ class GetObjectRequest(AbstractRequest):
             self.query_params['job'] = job
         if offset is not None:
             self.query_params['offset'] = offset
+        if version_id is not None:
+            self.query_params['version_id'] = version_id
         self.path = '/' + bucket_name + '/' + object_name
         self.http_verb = HttpVerb.GET
 
@@ -3047,7 +3119,7 @@ class GetDataPlannerBlobStoreTasksSpectraS3Request(AbstractRequest):
 
 class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
     
-    def __init__(self, activated=None, allow_new_job_requests=None, auto_activate_timeout_in_mins=None, auto_inspect=None, cache_available_retry_after_in_seconds=None, default_import_conflict_resolution_mode=None, default_verify_data_after_import=None, default_verify_data_prior_to_import=None, partially_verify_last_percent_of_tapes=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
+    def __init__(self, activated=None, allow_new_job_requests=None, auto_activate_timeout_in_mins=None, auto_inspect=None, cache_available_retry_after_in_seconds=None, default_verify_data_after_import=None, default_verify_data_prior_to_import=None, iom_enabled=None, partially_verify_last_percent_of_tapes=None, unavailable_media_policy=None, unavailable_pool_max_job_retry_in_mins=None, unavailable_tape_partition_max_job_retry_in_mins=None):
         super(ModifyDataPathBackendSpectraS3Request, self).__init__()
         if activated is not None:
             self.query_params['activated'] = activated
@@ -3059,12 +3131,12 @@ class ModifyDataPathBackendSpectraS3Request(AbstractRequest):
             self.query_params['auto_inspect'] = auto_inspect
         if cache_available_retry_after_in_seconds is not None:
             self.query_params['cache_available_retry_after_in_seconds'] = cache_available_retry_after_in_seconds
-        if default_import_conflict_resolution_mode is not None:
-            self.query_params['default_import_conflict_resolution_mode'] = default_import_conflict_resolution_mode
         if default_verify_data_after_import is not None:
             self.query_params['default_verify_data_after_import'] = default_verify_data_after_import
         if default_verify_data_prior_to_import is not None:
             self.query_params['default_verify_data_prior_to_import'] = default_verify_data_prior_to_import
+        if iom_enabled is not None:
+            self.query_params['iom_enabled'] = iom_enabled
         if partially_verify_last_percent_of_tapes is not None:
             self.query_params['partially_verify_last_percent_of_tapes'] = partially_verify_last_percent_of_tapes
         if unavailable_media_policy is not None:
@@ -3108,7 +3180,7 @@ class PutDataPersistenceRuleSpectraS3Request(AbstractRequest):
 
 class PutDataPolicySpectraS3Request(AbstractRequest):
     
-    def __init__(self, name, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_after_write=None, default_verify_job_priority=None, end_to_end_crc_required=None, rebuild_priority=None, versioning=None):
+    def __init__(self, name, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_after_write=None, default_verify_job_priority=None, end_to_end_crc_required=None, max_versions_to_keep=None, rebuild_priority=None, versioning=None):
         super(PutDataPolicySpectraS3Request, self).__init__()
         self.query_params['name'] = name
         if always_force_put_job_creation is not None:
@@ -3131,6 +3203,8 @@ class PutDataPolicySpectraS3Request(AbstractRequest):
             self.query_params['default_verify_job_priority'] = default_verify_job_priority
         if end_to_end_crc_required is not None:
             self.query_params['end_to_end_crc_required'] = end_to_end_crc_required
+        if max_versions_to_keep is not None:
+            self.query_params['max_versions_to_keep'] = max_versions_to_keep
         if rebuild_priority is not None:
             self.query_params['rebuild_priority'] = rebuild_priority
         if versioning is not None:
@@ -3425,7 +3499,7 @@ class ModifyDataPersistenceRuleSpectraS3Request(AbstractRequest):
 
 class ModifyDataPolicySpectraS3Request(AbstractRequest):
     
-    def __init__(self, data_policy_id, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_after_write=None, default_verify_job_priority=None, end_to_end_crc_required=None, name=None, rebuild_priority=None, versioning=None):
+    def __init__(self, data_policy_id, always_force_put_job_creation=None, always_minimize_spanning_across_media=None, blobbing_enabled=None, checksum_type=None, default_blob_size=None, default_get_job_priority=None, default_put_job_priority=None, default_verify_after_write=None, default_verify_job_priority=None, end_to_end_crc_required=None, max_versions_to_keep=None, name=None, rebuild_priority=None, versioning=None):
         super(ModifyDataPolicySpectraS3Request, self).__init__()
         self.data_policy_id = data_policy_id
         if always_force_put_job_creation is not None:
@@ -3448,6 +3522,8 @@ class ModifyDataPolicySpectraS3Request(AbstractRequest):
             self.query_params['default_verify_job_priority'] = default_verify_job_priority
         if end_to_end_crc_required is not None:
             self.query_params['end_to_end_crc_required'] = end_to_end_crc_required
+        if max_versions_to_keep is not None:
+            self.query_params['max_versions_to_keep'] = max_versions_to_keep
         if name is not None:
             self.query_params['name'] = name
         if rebuild_priority is not None:
@@ -3861,13 +3937,13 @@ class GetSuspectObjectsSpectraS3Request(AbstractRequest):
 
 class GetSuspectObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id=None, storage_domain_id=None):
+    def __init__(self, bucket_id=None, storage_domain=None):
         super(GetSuspectObjectsWithFullDetailsSpectraS3Request, self).__init__()
         self.query_params['full_details'] = None
         if bucket_id is not None:
             self.query_params['bucket_id'] = bucket_id
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain is not None:
+            self.query_params['storage_domain'] = storage_domain
         self.path = '/_rest_/suspect_object'
         self.http_verb = HttpVerb.GET
 
@@ -4176,9 +4252,10 @@ class GetBulkJobSpectraS3Request(AbstractRequest):
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'start_bulk_get'
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBulkJobSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('GetBulkJobSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
         if aggregating is not None:
             self.query_params['aggregating'] = aggregating
@@ -4201,9 +4278,10 @@ class PutBulkJobSpectraS3Request(AbstractRequest):
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'start_bulk_put'
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('PutBulkJobSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3PutObject) for cur_obj in object_list):
+                raise TypeError('PutBulkJobSpectraS3Request should have request payload of type: list of Ds3PutObject')
+            xml_object_list = Ds3PutObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
         if aggregating is not None:
             self.query_params['aggregating'] = aggregating
@@ -4234,9 +4312,10 @@ class VerifyBulkJobSpectraS3Request(AbstractRequest):
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'start_bulk_verify'
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('VerifyBulkJobSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('VerifyBulkJobSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
         if aggregating is not None:
             self.query_params['aggregating'] = aggregating
@@ -4476,6 +4555,27 @@ class ReplicatePutJobSpectraS3Request(AbstractRequest):
         self.query_params['replicate'] = None
         self.body = request_payload
 
+        if priority is not None:
+            self.query_params['priority'] = priority
+        self.path = '/_rest_/bucket/' + bucket_name
+        self.http_verb = HttpVerb.PUT
+
+
+class StageObjectsJobSpectraS3Request(AbstractRequest):
+    
+    def __init__(self, bucket_name, object_list, name=None, priority=None):
+        super(StageObjectsJobSpectraS3Request, self).__init__()
+        self.bucket_name = bucket_name
+        self.query_params['operation'] = 'start_bulk_stage'
+
+        if object_list is not None:
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('StageObjectsJobSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
+
+        if name is not None:
+            self.query_params['name'] = name
         if priority is not None:
             self.query_params['priority'] = priority
         self.path = '/_rest_/bucket/' + bucket_name
@@ -5294,13 +5394,11 @@ class GetTapePartitionFailureNotificationRegistrationsSpectraS3Request(AbstractR
 
 class DeleteFolderRecursivelySpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id, folder, roll_back=None):
+    def __init__(self, bucket_id, folder):
         super(DeleteFolderRecursivelySpectraS3Request, self).__init__()
         self.folder = folder
         self.query_params['bucket_id'] = bucket_id
         self.query_params['recursive'] = None
-        if roll_back is not None:
-            self.query_params['roll_back'] = roll_back
         self.path = '/_rest_/folder/' + folder
         self.http_verb = HttpVerb.DELETE
 
@@ -5327,10 +5425,12 @@ class GetObjectDetailsSpectraS3Request(AbstractRequest):
 
 class GetObjectsDetailsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
+    def __init__(self, bucket_id=None, end_date=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, start_date=None, type=None):
         super(GetObjectsDetailsSpectraS3Request, self).__init__()
         if bucket_id is not None:
             self.query_params['bucket_id'] = bucket_id
+        if end_date is not None:
+            self.query_params['end_date'] = end_date
         if last_page is not None:
             self.query_params['last_page'] = last_page
         if latest is not None:
@@ -5343,21 +5443,23 @@ class GetObjectsDetailsSpectraS3Request(AbstractRequest):
             self.query_params['page_offset'] = page_offset
         if page_start_marker is not None:
             self.query_params['page_start_marker'] = page_start_marker
+        if start_date is not None:
+            self.query_params['start_date'] = start_date
         if type is not None:
             self.query_params['type'] = type
-        if version is not None:
-            self.query_params['version'] = version
         self.path = '/_rest_/object'
         self.http_verb = HttpVerb.GET
 
 
 class GetObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id=None, include_physical_placement=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, type=None, version=None):
+    def __init__(self, bucket_id=None, end_date=None, include_physical_placement=None, last_page=None, latest=None, name=None, page_length=None, page_offset=None, page_start_marker=None, start_date=None, type=None):
         super(GetObjectsWithFullDetailsSpectraS3Request, self).__init__()
         self.query_params['full_details'] = None
         if bucket_id is not None:
             self.query_params['bucket_id'] = bucket_id
+        if end_date is not None:
+            self.query_params['end_date'] = end_date
         if include_physical_placement is not None:
             self.query_params['include_physical_placement'] = include_physical_placement
         if last_page is not None:
@@ -5372,80 +5474,96 @@ class GetObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
             self.query_params['page_offset'] = page_offset
         if page_start_marker is not None:
             self.query_params['page_start_marker'] = page_start_marker
+        if start_date is not None:
+            self.query_params['start_date'] = start_date
         if type is not None:
             self.query_params['type'] = type
-        if version is not None:
-            self.query_params['version'] = version
         self.path = '/_rest_/object'
         self.http_verb = HttpVerb.GET
 
 
 class GetPhysicalPlacementForObjectsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_name, object_list, storage_domain_id=None):
+    def __init__(self, bucket_name, object_list, storage_domain=None):
         super(GetPhysicalPlacementForObjectsSpectraS3Request, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'get_physical_placement'
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('GetPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain is not None:
+            self.query_params['storage_domain'] = storage_domain
         self.path = '/_rest_/bucket/' + bucket_name
         self.http_verb = HttpVerb.PUT
 
 
 class GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_name, object_list, storage_domain_id=None):
+    def __init__(self, bucket_name, object_list, storage_domain=None):
         super(GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'get_physical_placement'
         self.query_params['full_details'] = None
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain is not None:
+            self.query_params['storage_domain'] = storage_domain
         self.path = '/_rest_/bucket/' + bucket_name
+        self.http_verb = HttpVerb.PUT
+
+
+class UndeleteObjectSpectraS3Request(AbstractRequest):
+    
+    def __init__(self, bucket_id, name, version_id=None):
+        super(UndeleteObjectSpectraS3Request, self).__init__()
+        self.query_params['bucket_id'] = bucket_id
+        self.query_params['name'] = name
+        if version_id is not None:
+            self.query_params['version_id'] = version_id
+        self.path = '/_rest_/object'
         self.http_verb = HttpVerb.PUT
 
 
 class VerifyPhysicalPlacementForObjectsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_name, object_list, storage_domain_id=None):
+    def __init__(self, bucket_name, object_list, storage_domain=None):
         super(VerifyPhysicalPlacementForObjectsSpectraS3Request, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'verify_physical_placement'
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('VerifyPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('VerifyPhysicalPlacementForObjectsSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain is not None:
+            self.query_params['storage_domain'] = storage_domain
         self.path = '/_rest_/bucket/' + bucket_name
         self.http_verb = HttpVerb.GET
 
 
 class VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_name, object_list, storage_domain_id=None):
+    def __init__(self, bucket_name, object_list, storage_domain=None):
         super(VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'verify_physical_placement'
         self.query_params['full_details'] = None
         if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('VerifyPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain is not None:
+            self.query_params['storage_domain'] = storage_domain
         self.path = '/_rest_/bucket/' + bucket_name
         self.http_verb = HttpVerb.GET
 
@@ -5585,16 +5703,13 @@ class FormatForeignPoolSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.PUT
 
 
+# TODO remove incorrect request payload
 class GetBlobsOnPoolSpectraS3Request(AbstractRequest):
     
-    def __init__(self, object_list, pool):
+    def __init__(self, pool):
         super(GetBlobsOnPoolSpectraS3Request, self).__init__()
         self.pool = pool
         self.query_params['operation'] = 'get_physical_placement'
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBlobsOnPoolSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
 
         self.path = '/_rest_/pool/' + pool
         self.http_verb = HttpVerb.GET
@@ -5662,7 +5777,7 @@ class GetPoolSpectraS3Request(AbstractRequest):
 
 class GetPoolsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, assigned_to_storage_domain=None, bucket_id=None, guid=None, health=None, last_page=None, last_verified=None, name=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, powered_on=None, state=None, storage_domain_id=None, type=None):
+    def __init__(self, assigned_to_storage_domain=None, bucket_id=None, guid=None, health=None, last_page=None, last_verified=None, name=None, page_length=None, page_offset=None, page_start_marker=None, partition_id=None, powered_on=None, state=None, storage_domain_member_id=None, type=None):
         super(GetPoolsSpectraS3Request, self).__init__()
         if assigned_to_storage_domain is not None:
             self.query_params['assigned_to_storage_domain'] = assigned_to_storage_domain
@@ -5690,8 +5805,8 @@ class GetPoolsSpectraS3Request(AbstractRequest):
             self.query_params['powered_on'] = powered_on
         if state is not None:
             self.query_params['state'] = state
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain_member_id is not None:
+            self.query_params['storage_domain_member_id'] = storage_domain_member_id
         if type is not None:
             self.query_params['type'] = type
         self.path = '/_rest_/pool'
@@ -5700,11 +5815,9 @@ class GetPoolsSpectraS3Request(AbstractRequest):
 
 class ImportAllPoolsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
+    def __init__(self, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
         super(ImportAllPoolsSpectraS3Request, self).__init__()
         self.query_params['operation'] = 'import'
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -5723,12 +5836,10 @@ class ImportAllPoolsSpectraS3Request(AbstractRequest):
 
 class ImportPoolSpectraS3Request(AbstractRequest):
     
-    def __init__(self, pool, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
+    def __init__(self, pool, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
         super(ImportPoolSpectraS3Request, self).__init__()
         self.pool = pool
         self.query_params['operation'] = 'import'
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -5858,11 +5969,13 @@ class PutStorageDomainSpectraS3Request(AbstractRequest):
 
 class PutTapeStorageDomainMemberSpectraS3Request(AbstractRequest):
     
-    def __init__(self, storage_domain_id, tape_partition_id, tape_type, write_preference=None):
+    def __init__(self, storage_domain_id, tape_partition_id, tape_type, auto_compaction_threshold=None, write_preference=None):
         super(PutTapeStorageDomainMemberSpectraS3Request, self).__init__()
         self.query_params['storage_domain_id'] = storage_domain_id
         self.query_params['tape_partition_id'] = tape_partition_id
         self.query_params['tape_type'] = tape_type
+        if auto_compaction_threshold is not None:
+            self.query_params['auto_compaction_threshold'] = auto_compaction_threshold
         if write_preference is not None:
             self.query_params['write_preference'] = write_preference
         self.path = '/_rest_/storage_domain_member'
@@ -5998,9 +6111,13 @@ class GetStorageDomainsSpectraS3Request(AbstractRequest):
 
 class ModifyStorageDomainMemberSpectraS3Request(AbstractRequest):
     
-    def __init__(self, storage_domain_member, write_preference=None):
+    def __init__(self, storage_domain_member, auto_compaction_threshold=None, state=None, write_preference=None):
         super(ModifyStorageDomainMemberSpectraS3Request, self).__init__()
         self.storage_domain_member = storage_domain_member
+        if auto_compaction_threshold is not None:
+            self.query_params['auto_compaction_threshold'] = auto_compaction_threshold
+        if state is not None:
+            self.query_params['state'] = state
         if write_preference is not None:
             self.query_params['write_preference'] = write_preference
         self.path = '/_rest_/storage_domain_member/' + storage_domain_member
@@ -6301,17 +6418,12 @@ class EjectAllTapesSpectraS3Request(AbstractRequest):
 
 class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id, storage_domain_id, eject_label=None, eject_location=None, object_list=None):
+    def __init__(self, bucket_id, storage_domain, eject_label=None, eject_location=None):
         super(EjectStorageDomainBlobsSpectraS3Request, self).__init__()
         self.query_params['operation'] = 'eject'
         self.query_params['blobs'] = None
         self.query_params['bucket_id'] = bucket_id
-        self.query_params['storage_domain_id'] = storage_domain_id
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('EjectStorageDomainBlobsSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
-
+        self.query_params['storage_domain'] = storage_domain
         if eject_label is not None:
             self.query_params['eject_label'] = eject_label
         if eject_location is not None:
@@ -6322,10 +6434,10 @@ class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
 
 class EjectStorageDomainSpectraS3Request(AbstractRequest):
     
-    def __init__(self, storage_domain_id, bucket_id=None, eject_label=None, eject_location=None):
+    def __init__(self, storage_domain, bucket_id=None, eject_label=None, eject_location=None):
         super(EjectStorageDomainSpectraS3Request, self).__init__()
         self.query_params['operation'] = 'eject'
-        self.query_params['storage_domain_id'] = storage_domain_id
+        self.query_params['storage_domain'] = storage_domain
         if bucket_id is not None:
             self.query_params['bucket_id'] = bucket_id
         if eject_label is not None:
@@ -6381,17 +6493,22 @@ class FormatTapeSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.PUT
 
 
+# TODO incorrectly generated with request payload
 class GetBlobsOnTapeSpectraS3Request(AbstractRequest):
     
-    def __init__(self, object_list, tape_id):
+    def __init__(self, tape_id, last_page=None, page_length=None, page_offset=None, page_start_marker=None):
         super(GetBlobsOnTapeSpectraS3Request, self).__init__()
         self.tape_id = tape_id
         self.query_params['operation'] = 'get_physical_placement'
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBlobsOnTapeSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
 
+        if last_page is not None:
+            self.query_params['last_page'] = last_page
+        if page_length is not None:
+            self.query_params['page_length'] = page_length
+        if page_offset is not None:
+            self.query_params['page_offset'] = page_offset
+        if page_start_marker is not None:
+            self.query_params['page_start_marker'] = page_start_marker
         self.path = '/_rest_/tape/' + tape_id
         self.http_verb = HttpVerb.GET
 
@@ -6626,7 +6743,7 @@ class GetTapeSpectraS3Request(AbstractRequest):
 
 class GetTapesSpectraS3Request(AbstractRequest):
     
-    def __init__(self, assigned_to_storage_domain=None, available_raw_capacity=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, last_verified=None, page_length=None, page_offset=None, page_start_marker=None, partially_verified_end_of_tape=None, partition_id=None, previous_state=None, serial_number=None, sort_by=None, state=None, storage_domain_id=None, type=None, verify_pending=None, write_protected=None):
+    def __init__(self, assigned_to_storage_domain=None, available_raw_capacity=None, bar_code=None, bucket_id=None, eject_label=None, eject_location=None, full_of_data=None, last_page=None, last_verified=None, page_length=None, page_offset=None, page_start_marker=None, partially_verified_end_of_tape=None, partition_id=None, previous_state=None, serial_number=None, sort_by=None, state=None, storage_domain_member_id=None, type=None, verify_pending=None, write_protected=None):
         super(GetTapesSpectraS3Request, self).__init__()
         if assigned_to_storage_domain is not None:
             self.query_params['assigned_to_storage_domain'] = assigned_to_storage_domain
@@ -6664,8 +6781,8 @@ class GetTapesSpectraS3Request(AbstractRequest):
             self.query_params['sort_by'] = sort_by
         if state is not None:
             self.query_params['state'] = state
-        if storage_domain_id is not None:
-            self.query_params['storage_domain_id'] = storage_domain_id
+        if storage_domain_member_id is not None:
+            self.query_params['storage_domain_member_id'] = storage_domain_member_id
         if type is not None:
             self.query_params['type'] = type
         if verify_pending is not None:
@@ -6678,11 +6795,9 @@ class GetTapesSpectraS3Request(AbstractRequest):
 
 class ImportAllTapesSpectraS3Request(AbstractRequest):
     
-    def __init__(self, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
+    def __init__(self, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
         super(ImportAllTapesSpectraS3Request, self).__init__()
         self.query_params['operation'] = 'import'
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -6701,12 +6816,10 @@ class ImportAllTapesSpectraS3Request(AbstractRequest):
 
 class ImportTapeSpectraS3Request(AbstractRequest):
     
-    def __init__(self, tape_id, conflict_resolution_mode=None, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
+    def __init__(self, tape_id, data_policy_id=None, priority=None, storage_domain_id=None, user_id=None, verify_data_after_import=None, verify_data_prior_to_import=None):
         super(ImportTapeSpectraS3Request, self).__init__()
         self.tape_id = tape_id
         self.query_params['operation'] = 'import'
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -6770,9 +6883,11 @@ class ModifyTapeDriveSpectraS3Request(AbstractRequest):
 
 class ModifyTapePartitionSpectraS3Request(AbstractRequest):
     
-    def __init__(self, tape_partition, minimum_read_reserved_drives=None, minimum_write_reserved_drives=None, quiesced=None):
+    def __init__(self, tape_partition, auto_compaction_enabled=None, minimum_read_reserved_drives=None, minimum_write_reserved_drives=None, quiesced=None):
         super(ModifyTapePartitionSpectraS3Request, self).__init__()
         self.tape_partition = tape_partition
+        if auto_compaction_enabled is not None:
+            self.query_params['auto_compaction_enabled'] = auto_compaction_enabled
         if minimum_read_reserved_drives is not None:
             self.query_params['minimum_read_reserved_drives'] = minimum_read_reserved_drives
         if minimum_write_reserved_drives is not None:
@@ -7049,16 +7164,13 @@ class GetAzureTargetsSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.GET
 
 
+# TODO incorrectly generated with request payload
 class GetBlobsOnAzureTargetSpectraS3Request(AbstractRequest):
     
-    def __init__(self, azure_target, object_list):
+    def __init__(self, azure_target):
         super(GetBlobsOnAzureTargetSpectraS3Request, self).__init__()
         self.azure_target = azure_target
         self.query_params['operation'] = 'get_physical_placement'
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBlobsOnAzureTargetSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
 
         self.path = '/_rest_/azure_target/' + azure_target
         self.http_verb = HttpVerb.GET
@@ -7066,13 +7178,11 @@ class GetBlobsOnAzureTargetSpectraS3Request(AbstractRequest):
 
 class ImportAzureTargetSpectraS3Request(AbstractRequest):
     
-    def __init__(self, azure_target, cloud_bucket_name, conflict_resolution_mode=None, data_policy_id=None, priority=None, user_id=None):
+    def __init__(self, azure_target, cloud_bucket_name, data_policy_id=None, priority=None, user_id=None):
         super(ImportAzureTargetSpectraS3Request, self).__init__()
         self.azure_target = azure_target
         self.query_params['operation'] = 'import'
         self.query_params['cloud_bucket_name'] = cloud_bucket_name
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -7194,16 +7304,13 @@ class DeleteDs3TargetSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.DELETE
 
 
+# TODO incorrectly generated with request payload
 class GetBlobsOnDs3TargetSpectraS3Request(AbstractRequest):
     
-    def __init__(self, ds3_target, object_list):
+    def __init__(self, ds3_target):
         super(GetBlobsOnDs3TargetSpectraS3Request, self).__init__()
         self.ds3_target = ds3_target
         self.query_params['operation'] = 'get_physical_placement'
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBlobsOnDs3TargetSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
 
         self.path = '/_rest_/ds3_target/' + ds3_target
         self.http_verb = HttpVerb.GET
@@ -7494,16 +7601,13 @@ class DeleteS3TargetSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.DELETE
 
 
+# TODO incorrectly generated with request payload
 class GetBlobsOnS3TargetSpectraS3Request(AbstractRequest):
     
-    def __init__(self, object_list, s3_target):
+    def __init__(self, s3_target):
         super(GetBlobsOnS3TargetSpectraS3Request, self).__init__()
         self.s3_target = s3_target
         self.query_params['operation'] = 'get_physical_placement'
-        if object_list is not None:
-            if not isinstance(object_list, FileObjectList):
-                raise TypeError('GetBlobsOnS3TargetSpectraS3Request should have request payload of type: FileObjectList')
-            self.body = xmldom.tostring(object_list.to_xml())
 
         self.path = '/_rest_/s3_target/' + s3_target
         self.http_verb = HttpVerb.GET
@@ -7629,13 +7733,11 @@ class GetS3TargetsSpectraS3Request(AbstractRequest):
 
 class ImportS3TargetSpectraS3Request(AbstractRequest):
     
-    def __init__(self, cloud_bucket_name, s3_target, conflict_resolution_mode=None, data_policy_id=None, priority=None, user_id=None):
+    def __init__(self, cloud_bucket_name, s3_target, data_policy_id=None, priority=None, user_id=None):
         super(ImportS3TargetSpectraS3Request, self).__init__()
         self.s3_target = s3_target
         self.query_params['operation'] = 'import'
         self.query_params['cloud_bucket_name'] = cloud_bucket_name
-        if conflict_resolution_mode is not None:
-            self.query_params['conflict_resolution_mode'] = conflict_resolution_mode
         if data_policy_id is not None:
             self.query_params['data_policy_id'] = data_policy_id
         if priority is not None:
@@ -7810,11 +7912,13 @@ class GetUsersSpectraS3Request(AbstractRequest):
 
 class ModifyUserSpectraS3Request(AbstractRequest):
     
-    def __init__(self, user_id, default_data_policy_id=None, name=None, secret_key=None):
+    def __init__(self, user_id, default_data_policy_id=None, max_buckets=None, name=None, secret_key=None):
         super(ModifyUserSpectraS3Request, self).__init__()
         self.user_id = user_id
         if default_data_policy_id is not None:
             self.query_params['default_data_policy_id'] = default_data_policy_id
+        if max_buckets is not None:
+            self.query_params['max_buckets'] = max_buckets
         if name is not None:
             self.query_params['name'] = name
         if secret_key is not None:
@@ -9119,6 +9223,14 @@ class ReplicatePutJobSpectraS3Response(AbstractResponse):
             self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
 
 
+class StageObjectsJobSpectraS3Response(AbstractResponse):
+    
+    def process_response(self, response):
+        self.__check_status_codes__([200])
+        if self.response.status == 200:
+            self.result = parseModel(xmldom.fromstring(response.read()), MasterObjectList())
+
+
 class TruncateActiveJobSpectraS3Response(AbstractResponse):
     
     def process_response(self, response):
@@ -9769,6 +9881,14 @@ class GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(AbstractRes
             self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
 
 
+class UndeleteObjectSpectraS3Response(AbstractResponse):
+    
+    def process_response(self, response):
+        self.__check_status_codes__([200])
+        if self.response.status == 200:
+            self.result = parseModel(xmldom.fromstring(response.read()), S3Object())
+
+
 class VerifyPhysicalPlacementForObjectsSpectraS3Response(AbstractResponse):
     
     def process_response(self, response):
@@ -10385,11 +10505,17 @@ class FormatTapeSpectraS3Response(AbstractResponse):
 
 
 class GetBlobsOnTapeSpectraS3Response(AbstractResponse):
-    
+    def __init__(self, response, request):
+        self.paging_truncated = None
+        self.paging_total_result_count = None
+        super(self.__class__, self).__init__(response, request)
+
     def process_response(self, response):
         self.__check_status_codes__([200])
         if self.response.status == 200:
             self.result = parseModel(xmldom.fromstring(response.read()), BulkObjectList())
+            self.paging_truncated = self.parse_int_header('page-truncated', response.getheaders())
+            self.paging_total_result_count = self.parse_int_header('total-result-count', response.getheaders())
 
 
 class GetTapeDensityDirectiveSpectraS3Response(AbstractResponse):
@@ -11856,6 +11982,11 @@ class Client(object):
             raise TypeError('request for replicate_put_job_spectra_s3 should be of type ReplicatePutJobSpectraS3Request but was ' + request.__class__.__name__)
         return ReplicatePutJobSpectraS3Response(self.net_client.get_response(request), request)
     
+    def stage_objects_job_spectra_s3(self, request):
+        if not isinstance(request, StageObjectsJobSpectraS3Request):
+            raise TypeError('request for stage_objects_job_spectra_s3 should be of type StageObjectsJobSpectraS3Request but was ' + request.__class__.__name__)
+        return StageObjectsJobSpectraS3Response(self.net_client.get_response(request), request)
+    
     def truncate_active_job_spectra_s3(self, request):
         if not isinstance(request, TruncateActiveJobSpectraS3Request):
             raise TypeError('request for truncate_active_job_spectra_s3 should be of type TruncateActiveJobSpectraS3Request but was ' + request.__class__.__name__)
@@ -12210,6 +12341,11 @@ class Client(object):
         if not isinstance(request, GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request):
             raise TypeError('request for get_physical_placement_for_objects_with_full_details_spectra_s3 should be of type GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request but was ' + request.__class__.__name__)
         return GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response(self.net_client.get_response(request), request)
+    
+    def undelete_object_spectra_s3(self, request):
+        if not isinstance(request, UndeleteObjectSpectraS3Request):
+            raise TypeError('request for undelete_object_spectra_s3 should be of type UndeleteObjectSpectraS3Request but was ' + request.__class__.__name__)
+        return UndeleteObjectSpectraS3Response(self.net_client.get_response(request), request)
     
     def verify_physical_placement_for_objects_spectra_s3(self, request):
         if not isinstance(request, VerifyPhysicalPlacementForObjectsSpectraS3Request):
