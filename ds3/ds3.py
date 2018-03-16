@@ -51,7 +51,6 @@ class HeadRequestStatus(object):
     UNKNOWN = 'UNKNOWN'
 
 
-# TODO added
 class Ds3PutObject(object):
     def __init__(self, name, size):
         self.name = name
@@ -64,12 +63,12 @@ class Ds3PutObject(object):
         return xml_object
 
 
-# TODO added
 class Ds3GetObject(object):
-    def __init__(self, name, length=None, offset=None):
+    def __init__(self, name, length=None, offset=None, version_id=None):
         self.name = name
         self.length = length
         self.offset = offset
+        self.version_id = version_id
 
     def to_xml(self):
         xml_object = xmldom.Element('Object')
@@ -78,10 +77,11 @@ class Ds3GetObject(object):
             xml_object.set('Length', str(self.length))
         if self.offset is not None:
             xml_object.set('Offset', str(self.offset))
+        if self.version_id is not None:
+            xml_object.set('VersionId', self.version_id)
         return xml_object
 
 
-# TODO added
 class Ds3GetObjectList(object):
     def __init__(self, object_list):
         for obj in object_list:
@@ -96,7 +96,6 @@ class Ds3GetObjectList(object):
         return xml_object_list
 
 
-# TODO added
 class Ds3PutObjectList(object):
     def __init__(self, object_list):
         for obj in object_list:
@@ -109,34 +108,6 @@ class Ds3PutObjectList(object):
         for obj in self.object_list:
             xml_object_list.append(obj.to_xml())
         return xml_object_list
-
-''' TODO remove
-class FileObject(object):
-    def __init__(self, name, size=None):
-        self.name = name
-        self.size = size
-
-    def to_xml(self):
-        xml_object = xmldom.Element('Object')
-        xml_object.set('Name', posixpath.normpath(self.name))
-        if self.size is not None:
-            xml_object.set('Size', str(self.size))
-        return xml_object
-
-
-class FileObjectList(object):
-    def __init__(self, object_list):
-        for obj in object_list:
-            if not isinstance(obj, FileObject):
-                raise TypeError("FileObjectList should only contain type: FileObject")
-        self.object_list = object_list
-
-    def to_xml(self):
-        xml_object_list = xmldom.Element('Objects')
-        for obj in self.object_list:
-            xml_object_list.append(obj.to_xml())
-        return xml_object_list
-'''
 
 
 class DeleteObject(object):
@@ -2547,9 +2518,10 @@ class CompleteMultiPartUploadRequest(AbstractRequest):
         self.object_name = object_name
         self.query_params['upload_id'] = upload_id
         if part_list is not None:
-            if not isinstance(part_list, PartList):
-                raise TypeError('CompleteMultiPartUploadRequest should have request payload of type: PartList')
-            self.body = xmldom.tostring(part_list.to_xml())
+            if not (isinstance(cur_obj, Part) for cur_obj in part_list):
+                raise TypeError('CompleteMultiPartUploadRequest should have request payload of type: list of Part')
+            xml_object_list = PartList(part_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
 
         self.path = '/' + bucket_name + '/' + object_name
         self.http_verb = HttpVerb.POST
@@ -4567,7 +4539,6 @@ class StageObjectsJobSpectraS3Request(AbstractRequest):
         super(StageObjectsJobSpectraS3Request, self).__init__()
         self.bucket_name = bucket_name
         self.query_params['operation'] = 'start_bulk_stage'
-
         if object_list is not None:
             if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
                 raise TypeError('StageObjectsJobSpectraS3Request should have request payload of type: list of Ds3GetObject')
@@ -5703,14 +5674,12 @@ class FormatForeignPoolSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.PUT
 
 
-# TODO remove incorrect request payload
 class GetBlobsOnPoolSpectraS3Request(AbstractRequest):
     
     def __init__(self, pool):
         super(GetBlobsOnPoolSpectraS3Request, self).__init__()
         self.pool = pool
         self.query_params['operation'] = 'get_physical_placement'
-
         self.path = '/_rest_/pool/' + pool
         self.http_verb = HttpVerb.GET
 
@@ -6418,12 +6387,18 @@ class EjectAllTapesSpectraS3Request(AbstractRequest):
 
 class EjectStorageDomainBlobsSpectraS3Request(AbstractRequest):
     
-    def __init__(self, bucket_id, storage_domain, eject_label=None, eject_location=None):
+    def __init__(self, bucket_id, object_list, storage_domain, eject_label=None, eject_location=None):
         super(EjectStorageDomainBlobsSpectraS3Request, self).__init__()
         self.query_params['operation'] = 'eject'
         self.query_params['blobs'] = None
         self.query_params['bucket_id'] = bucket_id
         self.query_params['storage_domain'] = storage_domain
+        if object_list is not None:
+            if not (isinstance(cur_obj, Ds3GetObject) for cur_obj in object_list):
+                raise TypeError('EjectStorageDomainBlobsSpectraS3Request should have request payload of type: list of Ds3GetObject')
+            xml_object_list = Ds3GetObjectList(object_list)
+            self.body = xmldom.tostring(xml_object_list.to_xml())
+
         if eject_label is not None:
             self.query_params['eject_label'] = eject_label
         if eject_location is not None:
@@ -6493,14 +6468,12 @@ class FormatTapeSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.PUT
 
 
-# TODO incorrectly generated with request payload
 class GetBlobsOnTapeSpectraS3Request(AbstractRequest):
     
     def __init__(self, tape_id, last_page=None, page_length=None, page_offset=None, page_start_marker=None):
         super(GetBlobsOnTapeSpectraS3Request, self).__init__()
         self.tape_id = tape_id
         self.query_params['operation'] = 'get_physical_placement'
-
         if last_page is not None:
             self.query_params['last_page'] = last_page
         if page_length is not None:
@@ -7164,14 +7137,12 @@ class GetAzureTargetsSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.GET
 
 
-# TODO incorrectly generated with request payload
 class GetBlobsOnAzureTargetSpectraS3Request(AbstractRequest):
     
     def __init__(self, azure_target):
         super(GetBlobsOnAzureTargetSpectraS3Request, self).__init__()
         self.azure_target = azure_target
         self.query_params['operation'] = 'get_physical_placement'
-
         self.path = '/_rest_/azure_target/' + azure_target
         self.http_verb = HttpVerb.GET
 
@@ -7304,14 +7275,12 @@ class DeleteDs3TargetSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.DELETE
 
 
-# TODO incorrectly generated with request payload
 class GetBlobsOnDs3TargetSpectraS3Request(AbstractRequest):
     
     def __init__(self, ds3_target):
         super(GetBlobsOnDs3TargetSpectraS3Request, self).__init__()
         self.ds3_target = ds3_target
         self.query_params['operation'] = 'get_physical_placement'
-
         self.path = '/_rest_/ds3_target/' + ds3_target
         self.http_verb = HttpVerb.GET
 
@@ -7601,14 +7570,12 @@ class DeleteS3TargetSpectraS3Request(AbstractRequest):
         self.http_verb = HttpVerb.DELETE
 
 
-# TODO incorrectly generated with request payload
 class GetBlobsOnS3TargetSpectraS3Request(AbstractRequest):
     
     def __init__(self, s3_target):
         super(GetBlobsOnS3TargetSpectraS3Request, self).__init__()
         self.s3_target = s3_target
         self.query_params['operation'] = 'get_physical_placement'
-
         self.path = '/_rest_/s3_target/' + s3_target
         self.http_verb = HttpVerb.GET
 

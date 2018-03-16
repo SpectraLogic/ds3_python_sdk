@@ -1502,14 +1502,14 @@ class ResponseParsingTestCase(unittest.TestCase):
             20971520: 'iV2OqJaXJ/jmqgRSb1HmFA=='})
 
     def testStageObjects(self):
-        expected_request_payload = "<Objects><Object Name=\"obj1\" /><Object Length=\"20\" Name=\"obj2\" Offset=\"2\" /><Object Length=\"30\" Name=\"obj3\" Offset=\"3\" /></Objects>"
+        expected_request_payload = "<Objects><Object Name=\"obj1\" /><Object Length=\"20\" Name=\"obj2\" Offset=\"2\" /><Object Name=\"obj3\" VersionId=\"version-id\" /></Objects>"
         response_payload = "<MasterObjectList Aggregating=\"false\" BucketName=\"default_bucket_name\" CachedSizeInBytes=\"0\" ChunkClientProcessingOrderGuarantee=\"IN_ORDER\" CompletedSizeInBytes=\"0\" EntirelyInCache=\"false\" JobId=\"1e66c043-e741-436a-8f5c-561320922fda\" Naked=\"false\" Name=\"GET by null\" OriginalSizeInBytes=\"0\" Priority=\"LOW\" RequestType=\"GET\" StartDate=\"2017-03-23T23:24:06.000Z\" Status=\"IN_PROGRESS\" UserId=\"fcc976f8-afda-4a3c-a4f8-565cea8b9c08\" UserName=\"default_user_name\"><Nodes><Node EndPoint=\"NOT_INITIALIZED_YET\" Id=\"acda9183-9b30-4de6-88cc-3f073051e978\"/></Nodes><Objects ChunkId=\"5aaa294b-45b0-458d-92a2-a6ca0ae6068c\" ChunkNumber=\"1\"><Object Id=\"0b56d39c-5711-4d9f-b161-c730b3acf1ae\" InCache=\"false\" Latest=\"true\" Length=\"10\" Name=\"o2\" Offset=\"0\" VersionId=\"2af042b1-4543-4e88-a4f9-554570fcf50d\"/></Objects><Objects ChunkId=\"80f5f6f2-a3e4-4b15-ac68-c0184eed38f2\" ChunkNumber=\"2\"><Object Id=\"5008ebef-95fa-4cf6-9be0-88d0ed20f450\" InCache=\"false\" Latest=\"true\" Length=\"10\" Name=\"o1\" Offset=\"0\" VersionId=\"2af042b1-4543-4e88-a4f9-554570fcf50d\"/></Objects></MasterObjectList>"
 
         bucket_name = bucketName
         object_list = [
             Ds3GetObject(name="obj1"),
             Ds3GetObject(name="obj2", offset=2, length=20),
-            Ds3GetObject(name="obj3", offset=3, length=30)
+            Ds3GetObject(name="obj3", version_id="version-id")
         ]
 
         request = StageObjectsJobSpectraS3Request(bucket_name=bucket_name, object_list=object_list)
