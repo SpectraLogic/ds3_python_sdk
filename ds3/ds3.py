@@ -990,7 +990,6 @@ class SuspectBlobPool(object):
             'DateWritten': None,
             'Id': None,
             'LastAccessed': None,
-            'ObsoletionId': None,
             'PoolId': None
         }
         self.element_lists = {}
@@ -1002,7 +1001,6 @@ class SuspectBlobTape(object):
         self.elements = {
             'BlobId': None,
             'Id': None,
-            'ObsoletionId': None,
             'OrderIndex': None,
             'TapeId': None
         }
