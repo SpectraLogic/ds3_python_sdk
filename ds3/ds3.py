@@ -1114,7 +1114,6 @@ class TapePartition(object):
             'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
-            'SerialId': None,
             'SerialNumber': None,
             'State': None
         }
@@ -1530,7 +1529,6 @@ class DetailedTapePartition(object):
             'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
-            'SerialId': None,
             'SerialNumber': None,
             'State': None
         }
@@ -1807,7 +1805,6 @@ class NamedDetailedTapePartition(object):
             'MinimumWriteReservedDrives': None,
             'Name': None,
             'Quiesced': None,
-            'SerialId': None,
             'SerialNumber': None,
             'State': None
         }
@@ -6854,7 +6851,7 @@ class ModifyTapeDriveSpectraS3Request(AbstractRequest):
 
 class ModifyTapePartitionSpectraS3Request(AbstractRequest):
     
-    def __init__(self, tape_partition, auto_compaction_enabled=None, minimum_read_reserved_drives=None, minimum_write_reserved_drives=None, quiesced=None):
+    def __init__(self, tape_partition, auto_compaction_enabled=None, minimum_read_reserved_drives=None, minimum_write_reserved_drives=None, quiesced=None, serial_number=None):
         super(ModifyTapePartitionSpectraS3Request, self).__init__()
         self.tape_partition = tape_partition
         if auto_compaction_enabled is not None:
@@ -6865,6 +6862,8 @@ class ModifyTapePartitionSpectraS3Request(AbstractRequest):
             self.query_params['minimum_write_reserved_drives'] = minimum_write_reserved_drives
         if quiesced is not None:
             self.query_params['quiesced'] = quiesced
+        if serial_number is not None:
+            self.query_params['serial_number'] = serial_number
         self.path = '/_rest_/tape_partition/' + tape_partition
         self.http_verb = HttpVerb.PUT
 
