@@ -11250,7 +11250,7 @@ class Client(object):
             raise TypeError('request for get_service should be of type GetServiceRequest but was ' + request.__class__.__name__)
         return GetServiceResponse(self.net_client.get_response(request), request)
     
-    def get_object(self, request, buffer_size=None):
+    def get_object(self, request, buffer_size=1048576):
         if not isinstance(request, GetObjectRequest):
             raise TypeError('request for get_object should be of type GetObjectRequest but was ' + request.__class__.__name__)
         return GetObjectResponse(self.net_client.get_response(request), request, buffer_size)
