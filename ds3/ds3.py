@@ -8019,15 +8019,19 @@ class GetServiceResponse(AbstractResponse):
 
 
 class GetObjectResponse(AbstractResponse):
+
+    def __init__(self, response, request, buffer_size=None):
+        self.buffer_size = buffer_size
+        super(self.__class__, self).__init__(response, request)
     
     def process_response(self, response):
         self.__check_status_codes__([200, 206])
         stream = self.request.stream
         try:
-            bytes_read = response.read()
+            bytes_read = response.read(self.buffer_size)
             while bytes_read:
                 stream.write(bytes_read)
-                bytes_read = response.read()
+                bytes_read = response.read(self.buffer_size)
         finally:
             stream.close()
             response.close()
@@ -11336,10 +11340,10 @@ class Client(object):
             raise TypeError('request for get_service should be of type GetServiceRequest but was ' + request.__class__.__name__)
         return GetServiceResponse(self.net_client.get_response(request), request)
     
-    def get_object(self, request):
+    def get_object(self, request, buffer_size=None):
         if not isinstance(request, GetObjectRequest):
             raise TypeError('request for get_object should be of type GetObjectRequest but was ' + request.__class__.__name__)
-        return GetObjectResponse(self.net_client.get_response(request), request)
+        return GetObjectResponse(self.net_client.get_response(request), request, buffer_size)
     
     def head_bucket(self, request):
         if not isinstance(request, HeadBucketRequest):
