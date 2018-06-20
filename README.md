@@ -25,7 +25,7 @@ code written with the 1.x sdk to the 3.x sdk.
 
 Documentation
 -------------
-The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.0.0-beta/](http://spectralogic.github.io/ds3_python_sdk/sphinx/v3.4.1/)
+The documentation for the SDK can be found at [http://spectralogic.github.io/ds3_python_sdk](http://spectralogic.github.io/ds3_python_sdk)
 
 SDK
 ---
