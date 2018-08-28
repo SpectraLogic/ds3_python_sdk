@@ -1500,7 +1500,8 @@ class DeleteObjectError(object):
         self.elements = {
             'Code': None,
             'Key': None,
-            'Message': None
+            'Message': None,
+            'VersionId': None
         }
         self.element_lists = {}
 
@@ -1730,7 +1731,8 @@ class S3ObjectToDelete(object):
     def __init__(self):
         self.attributes = []
         self.elements = {
-            'Key': None
+            'Key': None,
+            'VersionId': None
         }
         self.element_lists = {}
 
@@ -7823,11 +7825,13 @@ class VerifyS3TargetSpectraS3Request(AbstractRequest):
 
 class DelegateCreateUserSpectraS3Request(AbstractRequest):
     
-    def __init__(self, name, id=None, secret_key=None):
+    def __init__(self, name, id=None, max_buckets=None, secret_key=None):
         super(DelegateCreateUserSpectraS3Request, self).__init__()
         self.query_params['name'] = name
         if id is not None:
             self.query_params['id'] = id
+        if max_buckets is not None:
+            self.query_params['max_buckets'] = max_buckets
         if secret_key is not None:
             self.query_params['secret_key'] = secret_key
         self.path = '/_rest_/user'
@@ -8019,11 +8023,10 @@ class GetServiceResponse(AbstractResponse):
 
 
 class GetObjectResponse(AbstractResponse):
-
     def __init__(self, response, request, buffer_size=None):
         self.buffer_size = buffer_size
         super(self.__class__, self).__init__(response, request)
-    
+
     def process_response(self, response):
         self.__check_status_codes__([200, 206])
         stream = self.request.stream
