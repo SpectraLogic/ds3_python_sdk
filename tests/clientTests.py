@@ -85,9 +85,7 @@ def clearBucket(client, bucketName):
     if bucketContents.response.status == 404:
         #There is no bucket to delete
         return
-    for obj in bucketContents.result['ContentsList']:
-        client.delete_object(DeleteObjectRequest(bucketName, obj['Key']))
-    client.delete_bucket(DeleteBucketRequest(bucketName))
+    client.delete_bucket_spectra_s3(DeleteBucketSpectraS3Request(bucketName, force=True))
 
 
 def statusCodeList(status):
