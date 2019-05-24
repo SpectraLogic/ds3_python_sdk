@@ -11,6 +11,7 @@
 
 import os
 import tempfile
+import time
 
 from ds3 import ds3
 
@@ -22,7 +23,7 @@ fileList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "uly
 
 bucketContents = client.get_bucket(ds3.GetBucketRequest(bucketName))
 
-objectList = ds3.FileObjectList(map(lambda obj: ds3.FileObject(obj['Key']), bucketContents.result['ContentsList']))
+objectList = list(map(lambda obj: ds3.Ds3GetObject(obj['Key']), bucketContents.result['ContentsList']))
 bulkGetResult = client.get_bulk_job_spectra_s3(ds3.GetBulkJobSpectraS3Request(bucketName, objectList))
 
 # create a set of the chunk ids which will be used to track
@@ -30,14 +31,14 @@ bulkGetResult = client.get_bulk_job_spectra_s3(ds3.GetBulkJobSpectraS3Request(bu
 chunkIds = set(map(lambda x: x['ChunkId'], bulkGetResult.result['ObjectsList']))
 
 # create a dictionary to map our retrieved objects to temporary files
-# if you want to keep the retreived files on disk, this is not necessary
-tempFiles={}
+# if you want to keep the retrieved files on disk, this is not necessary
+tempFiles = {}
 
 # while we still have chunks to retrieve
 while len(chunkIds) > 0:
     # get a list of the available chunks that we can get
     availableChunks = client.get_job_chunks_ready_for_client_processing_spectra_s3(
-                             ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkGetResult.result['JobId']))
+        ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkGetResult.result['JobId']))
 
     chunks = availableChunks.result['ObjectsList']
 
@@ -55,16 +56,16 @@ while len(chunkIds) > 0:
         chunkIds.remove(chunk['ChunkId'])
         for obj in chunk['ObjectList']:
             # if we haven't create a temporary file for this object yet, create one
-            if obj['Name'] not in tempFiles.keys():
-                tempFiles[obj['Name']]=tempfile.mkstemp()
-    
+            if obj['Name'] not in list(tempFiles.keys()):
+                tempFiles[obj['Name']] = tempfile.mkstemp()
+
         # get the object
         objectStream = open(tempFiles[obj['Name']][1], "wb")
-        client.get_object(ds3.GetObjectRequest(bucketName, 
+        client.get_object(ds3.GetObjectRequest(bucketName,
                                                obj['Name'],
-                                               objectStream,                                               
-                                               offset = int(obj['Offset']), 
-                                               job = bulkGetResult.result['JobId']))
+                                               objectStream,
+                                               offset=int(obj['Offset']),
+                                               job=bulkGetResult.result['JobId']))
 
 # iterate over the temporary files, printing out their names, then closing and and removing them
 for objName in tempFiles.keys():
