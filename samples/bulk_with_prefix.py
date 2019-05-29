@@ -23,17 +23,17 @@ fileList = ["resources/beowulf.txt", "resources/sherlock_holmes.txt", "resources
 fileMap = {}
 
 # this method is used to get the size of the files
-def createDs3Obj(fileName):
+def createDs3PutObject(fileName):
     size = os.stat(fileName).st_size
     ds3ObjName = "prefix/" + fileName
     fileMap[ds3ObjName] = fileName
-    return ds3.FileObject(ds3ObjName, size)
+    return ds3.Ds3PutObject(ds3ObjName, size)
 
 # get the sizes for each file
-fileList = ds3.FileObjectList(map(createDs3Obj, fileList))
+objectList = list(map(createDs3PutObject, fileList))
 
 # submit the put bulk request to DS3
-bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucketName, fileList))
+bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucketName, objectList))
 
 # the bulk request will split the files over several chunks if it needs to
 # we need to iterate over the chunks, ask the server for space to send
@@ -42,11 +42,12 @@ for chunk in bulkResult.result['ObjectsList']:
     allocateChunk = client.allocate_job_chunk_spectra_s3(ds3.AllocateJobChunkSpectraS3Request(chunk['ChunkId']))
     for obj in allocateChunk.result['ObjectList']:
         objectDataStream = open(fileMap[obj['Name']], "rb")
-        client.put_object(ds3.PutObjectRequest(bucketName, 
-                                               obj['Name'], 
-                                               obj['Length'],
-                                               objectDataStream,
-                                               offset=int(obj['Offset']), 
+        objectDataStream.seek(int(obj['Offset']), 0)
+        client.put_object(ds3.PutObjectRequest(bucket_name=bucketName,
+                                               object_name=obj['Name'],
+                                               length=obj['Length'],
+                                               stream=objectDataStream,
+                                               offset=int(obj['Offset']),
                                                job=bulkResult.result['JobId']))
 
 # we now verify that all our objects have been sent to DS3

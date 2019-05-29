@@ -10,12 +10,11 @@
 #   specific language governing permissions and limitations under the License.
 
 import os
-import tempfile
+import time
 
 from ds3 import ds3
 
 client = ds3.createClientFromEnv()
-
 
 bucketName = "books"
 
@@ -36,14 +35,16 @@ fileListMapping = {
     "folder/folder2/ulysses.txt":"resources/ulysses.txt"
 }
 
-# this method is used to get the size of the files
+
+# this method is used to map a file path to a Ds3PutObject
 # we need two parameters because the S3 API wants the name that the object will take on the server, but the size obviously needs to come from the file on the current file system
-def getSize(fileName, realFileName):
+def fileNameToDs3PutObject(fileName, realFileName):
     size = os.stat(realFileName).st_size
-    return ds3.FileObject(fileName, size)
+    return ds3.Ds3PutObject(fileName, size)
+
 
 # get the sizes for each file
-fileList = ds3.FileObjectList(map(lambda key:getSize(key, fileListMapping[key]), fileListMapping.keys()))
+fileList = list(map(lambda key:fileNameToDs3PutObject(key, fileListMapping[key]), fileListMapping.keys()))
 
 # submit the put bulk request to DS3
 bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucketName, fileList))
@@ -60,7 +61,7 @@ chunkIds = set(map(lambda x: x['ChunkId'], bulkResult.result['ObjectsList']))
 while len(chunkIds) > 0:
     # get a list of the available chunks that we can send
     availableChunks = client.get_job_chunks_ready_for_client_processing_spectra_s3(
-                             ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkResult.result['JobId']))
+        ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkResult.result['JobId']))
 
     chunks = availableChunks.result['ObjectsList']
 
@@ -76,22 +77,25 @@ while len(chunkIds) > 0:
         if not chunk['ChunkId'] in chunkIds:
             continue
         chunkIds.remove(chunk['ChunkId'])
-        
+
         for obj in chunk['ObjectList']:
-            # it is possible that if we start resending a chunk, due to the program crashing, that 
+            # it is possible that if we start resending a chunk, due to the program crashing, that
             # some objects will already be in cache.  Check to make sure that they are not, and then
             # send the object to Spectra S3
-            if not obj['InCache']:
-                client.put_object(PutObjectRequest(bucketName, 
-                                                   obj['Name'], 
-                                                   obj['Offset'], 
-                                                   obj['Length'], 
-                                                   bulkResult.result['JobId'], 
-                                                   real_file_name = fileListMapping[obj.name]))
+            if obj['InCache'] == 'false':
+                objectDataStream = open(fileListMapping[obj['Name']], "rb")
+                objectDataStream.seek(int(obj['Offset']), 0)
+                putObjectResponse = client.put_object(ds3.PutObjectRequest(bucket_name=bucketName,
+                                                                           object_name=obj['Name'],
+                                                                           offset=obj['Offset'],
+                                                                           length=obj['Length'],
+                                                                           stream=objectDataStream,
+                                                                           job=bulkResult.result['JobId']))
 
 # we now verify that all our objects have been sent to DS3
 bucketResponse = client.get_bucket(ds3.GetBucketRequest(bucketName))
 
+print "\nFiles in bucket:"
 for obj in bucketResponse.result['ContentsList']:
     print obj['Key']
 
@@ -100,7 +104,7 @@ for obj in bucketResponse.result['ContentsList']:
 
 client.delete_folder_recursively_spectra_s3(ds3.DeleteFolderRecursivelySpectraS3Request(bucketName, "folder/folder2"))
 
-print("\nAfter deletion number 1:")
+print "\nAfter deleting 'folder/folder2':"
 bucketResponse = client.get_bucket(ds3.GetBucketRequest(bucketName))
 
 for obj in bucketResponse.result['ContentsList']:
@@ -108,7 +112,7 @@ for obj in bucketResponse.result['ContentsList']:
 
 client.delete_folder_recursively_spectra_s3(ds3.DeleteFolderRecursivelySpectraS3Request(bucketName, "folder"))
 
-print("\nAfter deletion number 2:")
+print "\nAfter deleting 'folder':"
 bucketResponse = client.get_bucket(ds3.GetBucketRequest(bucketName))
 
 for obj in bucketResponse.result['ContentsList']:

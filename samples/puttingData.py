@@ -26,23 +26,25 @@ client.put_bucket(ds3.PutBucketRequest(bucketName))
 
 fileList = ["beowulf.txt", "sherlock_holmes.txt", "tale_of_two_cities.txt", "ulysses.txt"]
 
-# this method is used to get the size of the files
-def getSize(fileName, prefix=""):
-    size = os.stat(pathForResource(fileName)).st_size
-    return ds3.FileObject(prefix + fileName, size)
-    
+
+# this method is used to map a file path to a Ds3PutObject
+def fileNameToDs3PutObject(filePath, prefix=""):
+    size = os.stat(pathForResource(filePath)).st_size
+    return ds3.Ds3PutObject(prefix + filePath, size)
+
+
 # this method is used to get the os specific path for an object located in the resources folder
 def pathForResource(resourceName):
     encoding = sys.getfilesystemencoding()
     currentPath = os.path.dirname(unicode(__file__, encoding))
     return os.path.join(currentPath, "resources", resourceName)
 
+
 # get the sizes for each file
-fileList = map(getSize, fileList)
-fileObjectList = ds3.FileObjectList(fileList)
+fileList = list(map(fileNameToDs3PutObject, fileList))
 
 # submit the put bulk request to DS3
-bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucketName, fileObjectList))
+bulkResult = client.put_bulk_job_spectra_s3(ds3.PutBulkJobSpectraS3Request(bucketName, fileList))
 
 # the bulk request will split the files over several chunks if it needs to.
 # we then need to ask what chunks we can send, and then send them making
@@ -56,7 +58,7 @@ chunkIds = set(map(lambda x: x['ChunkId'], bulkResult.result['ObjectsList']))
 while len(chunkIds) > 0:
     # get a list of the available chunks that we can send
     availableChunks = client.get_job_chunks_ready_for_client_processing_spectra_s3(
-                             ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkResult.result['JobId']))
+        ds3.GetJobChunksReadyForClientProcessingSpectraS3Request(bulkResult.result['JobId']))
 
     chunks = availableChunks.result['ObjectsList']
 
@@ -71,17 +73,18 @@ while len(chunkIds) > 0:
     for chunk in chunks:
         if not chunk['ChunkId'] in chunkIds:
             continue
-        
+
         chunkIds.remove(chunk['ChunkId'])
         for obj in chunk['ObjectList']:
-            # it is possible that if we start resending a chunk, due to the program crashing, that 
+            # it is possible that if we start resending a chunk, due to the program crashing, that
             # some objects will already be in cache.  Check to make sure that they are not, and then
             # send the object to Spectra S3
             if obj['InCache'] == 'false':
                 localFileName = "resources/" + obj['Name']
                 objectDataStream = open(localFileName, "rb")
-                client.put_object(ds3.PutObjectRequest(bucketName, 
-                                                       obj['Name'], 
+                objectDataStream.seek(int(obj['Offset']), 0)
+                client.put_object(ds3.PutObjectRequest(bucketName,
+                                                       obj['Name'],
                                                        obj['Length'],
                                                        objectDataStream,
                                                        offset=int(obj['Offset']),
