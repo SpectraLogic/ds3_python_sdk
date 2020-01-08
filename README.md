@@ -5,6 +5,10 @@ Spectra S3 Python SDK
 
 An SDK conforming to the Spectra S3 [specification](https://developer.spectralogic.com/doc/ds3api/1.2/wwhelp/wwhimpl/js/html/wwhelp.htm) for Python 2.7
 
+Python 2.7 Sunsetting
+---------------------
+Python 2.7 has officially been [sunsetted](https://www.python.org/doc/sunset-python-2/) (End of Life/Support) as of Janurary 1st, 2020.  Please see our [blog](https://developer.spectralogic.com/no-more-future-releases-for-python-2-sdk/) article about current and future support for the Python 2 SDK.
+
 Contact Us
 ----------
 
