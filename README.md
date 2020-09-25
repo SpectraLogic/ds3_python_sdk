@@ -1,13 +1,17 @@
+DEPRECATED
+----------
+The Spectra S3 Python SDK is no longer supported. Please consider using the [Spectra S3 Python3 SDK](https://github.com/SpectraLogic/ds3_python3_sdk).
+
+Python 2.7 Sunsetting
+---------------------
+Python 2.7 has officially been [sunsetted](https://www.python.org/doc/sunset-python-2/) (End of Life/Support) as of January 1st, 2020.  Please see our [blog](https://developer.spectralogic.com/no-more-future-releases-for-python-2-sdk/) article about current and future support for the Python 2 SDK.
+
 Spectra S3 Python SDK
 --------------
 
 [![Apache V2 License](http://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/SpectraLogic/ds3_python_sdk/blob/master/LICENSE.md)
 
 An SDK conforming to the Spectra S3 [specification](https://developer.spectralogic.com/doc/ds3api/1.2/wwhelp/wwhimpl/js/html/wwhelp.htm) for Python 2.7
-
-Python 2.7 Sunsetting
----------------------
-Python 2.7 has officially been [sunsetted](https://www.python.org/doc/sunset-python-2/) (End of Life/Support) as of January 1st, 2020.  Please see our [blog](https://developer.spectralogic.com/no-more-future-releases-for-python-2-sdk/) article about current and future support for the Python 2 SDK.
 
 Contact Us
 ----------
